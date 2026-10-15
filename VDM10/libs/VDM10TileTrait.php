@@ -19,7 +19,7 @@ trait VDM10TileTrait
         'Reject', 'Open door', 'Hold to open', 'Opening…', 'Door %d', 'Permanently open', 'Ring tone outside', 'Motion detection',
         'Recent access', 'No access yet', 'Unknown', 'Events', 'No events yet', 'just now', '%d min ago', '%d h ago',
         'Yesterday', 'Fingerprint', 'Card', 'PIN', 'Face', 'Open', 'Closed', 'Alarm', 'Close',
-        'Last ring', 'Never', 'Pictures', 'Current picture', 'Previous', 'Next', 'Modules',
+        'Last ring', 'Never', 'Pictures', 'Current picture', 'Previous', 'Next', 'Modules', 'Do not disturb',
     ];
 
     /** In ApplyChanges(): Wechsel der eigenen Variablen beobachten (Log und Kachel). */
@@ -108,6 +108,7 @@ trait VDM10TileTrait
             'holdAllowed' => $this->ReadPropertyBoolean('HoldOpenEnabled'),
             'ring'      => (bool) $value('RING_ENABLED', true),
             'motionDet' => (bool) $value('MOTION_DETECTION', false),
+            'dnd'       => (bool) $value('DND', false),
             'motion'    => (bool) $value('MOTION', false),
             'tamper'    => (bool) $value('TAMPER', false),
             'snapshot'  => $snapshot === '' ? null : ['url' => $this->imageUrl('snapshot', '0', 'full', $snapshot),

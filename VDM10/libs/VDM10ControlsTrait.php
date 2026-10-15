@@ -143,6 +143,8 @@ trait VDM10ControlsTrait
             $info = json_decode($this->ReadAttributeString('DeviceInfo'), true);
             $this->SetValue('FIRMWARE', trim(($info['firmwareVersion'] ?? '') . ' ' . ($info['firmwareReleasedDate'] ?? '')));
             $this->refreshSubModules();
+            $this->refreshDoNotDisturb();
+            $this->refreshClock();
         } catch (Throwable $e) {
             $this->SendDebug('Status', $e->getMessage(), 0);
         }

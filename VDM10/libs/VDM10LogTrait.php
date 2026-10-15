@@ -26,6 +26,7 @@ trait VDM10LogTrait
         'DOOR1_ALARM'      => ['door_alarm', null],
         'DOOR2_ALARM'      => ['door_alarm', null],
         'SECURITY_MODULE'  => ['sm_online', 'sm_offline'],
+        'DND'              => ['dnd_on', 'dnd_off'],
     ];
 
     /** Texte je Art (englisch, übersetzt beim Eintragen). */
@@ -36,6 +37,7 @@ trait VDM10LogTrait
         'online' => 'Door station online', 'offline' => 'Door station offline', 'sip_on' => 'SIP registered',
         'sip_off' => 'SIP registration lost', 'sm_online' => 'Security module online', 'sm_offline' => 'Security module offline',
         'module_online' => 'Extension module online', 'module_offline' => 'Extension module offline',
+        'clock_set' => 'Clock of the door station set', 'dnd_on' => 'Do not disturb on', 'dnd_off' => 'Do not disturb off',
     ];
 
     /** @return array<int, array<string,mixed>> Log, neuester Eintrag zuerst */
@@ -64,6 +66,7 @@ trait VDM10LogTrait
         }
         $this->WriteAttributeString('EventLog', (string) json_encode(array_slice($log, 0, self::LOG_SIZE), JSON_UNESCAPED_UNICODE));
         $this->tileChanged();
+        $this->notifyEvent($kind, $text, $extra);
         return $id;
     }
 

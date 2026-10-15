@@ -63,7 +63,7 @@
     access: ['access', 'green'], access_denied: ['denied', 'red'], motion: ['motion', ''], tamper: ['tamper', 'red'],
     door_open: ['doorOpen', ''], door_closed: ['door', ''], door_alarm: ['alarm', 'red'], online: ['online', 'green'],
     offline: ['offline', 'red'], sip_on: ['sipOn', 'green'], sip_off: ['sipOff', 'red'], sm_online: ['smOn', 'green'], sm_offline: ['smOff', 'red'],
-    module_online: ['module', 'green'], module_offline: ['module', 'red'],
+    module_online: ['module', 'green'], module_offline: ['module', 'red'], clock_set: ['clock', ''], dnd_on: ['dnd', 'orange'], dnd_off: ['bell', ''],
   };
 
   function renderHead() {
@@ -186,7 +186,8 @@
   function renderToggles() {
     const tog = (ident, on, icon, offIcon, label) => '<button class="tog' + (on ? ' on' : '') + '" data-toggle="' + ident + '" data-on="' + on + '">' +
       I(on ? icon : offIcon) + esc(T(label)) + '</button>';
-    let html = tog('RING_ENABLED', state.ring, 'speaker', 'speakerOff', 'Ring tone outside') +
+    let html = tog('DND', state.dnd, 'dnd', 'bell', 'Do not disturb') +
+      tog('RING_ENABLED', state.ring, 'speaker', 'speakerOff', 'Ring tone outside') +
       tog('MOTION_DETECTION', state.motionDet, 'motion', 'motion', 'Motion detection');
     $('toggles').innerHTML = html;
   }
@@ -290,7 +291,9 @@
       if (door) { door.hold = !door.hold; action('DOOR' + door.no + '_HOLD', door.hold); renderDoors(); }
     } else if (t.dataset.toggle) {
       const on = t.dataset.on !== 'true';
-      if (t.dataset.toggle === 'RING_ENABLED') state.ring = on; else state.motionDet = on;
+      if (t.dataset.toggle === 'RING_ENABLED') state.ring = on;
+      else if (t.dataset.toggle === 'DND') state.dnd = on;
+      else state.motionDet = on;
       action(t.dataset.toggle, on);
       renderToggles();
     } else if (t.dataset.gallery) {

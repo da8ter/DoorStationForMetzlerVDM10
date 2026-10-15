@@ -105,7 +105,7 @@ final class VDM10SubModules
     /**
      * KeyCfgList (GET keyCfg bzw. keyCfg?type=virtualKey).
      *
-     * @return array<int, array{id:int,module:string,method:string,room:int,label:string}>
+     * @return array<int, array{id:int,module:string,method:string,room:int,label:string,template:int}>
      */
     public static function parseKeys(string $xml): array
     {
@@ -119,7 +119,8 @@ final class VDM10SubModules
             if ($id < 1) {
                 continue;
             }
-            $keys[] = ['id' => $id, 'module' => $get('module'), 'method' => $get('callMethod'), 'room' => (int) $get('callNumber'), 'label' => $get('customInfo')];
+            $keys[] = ['id' => $id, 'module' => $get('module'), 'method' => $get('callMethod'), 'room' => (int) $get('callNumber'), 'label' => $get('customInfo'),
+                'template' => (int) $get('templateNo')];
         }
         return $keys;
     }

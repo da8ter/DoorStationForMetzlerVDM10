@@ -147,6 +147,25 @@ eingetragen, rufen die Tasten nie ins Haus. Technisch ist das der Anrufplan der 
 die Uhr, die Zeitfenster bleiben gespeichert. Per Skript: `VDM10_SetCallTimes($id, true,
 '[{"days":"daily","from":"07:00","to":"21:00"}]')`.
 
+**„Nicht stören“:** Schalter in der Kachel und Variable `DND` (auch für Automationen, etwa bei
+Abwesenheit oder nachts). An: Die Klingeltasten rufen nie ins Haus, egal was bei den Rufzeiten steht.
+Aus: zurück zu den Rufzeiten bzw. rund um die Uhr. Technisch ein eigener, leerer Anrufplan der
+Türstation (Wochenplan 2, Vorlage 2). Symcon bekommt das Klingeln weiterhin, der Rufton außen bleibt.
+Per Skript: `VDM10_SetDoNotDisturb($id, true)`.
+
+**Push-Nachrichten:** Unter „Benachrichtigungen und Uhrzeit“ eine Kachel-Visualisierung wählen. Dann
+kommen Nachrichten beim Klingeln, wahlweise bei abgelehnten Zutritten und bei Störungen (Sabotage,
+Türalarm, Türstation offline, SIP-Anmeldung verloren, Modul offline; dieselbe Störung höchstens alle
+fünf Minuten). Bei „Nicht stören“ entfällt die Klingel-Nachricht, sofern nicht anders eingestellt. Ein
+Tipp öffnet die Kachel dieser Instanz; ein Bild kann eine Push-Nachricht selbst nicht enthalten.
+Voraussetzung sind eine gültige Subskription und registrierte Geräte. Button „Testnachricht senden“.
+
+**Uhrzeit:** Die Variable „Uhrzeit-Abweichung der Türstation“ zeigt jede Minute den Unterschied zu
+Symcon. Die Türstation stellt ihre Uhr per NTP über einen Hostnamen und driftet, wenn sie keine Namen
+auflösen kann. Ab 30 s Abweichung stellt das Modul sie auf die Symcon-Zeit (höchstens einmal pro
+Stunde, abschaltbar); der Zeitmodus bleibt NTP. Manuell: `VDM10_SyncClock($id)` oder der Button
+„Uhr der Türstation jetzt stellen“.
+
 ## 8. Metzler-Sicherheitsmodul
 
 Mit dem Sicherheitsmodul (Metzler-SM) hängt der Türöffner nicht mehr an der Türstation, sondern am

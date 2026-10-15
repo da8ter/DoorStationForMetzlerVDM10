@@ -23,6 +23,7 @@ trait VDM10SubModulesTrait
 
     private function registerSubModuleProperties(): void
     {
+        $this->registerNotifyProperties(); // „Nicht stören“, Push, Uhr (VDM10NotifyTrait)
         $this->RegisterPropertyBoolean('SubModuleVariables', true);
         $this->RegisterAttributeString('SubModules', ''); // '' = noch nie gelesen
         $this->RegisterAttributeString('Keys', '[]');
@@ -31,6 +32,7 @@ trait VDM10SubModulesTrait
     /** In ApplyChanges(): Variablen anlegen bzw. (Option aus) entfernen; $query = Türstation erreichbar. */
     private function maintainSubModules(bool $query): void
     {
+        $this->maintainNotify();
         if (!$this->ReadPropertyBoolean('SubModuleVariables')) {
             foreach (IPS_GetChildrenIDs($this->InstanceID) as $child) {
                 $ident = IPS_GetObject($child)['ObjectIdent'];

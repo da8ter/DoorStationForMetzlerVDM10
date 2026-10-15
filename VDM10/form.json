@@ -193,6 +193,54 @@
                     "caption": "Note: Switching this off deletes these variables including their archived data."
                 }
             ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Notifications and clock",
+            "items": [
+                {
+                    "type": "SelectInstance",
+                    "name": "NotifyVisu",
+                    "caption": "Push notifications via tile visualization",
+                    "validModules": [
+                        "{B5B875BB-9B76-45FD-4E67-2607E45B3AC4}"
+                    ],
+                    "width": "400px"
+                },
+                {
+                    "type": "Label",
+                    "caption": "Tapping a notification opens the tile of this instance with the picture; the instance must be reachable in this visualization. Push notifications cannot carry a picture."
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "NotifyRing",
+                    "caption": "When the doorbell rings"
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "NotifyRingDnd",
+                    "caption": "Also while “Do not disturb” is on"
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "NotifyAccessDenied",
+                    "caption": "On denied access attempts"
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "NotifyProblems",
+                    "caption": "On problems (tamper, door alarm, door station offline, SIP registration lost, module offline)"
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "ClockSync",
+                    "caption": "Set the clock of the door station automatically if it is off by 30 s or more"
+                },
+                {
+                    "type": "Label",
+                    "caption": "The door station synchronises its clock via NTP with a host name. If it cannot resolve host names, its clock drifts and call times and access schedules run wrong. The variable “Clock deviation” shows the difference to Symcon."
+                }
+            ]
         }
     ],
     "actions": [
@@ -928,6 +976,16 @@
                     "caption": "Reboot door station",
                     "confirm": "Reboot the door station now?",
                     "onClick": "echo VDM10_Reboot($id) ? 'OK' : 'Error';"
+                },
+                {
+                    "type": "Button",
+                    "caption": "Send test notification",
+                    "onClick": "echo VDM10_UINotifyTest($id);"
+                },
+                {
+                    "type": "Button",
+                    "caption": "Set clock of the door station now",
+                    "onClick": "echo sprintf('%d s', VDM10_SyncClock($id));"
                 }
             ]
         }

@@ -8,6 +8,9 @@ declare(strict_types=1);
  * Weboberfläche der Türstation („Anrufplaneinstellungen“): Wochenplan 1 + Vorlage 1, jede Taste
  * verweist mit templateNo 1 darauf; templateNo 0 = „ganzer Tag“ (Grundeinstellung).
  *
+ * „Nicht stören“ nutzt einen eigenen, leeren Plan (Wochenplan 2 + Vorlage 2): Die Tasten verweisen
+ * dann auf Vorlage 2 und rufen nie ins Haus; ausgeschaltet zurück auf 1 (Rufzeiten an) bzw. 0.
+ *
  * Zeitfenster im Modul wie bei den Zugangszeitplänen: ['days' => 'weekdays'|..|'mon'.., 'from', 'to'].
  * Wird von VDM10 (module.php) als Trait eingebunden; nutzt clock()/windowsFromPlan() aus
  * VDM10SchedulesTrait.
@@ -15,6 +18,7 @@ declare(strict_types=1);
 trait VDM10CallTimesTrait
 {
     private const CALL_PLAN_NO = 1;
+    private const DND_PLAN_NO = 2;
     private const CALL_WINDOWS_PER_DAY = 5;
     private const PATH_KEY_WEEK_PLAN = '/ISAPI/VideoIntercom/keyCfg/weekPlan/%d?format=json';
     private const PATH_KEY_TEMPLATE = '/ISAPI/VideoIntercom/keyCfg/planTemplate/%d?format=json';
@@ -23,10 +27,47 @@ trait VDM10CallTimesTrait
     public function GetCallTimes(): array
     {
         $api = $this->isapi();
-        $keys = VDM10SubModules::parseKeys($api->request('GET', self::PATH_KEYS, '', 5)['body']);
-        $linked = $keys !== [] && array_filter($keys, fn (array $k): bool => $this->keyTemplate($k['id']) === self::CALL_PLAN_NO) !== [];
+        $template = $this->json($api->request('GET', sprintf(self::PATH_KEY_TEMPLATE, self::CALL_PLAN_NO), '', 5))['KeyCfgPlanTemplate'] ?? [];
         $plan = $this->json($api->request('GET', sprintf(self::PATH_KEY_WEEK_PLAN, self::CALL_PLAN_NO), '', 5))['KeyCfgWeekPlan'] ?? [];
-        return ['enabled' => $linked, 'windows' => $this->windowsFromPlan($plan['WeekPlanCfg'] ?? [])];
+        return ['enabled' => !empty($template['enable']), 'windows' => $this->windowsFromPlan($plan['WeekPlanCfg'] ?? [])];
+    }
+
+    /** „Nicht stören“: Tasten rufen nie ins Haus (unabhängig von den Rufzeiten). */
+    public function SetDoNotDisturb(bool $Active): bool
+    {
+        if ($Active) {
+            $this->writeChecked('PUT', sprintf(self::PATH_KEY_WEEK_PLAN, self::DND_PLAN_NO),
+                (string) json_encode(['KeyCfgWeekPlan' => ['enable' => true, 'WeekPlanCfg' => []]]));
+            $this->writeChecked('PUT', sprintf(self::PATH_KEY_TEMPLATE, self::DND_PLAN_NO), (string) json_encode(['KeyCfgPlanTemplate' => [
+                'enable' => true, 'templateName' => 'Symcon DND', 'weekPlanNo' => self::DND_PLAN_NO, 'holidayGroupNo' => (string) self::DND_PLAN_NO,
+            ]]));
+        }
+        $this->linkKeys($Active ? self::DND_PLAN_NO : ($this->GetCallTimes()['enabled'] ? self::CALL_PLAN_NO : 0));
+        if (@$this->GetIDForIdent('DND')) {
+            $this->SetValue('DND', $Active);
+        }
+        $this->tileChanged();
+        return true;
+    }
+
+    /** Ist „Nicht stören“ an der Türstation aktiv? null = nicht lesbar. */
+    private function readDoNotDisturb(): ?bool
+    {
+        $r = $this->isapi()->request('GET', self::PATH_KEYS, '', 5);
+        $keys = $r['code'] === 200 ? VDM10SubModules::parseKeys($r['body']) : [];
+        return $keys === [] ? null : array_filter($keys, static fn (array $k): bool => $k['template'] === self::DND_PLAN_NO) !== [];
+    }
+
+    /** Alle Tasten auf eine Vorlage stellen (nur geänderte schreiben). */
+    private function linkKeys(int $template): void
+    {
+        foreach (VDM10SubModules::parseKeys($this->isapi()->request('GET', self::PATH_KEYS, '', 5)['body']) as $key) {
+            if ($key['template'] !== $template) {
+                $path = sprintf(self::PATH_KEY, $key['id']);
+                $xml = $this->isapi()->request('GET', $path)['body'];
+                $this->writeChecked('PUT', $path, VDM10SubModules::xmlSet($xml, 'KeyCfg', 'templateNo', (string) $template));
+            }
+        }
     }
 
     /**
@@ -47,24 +88,11 @@ trait VDM10CallTimesTrait
             // holidayGroupNo als Text: als Zahl antwortet die Türstation (V3.7.1) mit badJsonContent
             'enable' => $Enabled, 'templateName' => 'Symcon', 'weekPlanNo' => self::CALL_PLAN_NO, 'holidayGroupNo' => '1',
         ]]));
-        foreach (VDM10SubModules::parseKeys($this->isapi()->request('GET', self::PATH_KEYS, '', 5)['body']) as $key) {
-            $target = $Enabled ? self::CALL_PLAN_NO : 0;
-            $current = $this->keyTemplate($key['id']);
-            if ($current !== $target && ($Enabled || $current === self::CALL_PLAN_NO)) {
-                $path = sprintf(self::PATH_KEY, $key['id']);
-                $xml = $this->isapi()->request('GET', $path)['body'];
-                $this->writeChecked('PUT', $path, VDM10SubModules::xmlSet($xml, 'KeyCfg', 'templateNo', (string) $target));
-            }
+        if (!$this->readDoNotDisturb()) { // bei „Nicht stören“ bleiben die Tasten auf dem leeren Plan
+            $this->linkKeys($Enabled ? self::CALL_PLAN_NO : 0);
         }
         $this->SendDebug('CallTimes', ($Enabled ? 'on ' : 'off ') . $Windows, 0);
         return true;
-    }
-
-    /** Vorlage, auf die eine Taste verweist (0 = ganzer Tag). */
-    private function keyTemplate(int $keyId): int
-    {
-        $xml = $this->isapi()->request('GET', sprintf(self::PATH_KEY, $keyId), '', 5)['body'];
-        return preg_match('#<templateNo>(\d+)</templateNo>#', $xml, $m) ? (int) $m[1] : 0;
     }
 
     /** Zeitfenster → WeekPlanCfg (nur belegte Segmente, je Tag id 1..5, Rufart „Nummer anrufen“). */

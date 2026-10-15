@@ -2,24 +2,11 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/libs/VDM10Isapi.php';
-require_once __DIR__ . '/libs/VDM10Events.php';
-require_once __DIR__ . '/libs/VDM10MediaTrait.php';
-require_once __DIR__ . '/libs/VDM10StreamTrait.php';
-require_once __DIR__ . '/libs/VDM10PersonsTrait.php';
-require_once __DIR__ . '/libs/VDM10PersonsUITrait.php';
-require_once __DIR__ . '/libs/VDM10SchedulesTrait.php';
-require_once __DIR__ . '/libs/VDM10SchedulesUITrait.php';
-require_once __DIR__ . '/libs/VDM10ControlsTrait.php';
-require_once __DIR__ . '/libs/VDM10DeviceFormTrait.php';
-require_once __DIR__ . '/libs/VDM10SecurityModuleTrait.php';
-require_once __DIR__ . '/libs/VDM10LogTrait.php';
-require_once __DIR__ . '/libs/VDM10ImageHookTrait.php';
-require_once __DIR__ . '/libs/VDM10TileTrait.php';
-require_once __DIR__ . '/libs/VDM10SubModules.php';
-require_once __DIR__ . '/libs/VDM10SubModulesTrait.php';
-require_once __DIR__ . '/libs/VDM10SubModulesUITrait.php';
-require_once __DIR__ . '/libs/VDM10CallTimesTrait.php';
+foreach (['VDM10Isapi', 'VDM10Events', 'VDM10MediaTrait', 'VDM10StreamTrait', 'VDM10PersonsTrait', 'VDM10PersonsUITrait', 'VDM10SchedulesTrait',
+    'VDM10SchedulesUITrait', 'VDM10ControlsTrait', 'VDM10DeviceFormTrait', 'VDM10SecurityModuleTrait', 'VDM10LogTrait', 'VDM10ImageHookTrait', 'VDM10TileTrait',
+    'VDM10SubModules', 'VDM10SubModulesTrait', 'VDM10SubModulesUITrait', 'VDM10CallTimesTrait', 'VDM10NotifyTrait'] as $lib) {
+    require_once __DIR__ . '/libs/' . $lib . '.php';
+}
 
 /**
  * Metzler VDM10 Video-Türstation (Hikvision DS-KD8003-Basis) über ISAPI.
@@ -45,6 +32,7 @@ class VDM10 extends IPSModuleStrict
     use VDM10SubModulesTrait;
     use VDM10SubModulesUITrait;
     use VDM10CallTimesTrait;
+    use VDM10NotifyTrait;
 
     private const CLIENT_SOCKET_GUID = '{3CFF0FD9-E306-41DB-9B5A-9D06D38576C3}';
     private const SOCKET_RX = '{018EF6B5-AB94-40C6-AA53-46943E824ACF}';
@@ -265,7 +253,8 @@ class VDM10 extends IPSModuleStrict
                 $this->SetValue('CALL_CONTROL', self::CTRL_NONE);
                 break;
             default:
-                if (!$this->controlAction($Ident, $Value) && !$this->tileAction($Ident, $Value) && !$this->subModuleAction($Ident, $Value)) {
+                if (!$this->controlAction($Ident, $Value) && !$this->tileAction($Ident, $Value) && !$this->subModuleAction($Ident, $Value)
+                    && !$this->notifyAction($Ident, $Value)) {
                     throw new Exception('Invalid ident ' . $Ident);
                 }
         }
