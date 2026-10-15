@@ -212,6 +212,27 @@ final class VDM10SubModules
         ];
     }
 
+    /** Länge des Hinweistexts (GET Publish/TerminalMgr/CustomText/capabilities); null = nicht unterstützt. */
+    public static function parseDisplayTextCaps(string $body): ?array
+    {
+        $c = json_decode($body, true)['CustomTextCap']['content'] ?? null;
+        return is_array($c) ? [(int) ($c['@min'] ?? 0), (int) ($c['@max'] ?? 45)] : null;
+    }
+
+    /** Nutzlast für PUT CustomText: leerer Text = aus; sonst gekürzt auf die erlaubte Länge. */
+    public static function displayTextPayload(array $caps, string $text): array
+    {
+        $text = trim(str_replace(["\r", "\n"], ' ', $text));
+        if ($text === '') {
+            return ['CustomText' => ['enabled' => false, 'content' => '']];
+        }
+        $text = mb_substr($text, 0, max(1, $caps[1]));
+        if (mb_strlen($text) < $caps[0]) {
+            throw new InvalidArgumentException(sprintf('Text must have at least %d characters', $caps[0]));
+        }
+        return ['CustomText' => ['enabled' => true, 'content' => $text]];
+    }
+
     /** Aktuelle Werte (GET SubModules/<id>/Configurations). */
     public static function parseConfig(string $body): array
     {

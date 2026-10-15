@@ -29,6 +29,8 @@ trait VDM10SubModulesUITrait
                     $item['values'] = $this->keyRows();
                 }
             }
+            unset($item);
+            $action['items'] = $this->fillDisplayTextForm($action['items'], $online);
         }
         return $form;
     }

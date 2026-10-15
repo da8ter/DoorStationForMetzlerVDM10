@@ -77,6 +77,15 @@ $check('Touch-Display: Karte und PIN', VDM10SubModules::credentials($mod('DS-KD-
 $check('Tastenfeld: nur PIN', VDM10SubModules::credentials($mod('ds-kd-kp')) === ['finger' => false, 'card' => false, 'pin' => true]);
 $check('Wiegand am Sicherheitsmodul: Karte', VDM10SubModules::credentials($mod('DS-KD-KK'), true)['card'] === true);
 
+// Hinweistext auf dem Touch-Display
+$tc = VDM10SubModules::parseDisplayTextCaps('{"CustomTextCap":{"content":{"@min":0,"@max":45},"enabled":{"@opt":[true,false]}}}');
+$check('Hinweis-Fähigkeit gelesen', $tc === [0, 45]);
+$check('ohne Display nicht unterstützt', VDM10SubModules::parseDisplayTextCaps('{"statusCode":4,"subStatusCode":"notSupport"}') === null);
+$check('leerer Text blendet aus', VDM10SubModules::displayTextPayload($tc, "  ") === ['CustomText' => ['enabled' => false, 'content' => '']]);
+$long = VDM10SubModules::displayTextPayload($tc, str_repeat('Ä', 60) . "\nx");
+$check('Text auf 45 Zeichen gekürzt, Zeilenumbruch entfernt', $long['CustomText']['enabled'] === true && mb_strlen($long['CustomText']['content']) === 45);
+$check('normaler Text', VDM10SubModules::displayTextPayload($tc, 'Paket bitte beim Nachbarn')['CustomText']['content'] === 'Paket bitte beim Nachbarn');
+
 // Tastenerkennung in Ereignissen
 $ring = '{"eventType":"AccessControllerEvent","eventState":"active","dateTime":"2026-10-14T22:59:09+01:00","AccessControllerEvent":{"deviceName":"Türklingel","majorEventType":1,"subEventType":3,"serialNo":46,"currentEvent":true}}';
 $e = VDM10Events::parseNotification($ring);

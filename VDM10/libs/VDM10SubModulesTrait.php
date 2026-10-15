@@ -19,7 +19,7 @@ trait VDM10SubModulesTrait
     private const PATH_CALLER_INFO = '/ISAPI/VideoIntercom/callerInfo?format=json';
     private const POSITION_SUBMODULE = 300;
     private const POSITION_DISPLAY = 340;
-    private const SUBMODULE_IDENTS = '/^(SUBMODULE_\d+|DISPLAY\d+_BRIGHTNESS|RING_BUTTON)$/';
+    private const SUBMODULE_IDENTS = '/^(SUBMODULE_\d+|DISPLAY\d+_BRIGHTNESS|RING_BUTTON|DISPLAY_TEXT)$/';
 
     private function registerSubModuleProperties(): void
     {
@@ -97,6 +97,7 @@ trait VDM10SubModulesTrait
                 $this->refreshDisplay($m);
             }
         }
+        $this->refreshDisplayText();
         // Vom Bus verschwundene Module als offline melden; die Variable bleibt (Name gehört dem Nutzer).
         foreach (IPS_GetChildrenIDs($this->InstanceID) as $child) {
             $ident = IPS_GetObject($child)['ObjectIdent'];

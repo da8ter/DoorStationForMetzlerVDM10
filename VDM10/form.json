@@ -940,6 +940,26 @@
                         }
                     ],
                     "onEdit": "echo VDM10_UIKeySave($id, (int) $Keys['KeyId'], (int) $Keys['KeyRoom'], (string) $Keys['KeyLabel']);"
+                },
+                {
+                    "type": "Label",
+                    "name": "DisplayTextLabel",
+                    "visible": false,
+                    "caption": "Notice on the touch display: shown when the display wakes up or is idle (Metzler recommends at most 45 characters). Empty = hidden. Also available as variable for automations."
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "DisplayText",
+                    "visible": false,
+                    "caption": "Notice text",
+                    "width": "420px"
+                },
+                {
+                    "type": "Button",
+                    "name": "DisplayTextSave",
+                    "visible": false,
+                    "caption": "Show on the touch display",
+                    "onClick": "echo VDM10_UIDisplayTextSave($id, $DisplayText);"
                 }
             ]
         },

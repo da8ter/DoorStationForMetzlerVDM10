@@ -252,6 +252,15 @@ zugehörigen Spalten, Buttons und die Fingerabdruck-Sicherheitsstufe aus. Ohne j
 Kachel keinen Bereich „Letzte Zutritte“. Solange die Modulliste nie gelesen werden konnte, bleibt
 alles sichtbar.
 
+**Hinweis auf dem Touch-Display:** Mit einem Touch-Display (z. B. VDM10-TDM) lässt sich ein kurzer
+Text einblenden, den das Display beim Aufwachen und im Ruhezustand zeigt, etwa „Paket bitte beim
+Nachbarn abgeben“ (Metzler empfiehlt höchstens 45 Zeichen). Im Bereich „Erweiterungsmodule und
+Klingeltasten“, als Variable „Hinweis auf dem Touch-Display“ oder per Skript
+`VDM10_SetDisplayText($id, 'Text')`; ein leerer Text blendet ihn aus. Formularfeld und Variable
+erscheinen nur, wenn ein Display-Modul angeschlossen ist und die Türstation die Funktion meldet. Die
+Diashow mit eigenen Bildern („Bilderanzeige des Touch-Moduls“) ist nicht eingebaut; sie bleibt in der
+Weboberfläche der Türstation.
+
 Geprüft ist der Finger- und Kartenleser DS-KD-MFB. Display-, Taster- und Info-Module sind nach der
 Weboberfläche der Türstation umgesetzt und ohne Hardware getestet (`php tests/SubModulesTest.php`).
 Die Option „Variablen für Erweiterungsmodule“ in der Konfiguration schaltet die Variablen ab.

@@ -378,7 +378,14 @@
             "Send test notification": "Testnachricht senden",
             "Set clock of the door station now": "Uhr der Türstation jetzt stellen",
             "Take a picture on motion (for the log and gallery, the last 10 are kept)": "Bei Bewegung ein Bild aufnehmen (für Log und Galerie, die letzten 10 bleiben)",
-            "Poll call status every (s, 0 = off) – detects the doorbell": "Rufstatus abfragen alle (s, 0 = aus) – erkennt das Klingeln"
+            "Poll call status every (s, 0 = off) – detects the doorbell": "Rufstatus abfragen alle (s, 0 = aus) – erkennt das Klingeln",
+            "No touch display with notices on the door station.": "An der Türstation hängt kein Touch-Display mit Hinweisfunktion.",
+            "Notice on the touch display": "Hinweis auf dem Touch-Display",
+            "Notice hidden.": "Hinweis ausgeblendet.",
+            "Notice shown on the touch display.": "Hinweis wird auf dem Touch-Display angezeigt.",
+            "Notice on the touch display: shown when the display wakes up or is idle (Metzler recommends at most 45 characters). Empty = hidden. Also available as variable for automations.": "Hinweis auf dem Touch-Display: erscheint beim Aufwachen und im Ruhezustand des Displays (Metzler empfiehlt höchstens 45 Zeichen). Leer = ausgeblendet. Auch als Variable für Automationen.",
+            "Notice text": "Hinweistext",
+            "Show on the touch display": "Auf dem Touch-Display anzeigen"
         }
     }
 }
