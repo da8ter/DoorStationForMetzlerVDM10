@@ -71,7 +71,7 @@ Rückfallebene Klingeln und Zutritte mit einigen Sekunden Verzögerung.
 | `CALL_STATUS` | Integer | 0 Frei, 1 Klingelt, 2 Gespräch |
 | `DOORBELL`, `LAST_RING` | Boolean, Integer | Klingeln und Zeitpunkt |
 | `DOOR1`, `DOOR2` | Boolean | Türöffner (Impuls) |
-| `DOOR1_HOLD`, `DOOR2_HOLD` | Boolean | Tür dauerhaft offen |
+| `DOOR1_HOLD`, `DOOR2_HOLD` | Boolean | Tür dauerhaft offen (ohne Schalter, wenn gesperrt) |
 | `CALL_CONTROL` | Integer | Annehmen, Ablehnen, Auflegen |
 | `MOTION`, `TAMPER` | Boolean | Bewegung, Sabotage |
 | `LAST_ACCESS`, `LAST_ACCESS_TIME` | String, Integer | Letzter Zutritt mit Name |
@@ -128,6 +128,16 @@ VDM10_DeleteSchedule(int $InstanzID, int $Nr): bool;
 ```
 
 Schaltbare Variablen lassen sich zusätzlich mit `RequestAction` setzen.
+
+**„Dauerhaft offen“** hält das Relais des Türöffners eingeschaltet, bis es wieder ausgeschaltet wird
+(Befehl `alwaysOpen`, zurück mit `resume`). Ein Arbeitsstrom-Türöffner steht dann ständig unter Strom.
+Das ist nur zulässig, wenn er für 100 % Einschaltdauer freigegeben ist oder eine Tagesentriegelung hat.
+Am Metzler-Sicherheitsmodul gilt höchstens 12 V DC und 1 A. Mit der Option „„Dauerhaft offen“
+erlauben“ lässt sich die Funktion sperren. Dann fehlt der Schalter in Kachel und Visualisierung, die
+Variable zeigt nur noch den Zustand. Das Modul sendet `alwaysOpen` oder `remainOpen` auf keinem Weg,
+auch nicht über RequestAction oder `VDM10_Request()`, selbst wenn der Befehl kodiert ist
+(`php tests/HoldOpenGuardTest.php`). Die Weboberfläche der Türstation und Hik-Connect sperrt das
+nicht. Steht die Tür über diese Wege trotzdem dauerhaft offen, zeigt die Kachel einen orangen Hinweis.
 
 ## 8. Metzler-Sicherheitsmodul
 

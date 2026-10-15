@@ -20,6 +20,7 @@ trait VDM10ControlsTrait
     /** In Create() aufrufen. */
     private function registerControlVariables(): void
     {
+        $this->RegisterPropertyBoolean('HoldOpenEnabled', true);
         $this->RegisterVariableBoolean('DOOR1_HOLD', $this->Translate('Door 1 permanently open'), $this->holdPresentation(), 45);
         $this->EnableAction('DOOR1_HOLD');
         $this->RegisterVariableBoolean('MOTION_DETECTION', $this->Translate('Motion detection'), [
@@ -62,8 +63,13 @@ trait VDM10ControlsTrait
     {
         $two = $this->ReadPropertyInteger('DoorCount') >= 2;
         $this->MaintainVariable('DOOR2_HOLD', $this->Translate('Door 2 permanently open'), VARIABLETYPE_BOOLEAN, $this->holdPresentation(), 55, $two);
-        if ($two) {
-            $this->EnableAction('DOOR2_HOLD');
+        // „Dauerhaft offen“ gesperrt: kein Schalter mehr, die Variable zeigt nur noch den Zustand der Türstation
+        foreach ($two ? [1, 2] : [1] as $door) {
+            if ($this->ReadPropertyBoolean('HoldOpenEnabled')) {
+                $this->EnableAction('DOOR' . $door . '_HOLD');
+            } else {
+                $this->DisableAction('DOOR' . $door . '_HOLD');
+            }
         }
         $this->SetTimerInterval('StatusRefresh', $active ? 60000 : 0);
         if ($active) {
@@ -148,6 +154,9 @@ trait VDM10ControlsTrait
         switch ($Ident) {
             case 'DOOR1_HOLD':
             case 'DOOR2_HOLD':
+                if (!$this->ReadPropertyBoolean('HoldOpenEnabled')) {
+                    throw new RuntimeException($this->Translate('“Permanently open” is disabled in the instance configuration.'));
+                }
                 $door = (int) substr($Ident, 4, 1);
                 if (!$this->isapi()->door($door, (bool) $Value ? 'alwaysOpen' : 'resume')) {
                     throw new RuntimeException($this->Translate('Door opener failed'));

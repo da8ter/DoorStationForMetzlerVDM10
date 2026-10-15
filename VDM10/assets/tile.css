@@ -36,6 +36,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .chip::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
 .chip.ok::before { background: var(--green); }
 .chip.bad::before { background: var(--red); }
+.chip.warn { color: var(--orange); }
+.chip.warn::before { background: var(--orange); }
 
 .body { flex: 1; min-height: 0; overflow-y: scroll; padding-right: var(--sb-pad); display: flex; flex-direction: column; gap: 14px; }
 .col { display: flex; flex-direction: column; gap: 14px; min-width: 0; }

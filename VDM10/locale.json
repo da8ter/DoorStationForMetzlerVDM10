@@ -344,7 +344,11 @@
             "On from": "An ab",
             "Off at": "Aus um",
             "Button lighting: start and end must differ": "Tastenbeleuchtung: Beginn und Ende müssen verschieden sein",
-            "Take a picture on every access attempt (fingerprint, card, PIN), successful or not": "Bei jedem Zutrittsversuch ein Bild aufnehmen (Fingerabdruck, Karte, PIN), erfolgreich oder nicht"
+            "Take a picture on every access attempt (fingerprint, card, PIN), successful or not": "Bei jedem Zutrittsversuch ein Bild aufnehmen (Fingerabdruck, Karte, PIN), erfolgreich oder nicht",
+            "Allow “permanently open” (switch in the visualisation and tile)": "„Dauerhaft offen“ erlauben (Schalter in Visualisierung und Kachel)",
+            "“Permanently open” keeps the relay of the door opener switched on until it is switched off again. Fail-secure door openers then carry current all the time: use this only if the door opener is rated for 100 % duty cycle (continuous current) or has a day release. Limit at the Metzler security module: 12 V DC, 1 A.": "Hinweis: „Dauerhaft offen“ hält das Relais des Türöffners eingeschaltet, bis es wieder ausgeschaltet wird. Ein Arbeitsstrom-Türöffner steht dann ständig unter Strom. Nur verwenden, wenn der Türöffner für 100 % Einschaltdauer (Dauerstrom) freigegeben ist oder eine Tagesentriegelung hat. Grenze am Metzler-Sicherheitsmodul: 12 V DC, 1 A.",
+            "Switched off, the module never sends “permanently open”: not from the tile, the variable, RequestAction or VDM10_Request(). The variable then only shows the state of the door station. The web interface of the door station and Hik-Connect are not affected.": "Abgewählt sendet das Modul „dauerhaft offen“ nie: weder aus der Kachel noch über die Variable, RequestAction oder VDM10_Request(). Die Variable zeigt dann nur noch den Zustand der Türstation. Die Weboberfläche der Türstation und Hik-Connect sind davon nicht betroffen.",
+            "“Permanently open” is disabled in the instance configuration.": "„Dauerhaft offen“ ist in der Instanzkonfiguration gesperrt."
         }
     }
 }

@@ -92,6 +92,19 @@
                 },
                 {
                     "type": "CheckBox",
+                    "name": "HoldOpenEnabled",
+                    "caption": "Allow “permanently open” (switch in the visualisation and tile)"
+                },
+                {
+                    "type": "Label",
+                    "caption": "“Permanently open” keeps the relay of the door opener switched on until it is switched off again. Fail-secure door openers then carry current all the time: use this only if the door opener is rated for 100 % duty cycle (continuous current) or has a day release. Limit at the Metzler security module: 12 V DC, 1 A."
+                },
+                {
+                    "type": "Label",
+                    "caption": "Switched off, the module never sends “permanently open”: not from the tile, the variable, RequestAction or VDM10_Request(). The variable then only shows the state of the door station. The web interface of the door station and Hik-Connect are not affected."
+                },
+                {
+                    "type": "CheckBox",
                     "name": "SecurityModule",
                     "caption": "Metzler security module (Metzler-SM) installed"
                 },

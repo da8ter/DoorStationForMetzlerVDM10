@@ -329,6 +329,9 @@ class VDM10 extends IPSModuleStrict
     /** Generischer ISAPI-Durchgriff für Skripte; liefert den Antwortrumpf. */
     public function Request(string $Method, string $Path, string $Body = ''): string
     {
+        if (!$this->ReadPropertyBoolean('HoldOpenEnabled') && strtoupper($Method) !== 'GET' && VDM10Isapi::containsHoldOpen($Path . ' ' . $Body)) {
+            throw new RuntimeException($this->Translate('“Permanently open” is disabled in the instance configuration.'));
+        }
         $r = $this->isapi()->request(strtoupper($Method), $Path, $Body);
         return $r['body'] !== '' ? $r['body'] : VDM10Isapi::errorText($r);
     }
@@ -382,8 +385,8 @@ class VDM10 extends IPSModuleStrict
     private function isapi(): VDM10Isapi
     {
         $base = ($this->ReadPropertyBoolean('UseHttps') ? 'https' : 'http') . '://' . $this->ReadPropertyString('Host') . ':' . $this->ReadPropertyInteger('Port');
-        return new VDM10Isapi($base, $this->ReadPropertyString('Username'), $this->ReadPropertyString('Password'),
-            fn (string $topic, string $message) => $this->SendDebug($topic, $message, 0));
+        return (new VDM10Isapi($base, $this->ReadPropertyString('Username'), $this->ReadPropertyString('Password'),
+            fn (string $topic, string $message) => $this->SendDebug($topic, $message, 0)))->blockHoldOpen(!$this->ReadPropertyBoolean('HoldOpenEnabled'));
     }
 
     private function refreshDeviceInfo(): void

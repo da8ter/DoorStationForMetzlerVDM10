@@ -105,6 +105,7 @@ trait VDM10TileTrait
             'ringing'   => (bool) $value('DOORBELL', false),
             'lastRing'  => (int) $value('LAST_RING', 0),
             'doors'     => $doors,
+            'holdAllowed' => $this->ReadPropertyBoolean('HoldOpenEnabled'),
             'ring'      => (bool) $value('RING_ENABLED', true),
             'motionDet' => (bool) $value('MOTION_DETECTION', false),
             'motion'    => (bool) $value('MOTION', false),

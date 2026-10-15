@@ -170,11 +170,14 @@
     $('doors').innerHTML = state.doors.map(d => {
       const contact = d.contact === null || d.contact === undefined ? '' :
         '<span class="chip ' + (d.alarm ? 'bad' : (d.contact ? '' : 'ok')) + '">' + esc(T(d.alarm ? 'Alarm' : (d.contact ? 'Open' : 'Closed'))) + '</span>';
+      // Gesperrt: kein Schalter; steht die Tür trotzdem dauerhaft offen (Gerät/Weboberfläche), Warn-Chip
+      const allowed = state.holdAllowed !== false;
+      const held = !allowed && d.hold ? '<span class="chip warn">' + esc(T('Permanently open')) + '</span>' : '';
       return '<div class="door">' +
-        (multi || contact ? '<div class="door-head"><span>' + esc(multi ? T('Door %d', d.no) : '') + '</span>' + contact + '</div>' : '') +
+        (multi || contact || held ? '<div class="door-head"><span>' + esc(multi ? T('Door %d', d.no) : '') + '</span>' + held + contact + '</div>' : '') +
         holdButton(d.no) +
-        '<div class="switch-row"><span>' + esc(T('Permanently open')) + '</span><button class="switch' + (d.hold ? ' on' : '') +
-        '" data-hold="' + d.no + '" aria-pressed="' + d.hold + '"></button></div></div>';
+        (allowed ? '<div class="switch-row"><span>' + esc(T('Permanently open')) + '</span><button class="switch' + (d.hold ? ' on' : '') +
+        '" data-hold="' + d.no + '" aria-pressed="' + d.hold + '"></button></div>' : '') + '</div>';
     }).join('');
   }
 
@@ -283,7 +286,7 @@
     if (t.dataset.reject) action('CALL_CONTROL', 2);
     else if (t.dataset.live && state.live) { try { openObject(state.live); } catch (err) { /* außerhalb von Symcon */ } }
     else if (t.dataset.snap) { action('TileSnapshot', true); notice(T('New picture') + ' …'); }
-    else if (t.dataset.hold) {
+    else if (t.dataset.hold && state.holdAllowed !== false) {
       const door = state.doors.find(d => String(d.no) === t.dataset.hold);
       if (door) { door.hold = !door.hold; action('DOOR' + door.no + '_HOLD', door.hold); renderDoors(); }
     } else if (t.dataset.toggle) {

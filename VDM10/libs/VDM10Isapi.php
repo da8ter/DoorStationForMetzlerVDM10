@@ -23,6 +23,9 @@ final class VDM10Isapi
     /** @var callable|null fn(string $topic, string $message) */
     private $debug;
 
+    /** Sperre „dauerhaft offen“: schreibende Anfragen mit alwaysOpen/remainOpen werden nicht gesendet. */
+    private bool $blockHoldOpen = false;
+
     public function __construct(
         private readonly string $base,
         private readonly string $user,
@@ -37,11 +40,45 @@ final class VDM10Isapi
         return $this->base;
     }
 
+    public function blockHoldOpen(bool $block): self
+    {
+        $this->blockHoldOpen = $block;
+        return $this;
+    }
+
+    /**
+     * Enthält Pfad oder Rumpf einen Befehl für „dauerhaft offen“ (alwaysOpen, remainOpen)?
+     * Prüft auch JSON-Escapes, XML-/HTML-Entities, URL-Kodierung, Groß-/Kleinschreibung und
+     * Trennzeichen, damit sich die Sperre nicht umgehen lässt. Trifft bewusst auch harmlose
+     * Felder wie den Magnetkontakt-Typ „alwaysOpen“ (lieber zu streng).
+     */
+    public static function containsHoldOpen(string $text): bool
+    {
+        $parts = [$text];
+        $json = json_decode($text, true);
+        if (is_array($json)) {
+            array_walk_recursive($json, static function ($v, $k) use (&$parts): void {
+                $parts[] = (string) $k;
+                $parts[] = is_scalar($v) ? (string) $v : '';
+            });
+        }
+        $all = implode(' ', $parts);
+        for ($i = 0; $i < 3; $i++) { // mehrfach kodiert
+            $all = html_entity_decode(rawurldecode($all), ENT_QUOTES | ENT_XML1 | ENT_HTML5, 'UTF-8');
+        }
+        $flat = strtolower((string) preg_replace('/[^a-z]/i', '', $all));
+        return str_contains($flat, 'alwaysopen') || str_contains($flat, 'remainopen');
+    }
+
     /**
      * @return array{code:int, ctype:string, body:string, error:string}
      */
     public function request(string $method, string $path, string $body = '', int $timeout = 8): array
     {
+        if ($this->blockHoldOpen && strtoupper($method) !== 'GET' && self::containsHoldOpen($path . ' ' . $body)) {
+            $this->log('HTTP', sprintf('%s %s -> blocked (permanently open disabled)', $method, $path));
+            throw new RuntimeException('Permanently open is disabled in the instance configuration');
+        }
         $ch = curl_init($this->base . $path);
         $headers = [];
         if ($body !== '') {
