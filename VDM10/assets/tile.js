@@ -19,6 +19,9 @@
   let offset = 0;          // Serverzeit - Browserzeit (s)
   let photoKey = null;     // Bild nur neu setzen, wenn sich die Adresse ändert
   let holding = null;      // laufender Halte-Vorgang {door, timer}
+  let shots = [];          // Bilder der offenen Galerie bzw. Großansicht
+  let shotIndex = 0;
+  let galleryKey = null;   // Galerie nur neu zeichnen, wenn neue Bilder dazukommen
   const busy = {};         // Tür -> Zeitpunkt bis „Wird geöffnet…“
 
   function action(ident, value) {
@@ -87,13 +90,64 @@
       '<div class="ring-actions"><button class="btn danger" data-reject="1">' + I('reject') + esc(T('Reject')) + '</button>' + holdButton(1) + '</div>';
   }
 
+  // Aktuelles Bild und Klingelbilder aus dem Log, neueste zuerst. Das aktuelle Bild entfällt,
+  // wenn es das Bild des letzten Klingelns ist.
+  function gallery() {
+    const rings = (state.log || []).filter(e => e.thumb).map(e => ({ thumb: e.thumb, full: e.full, ts: e.ts, text: e.text, icon: 'bell' }));
+    const snap = state.snapshot;
+    const same = snap && snap.url ? rings.find(r => Math.abs(r.ts - snap.ts) <= 15) : null;
+    if (same) same.alt = snap.url; // Hauptbild antippen blättert ab diesem Klingelbild
+    else if (snap && snap.url) {
+      rings.push({ thumb: snap.thumb || snap.url, full: snap.url, ts: snap.ts, text: T('Current picture'), icon: 'camera' });
+    }
+    return rings.sort((a, b) => b.ts - a.ts);
+  }
+
+  function renderGallery(force) {
+    const sheet = $('sheet');
+    if (sheet.hidden && !force) return;
+    const list = gallery();
+    const key = list.map(g => g.full).join('|');
+    if (!force && key === galleryKey) {
+      sheet.querySelectorAll('.shot-time').forEach((el, i) => { if (list[i]) el.textContent = ago(list[i].ts); });
+      return;
+    }
+    galleryKey = key;
+    sheet.innerHTML = '<div class="sheet-box"><div class="sheet-head"><span class="sheet-title">' + esc(T('Pictures')) + ' (' + list.length + ')</span>' +
+      '<button class="sheet-close" data-sheet-close="1" title="' + esc(T('Close')) + '">' + I('close') + '</button></div>' +
+      '<div class="gallery-grid scroll">' + list.map((g, i) => '<button class="shot" data-shot="' + i + '" style="background-image:url(\'' + esc(g.thumb) + '\')">' +
+        '<span class="shot-meta">' + I(g.icon) + '<span class="shot-time">' + esc(ago(g.ts)) + '</span></span></button>').join('') + '</div></div>';
+    const grid = sheet.querySelector('.gallery-grid');
+    if (grid && window.VDMScroll) window.VDMScroll.bind(grid);
+    sheet.hidden = false;
+  }
+
+  // Großansicht mit Vor/Zurück durch die Galerie; ein Bild außerhalb der Galerie wird allein gezeigt.
+  function showShot(list, index) {
+    if (!list.length) return;
+    shots = list;
+    shotIndex = (index + list.length) % list.length;
+    const g = shots[shotIndex];
+    $('overlayImg').src = g.full;
+    $('overlayCap').textContent = g.text ? g.text + ' · ' + ago(g.ts) : '';
+    $('overlayPrev').hidden = $('overlayNext').hidden = shots.length < 2;
+    $('overlay').hidden = false;
+  }
+  function showFull(url) {
+    const list = gallery();
+    const i = list.findIndex(g => g.full === url || g.alt === url);
+    showShot(i >= 0 ? list : [{ full: url, text: '', ts: 0 }], Math.max(0, i));
+  }
+
   function renderPhoto() {
     const snap = state.snapshot;
-    const key = (snap ? snap.url : '') + '|' + state.live;
+    const rings = (state.log || []).filter(e => e.thumb).length;
+    const key = (snap ? snap.url : '') + '|' + state.live + '|' + (rings > 0);
     const el = $('photo');
     if (key !== photoKey) {
       photoKey = key;
       const tools = '<div class="photo-tools">' +
+        (rings > 0 ? '<button class="glass-btn" data-gallery="1" title="' + esc(T('Pictures')) + '">' + I('gallery') + '</button>' : '') +
         (state.live ? '<button class="glass-btn" data-live="1" title="' + esc(T('Live view')) + '">' + I('video') + '</button>' : '') +
         '<button class="glass-btn" data-snap="1" title="' + esc(T('New picture')) + '">' + I('camera') + '</button></div>';
       el.innerHTML = (snap && snap.url ? '<img src="' + esc(snap.url) + '" alt="" data-full="' + esc(snap.url) + '">' :
@@ -166,6 +220,7 @@
     renderToggles();
     renderAccess();
     renderLog();
+    renderGallery(false);
     $('lastRing').textContent = T('Last ring') + ': ' + ago(state.lastRing);
   }
 
@@ -221,15 +276,44 @@
       if (t.dataset.toggle === 'RING_ENABLED') state.ring = on; else state.motionDet = on;
       action(t.dataset.toggle, on);
       renderToggles();
+    } else if (t.dataset.gallery) {
+      renderGallery(true);
+    } else if (t.dataset.sheetClose) {
+      $('sheet').hidden = true;
+    } else if (t.dataset.shot) {
+      showShot(gallery(), parseInt(t.dataset.shot, 10));
     } else if (t.dataset.full) {
-      $('overlayImg').src = t.dataset.full;
-      $('overlay').hidden = false;
+      showFull(t.dataset.full);
+    } else if (t.id === 'overlayPrev' || t.id === 'overlayNext') {
+      showShot(shots, shotIndex + (t.id === 'overlayNext' ? 1 : -1));
     } else if (t.id === 'overlayClose') {
       $('overlay').hidden = true;
     }
   });
   $('overlay').addEventListener('click', e => { if (e.target.id === 'overlay') $('overlay').hidden = true; });
+  $('sheet').addEventListener('click', e => { if (e.target.id === 'sheet') $('sheet').hidden = true; });
   $('overlayClose').innerHTML = I('close');
+  $('overlayPrev').innerHTML = I('prev');
+  $('overlayNext').innerHTML = I('next');
+  $('overlayPrev').title = T('Previous');
+  $('overlayNext').title = T('Next');
+
+  // Wischen in der Großansicht blättert, Pfeiltasten und Escape am Rechner
+  let swipeX = null;
+  $('overlayImg').addEventListener('pointerdown', e => { swipeX = e.clientX; });
+  $('overlayImg').addEventListener('pointerup', e => {
+    if (swipeX !== null && shots.length > 1 && Math.abs(e.clientX - swipeX) > 40) showShot(shots, shotIndex + (e.clientX < swipeX ? 1 : -1));
+    swipeX = null;
+  });
+  $('overlayImg').addEventListener('dragstart', e => e.preventDefault());
+  document.addEventListener('keydown', e => {
+    if (!$('overlay').hidden) {
+      if (e.key === 'Escape') $('overlay').hidden = true;
+      else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') showShot(shots, shotIndex + (e.key === 'ArrowRight' ? 1 : -1));
+    } else if (!$('sheet').hidden && e.key === 'Escape') {
+      $('sheet').hidden = true;
+    }
+  });
 
   function receive(data) {
     let msg;

@@ -158,12 +158,41 @@ html.wide .body { display: grid; grid-template-columns: minmax(320px, 1fr) minma
 html.wide .col { min-height: 0; overflow-y: auto; padding-right: var(--sb-pad); }
 html.wide .photo { max-height: 42vh; aspect-ratio: auto; height: min(42vh, calc((50vw - 40px) * 9 / 16)); }
 
+/* Bildergalerie: Blatt von unten wie im Musikplayer, Glas in den Farben des Symcon-Themas */
+.sheet { position: fixed; inset: 0; z-index: 15; display: flex; align-items: flex-end; justify-content: center;
+  background: rgba(0, 0, 0, .3); padding: var(--margintop, 12px) var(--marginside, 12px) var(--marginbottom, 12px); }
+.sheet-box { width: 100%; max-width: 640px; max-height: 100%; min-height: 0; display: flex; flex-direction: column; gap: 10px;
+  padding: 12px; border-radius: 16px; color: var(--content-color, #1d1d1f);
+  background: color-mix(in srgb, var(--card-color, #fff) 62%, transparent);
+  -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid color-mix(in srgb, var(--content-color, #1d1d1f) 12%, transparent);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, .35); animation: sheet-in .2s ease-out; }
+@keyframes sheet-in { from { transform: translateY(16px); opacity: 0; } to { transform: none; opacity: 1; } }
+.sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-left: 4px; }
+.sheet-title { font-size: 16px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sheet-close { width: 32px; height: 32px; flex: none; display: grid; place-items: center; border-radius: 50%; background: var(--surface); }
+.sheet-close .fa-icon { width: 14px; height: 14px; }
+.gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; min-height: 0;
+  overflow-y: auto; overscroll-behavior: contain; padding-right: 2px; }
+.shot { position: relative; aspect-ratio: 4 / 3; border-radius: 12px; overflow: hidden; background: var(--surface) center / cover no-repeat; }
+.shot-meta { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 5px; padding: 18px 8px 6px;
+  color: #fff; font-size: 11px; font-weight: 600; text-align: left; white-space: nowrap; overflow: hidden;
+  background: linear-gradient(transparent, rgba(0, 0, 0, .65)); }
+.shot-meta .fa-icon { width: 11px; height: 11px; flex: none; }
+.shot-meta span { overflow: hidden; text-overflow: ellipsis; }
+
 /* Großes Bild */
-.overlay { position: absolute; inset: 0; z-index: 10; display: grid; place-items: center; padding: 16px;
+.overlay { position: absolute; inset: 0; z-index: 20; display: grid; place-items: center; padding: 16px;
   background: rgba(0, 0, 0, .55); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
 .overlay-box { position: relative; max-width: 100%; max-height: 100%; }
 .overlay-box img { display: block; max-width: 100%; max-height: calc(100vh - 32px); border-radius: 12px; }
 .overlay-close { position: absolute; top: 10px; right: 10px; }
+.overlay-nav { position: absolute; top: 50%; transform: translateY(-50%); }
+.overlay-nav.prev { left: 10px; }
+.overlay-nav.next { right: 10px; }
+.overlay-cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 12px 10px; border-radius: 0 0 12px 12px; color: #fff;
+  font-size: 12px; font-weight: 600; background: linear-gradient(transparent, rgba(0, 0, 0, .6)); pointer-events: none; }
+.overlay-cap:empty { display: none; }
 
-.notice { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 11; max-width: 90%;
+.notice { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 21; max-width: 90%;
   padding: 10px 14px; border-radius: 10px; background: rgba(40, 40, 40, .92); color: #fff; font-size: 13px; }

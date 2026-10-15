@@ -27,7 +27,8 @@ DS-KD8003(B); geprüft mit Firmware V3.7.1 (build 251112).
   Fingerabdruck-Sicherheitsstufe
 - **Eigene Kachel** als Steuerzentrale: Snapshot mit Livebild-Knopf, Klingel-Hinweis mit
   „Ablehnen“ und „Tür öffnen“, Türöffner zum Gedrückthalten, Schnellschalter, die letzten fünf
-  Zutritte mit Personenfoto und ein Ereignis-Log der letzten 50 Ereignisse mit Klingelbildern.
+  Zutritte mit Personenfoto, ein Ereignis-Log der letzten 50 Ereignisse und eine Bildergalerie
+  der letzten Klingelbilder.
   Bilder kommen über einen mit Token abgesicherten WebHook.
 - Neustart der Türstation, generischer ISAPI-Durchgriff `VDM10_Request()` für Skripte
 

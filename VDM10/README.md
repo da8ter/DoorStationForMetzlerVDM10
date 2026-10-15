@@ -154,6 +154,10 @@ Zeit. Abgelehnte Versuche erscheinen als „Unbekannt“ mit rotem Rand. Das Fot
 Personen-Dialog unter „Foto“ aus den Bild-Medienobjekten von Symcon. Die Türstation selbst kann keine
 Fotos speichern.
 
+Der Knopf **Bilder** auf dem Snapshot öffnet eine Galerie mit dem aktuellen Bild und den Bildern der
+letzten zehn Klingel-Ereignisse. Ein Tipp öffnet die Großansicht. Dort blättern die Pfeile, eine
+Wischgeste oder die Pfeiltasten durch die Bilder.
+
 Das **Ereignis-Log** hält die letzten 50 Ereignisse und übersteht Neustarts: Klingeln, Türöffner,
 dauerhaft offen, Zutritte, Bewegung, Sabotage, Türkontakt, Verbindung und SIP-Anmeldung. Die letzten
 zehn Klingel-Einträge haben ein Vorschaubild. Ein Tipp darauf zeigt das Bild groß. Die Bilder liegen
