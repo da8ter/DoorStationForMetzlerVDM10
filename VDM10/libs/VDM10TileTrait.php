@@ -125,28 +125,39 @@ trait VDM10TileTrait
         ];
     }
 
-    /** Die letzten Zutritte verschiedener Personen (abgelehnte Versuche je Eintrag). */
+    /**
+     * Die letzten Zutritte verschiedener Personen. Aufeinanderfolgende abgelehnte Versuche
+     * bilden einen Eintrag mit Anzahl (Badge in der Kachel).
+     */
     private function tileAccess(array $log): array
     {
         $seen = [];
         $out = [];
+        $lastDenied = false;
         foreach ($log as $e) {
             if (!in_array($e['kind'], ['access', 'access_denied'], true)) {
                 continue;
             }
-            $emp = (string) ($e['emp'] ?? '');
-            $key = $e['kind'] === 'access' ? ($emp !== '' ? 'p' . $emp : 'n' . ($e['name'] ?? '')) : 'd' . $e['id'];
-            if (isset($seen[$key])) {
+            $denied = $e['kind'] === 'access_denied';
+            if ($denied && $lastDenied) {
+                $out[count($out) - 1]['count']++;
                 continue;
+            }
+            $lastDenied = $denied;
+            $emp = (string) ($e['emp'] ?? '');
+            $key = !$denied ? ($emp !== '' ? 'p' . $emp : 'n' . ($e['name'] ?? '')) : 'd' . $e['id'];
+            if (isset($seen[$key])) {
+                $lastDenied = false; // auch eine schon gezeigte Person trennt Fehlversuche
+                continue;
+            }
+            if (count($out) >= self::TILE_ACCESS_PERSONS) {
+                break; // erst hier, damit Fehlversuche des letzten Eintrags noch mitzählen
             }
             $seen[$key] = true;
             $photo = $emp !== '' ? $this->personPhotoVersion($emp) : '';
             $out[] = ['name' => (string) ($e['name'] ?? ''), 'ts' => $e['ts'], 'method' => $e['method'] ?? '',
-                'denied' => $e['kind'] === 'access_denied',
+                'denied' => $denied, 'count' => 1,
                 'photo' => $photo !== '' ? $this->imageUrl('person', $emp, 'thumb', $photo) : ''];
-            if (count($out) >= self::TILE_ACCESS_PERSONS) {
-                break;
-            }
         }
         return $out;
     }

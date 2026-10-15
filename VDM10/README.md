@@ -152,7 +152,8 @@ Der Türöffner reagiert erst, wenn er eine Sekunde gedrückt gehalten wird. So 
 versehentliches Antippen keine Tür.
 
 **Letzte Zutritte** zeigt die fünf zuletzt eingetretenen Personen mit Foto, Art des Zutritts und
-Zeit. Abgelehnte Versuche erscheinen als „Unbekannt“ mit rotem Rand. Das Foto wählt man im
+Zeit. Abgelehnte Versuche erscheinen als „Unbekannt“ mit rotem Rand. Mehrere Fehlversuche
+hintereinander bilden einen Eintrag, ein roter Badge am Foto zeigt ihre Anzahl. Das Foto wählt man im
 Personen-Dialog unter „Foto“ aus den Bild-Medienobjekten von Symcon. Die Türstation selbst kann keine
 Fotos speichern.
 

@@ -113,6 +113,11 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .avatar { position: relative; width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; overflow: hidden;
   background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--accent); font-weight: 700; font-size: 18px; border: 2px solid transparent; }
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
+/* Anzahl zusammengefasster Fehlversuche, rot rechts unten am Foto */
+.avatar-wrap { position: relative; }
+.badge { position: absolute; right: -4px; bottom: -4px; min-width: 21px; height: 21px; padding: 0 5px; box-sizing: border-box;
+  display: grid; place-items: center; border-radius: 11px; background: var(--red); color: #fff; font-size: 11px; font-weight: 700;
+  line-height: 1; border: 2px solid var(--card-color, #fff); font-variant-numeric: tabular-nums; }
 .person.denied .avatar { border-color: var(--red); color: var(--red); background: color-mix(in srgb, var(--red) 14%, transparent); }
 .avatar .fa-icon { width: 22px; height: 22px; }
 .person b { font-size: 12px; font-weight: 600; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

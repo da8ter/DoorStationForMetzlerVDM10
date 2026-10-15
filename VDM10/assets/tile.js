@@ -198,7 +198,8 @@
         const m = METHOD[p.method];
         const initials = (p.name || '').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
         const face = p.photo ? '<img src="' + esc(p.photo) + '" alt="">' : (p.denied ? I('denied') : (initials ? esc(initials) : I('user')));
-        return '<div class="person' + (p.denied ? ' denied' : '') + '"><div class="avatar">' + face + '</div>' +
+        const n = p.count > 1 ? '<span class="badge" title="' + esc(p.count) + '">' + (p.count > 99 ? '99+' : esc(p.count)) + '</span>' : '';
+        return '<div class="person' + (p.denied ? ' denied' : '') + '"><div class="avatar-wrap"><div class="avatar">' + face + '</div>' + n + '</div>' +
           '<b>' + esc(p.denied ? T('Unknown') : (p.name || T('Unknown'))) + '</b><small>' + (m ? I(m[0]) : '') + esc(ago(p.ts, true)) + '</small></div>';
       }).join('') + '</div>');
   }
