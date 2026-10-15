@@ -141,7 +141,8 @@
             "Saved": "Gespeichert",
             "Person deleted. Close the dialog with Cancel.": "Person gelöscht. Dialog mit Abbrechen schließen.",
             "No. %s · Fingerprints: %d · Cards: %d": "Nr. %s · Fingerabdrücke: %d · Karten: %d",
-            "Please select a date": "Bitte ein Datum wählen"
+            "Please select a date": "Bitte ein Datum wählen",
+            "Name and validity are saved with OK; the buttons act immediately.": "Name und Gültigkeit werden mit OK gespeichert; die Buttons wirken sofort."
         }
     }
 }

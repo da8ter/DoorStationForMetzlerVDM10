@@ -10,6 +10,9 @@ declare(strict_types=1);
  */
 trait VDM10PersonsUITrait
 {
+    /** Untermodule mit Tastenfeld (PIN-Eingabe): Tastenmodul und Touch-Module (VDM10-TDM = DS-KD-TDM). */
+    private const KEYPAD_MODULES = ['DS-KD-KP', 'DS-KD-TD', 'DS-KD-TDM', 'DS-KD-TDE'];
+
     /** Dialog für eine Zeile; leere Nummer = neue Person. */
     public function UIPersonForm(string $EmployeeNo, bool $Limited): string
     {
@@ -17,7 +20,7 @@ trait VDM10PersonsUITrait
             ['type' => 'ValidationTextBox', 'name' => 'PersonNo', 'caption' => 'No.', 'visible' => false],
             ['type' => 'ValidationTextBox', 'name' => 'PersonName', 'caption' => $this->Translate('Name'), 'width' => '320px',
                 'validate' => '^.{1,32}$'],
-            ['type' => 'PasswordTextBox', 'name' => 'PersonPin', 'width' => '320px',
+            ['type' => 'PasswordTextBox', 'name' => 'PersonPin', 'width' => '320px', 'visible' => $this->hasKeypad(),
                 'caption' => $EmployeeNo === '' ? $this->Translate('PIN (4-8 digits, optional)') : $this->Translate('New PIN (empty = unchanged)')],
             ['type' => 'CheckBox', 'name' => 'PersonLimited', 'caption' => $this->Translate('Valid only in a period'),
                 'onChange' => 'VDM10_UIPersonLimited($id, $PersonLimited);'],
@@ -37,17 +40,19 @@ trait VDM10PersonsUITrait
         ], static fn ($v) => $v !== null);
         $form[] = ['type' => 'Label', 'name' => 'PersonCredentials', 'caption' => $this->credentialText($EmployeeNo), 'bold' => true];
         $form[] = ['type' => 'Label', 'caption' => $this->Translate('Enrolling: click the button, then within 10 seconds place the finger on the reader of the door station (lift and place it again after each beep) or hold the card in front of it.')];
-        $form[] = ['type' => 'RowLayout', 'items' => [
-            $button('Enroll fingerprint', 'fingerprint'),
-            $button('Enroll card', 'card'),
-            $button('Remove PIN', 'nopin', 'Remove the PIN of this person?'),
-        ]];
+        $first = [$button('Enroll fingerprint', 'fingerprint'), $button('Enroll card', 'card')];
+        if ($this->hasKeypad()) {
+            $first[] = $button('Remove PIN', 'nopin', 'Remove the PIN of this person?');
+        }
+        $form[] = ['type' => 'RowLayout', 'items' => $first];
         $form[] = ['type' => 'RowLayout', 'items' => [
             $button('Delete fingerprints', 'delfp', 'Delete all fingerprints of this person?'),
             $button('Delete cards', 'delcard', 'Delete all cards of this person?'),
             $button('Delete person', 'delete', 'Delete this person from the door station?'),
         ]];
-        $form[] = ['type' => 'Label', 'caption' => $this->Translate('Name, PIN and validity are saved with OK; the buttons act immediately.')];
+        $form[] = ['type' => 'Label', 'caption' => $this->Translate($this->hasKeypad()
+            ? 'Name, PIN and validity are saved with OK; the buttons act immediately.'
+            : 'Name and validity are saved with OK; the buttons act immediately.')];
         return (string) json_encode($form);
     }
 
@@ -171,6 +176,28 @@ trait VDM10PersonsUITrait
             ];
         }
         return $rows;
+    }
+
+    /**
+     * Hat die Türstation ein Tastenfeld? Nur dann ist eine persönliche PIN nutzbar
+     * (Eingabe Raum-Nummer + PIN). Ergebnis 10 Minuten gepuffert; im Zweifel true.
+     */
+    private function hasKeypad(): bool
+    {
+        $cached = json_decode($this->GetBuffer('Keypad'), true);
+        if (is_array($cached) && time() - (int) $cached['t'] < 600) {
+            return (bool) $cached['v'];
+        }
+        $r = $this->isapi()->request('GET', '/ISAPI/VideoIntercom/SubModules?format=json', '', 5);
+        $modules = json_decode($r['body'], true)['SubModules'] ?? null;
+        if ($r['code'] !== 200 || !is_array($modules)) {
+            return true;
+        }
+        $types = array_map(static fn (array $m): string => strtoupper((string) ($m['moduleType'] ?? '')), $modules);
+        $keypad = array_intersect($types, self::KEYPAD_MODULES) !== [];
+        $this->SendDebug('Keypad', implode(', ', $types) . ' -> ' . ($keypad ? 'yes' : 'no'), 0);
+        $this->SetBuffer('Keypad', (string) json_encode(['t' => time(), 'v' => $keypad]));
+        return $keypad;
     }
 
     private function credentialText(string $EmployeeNo): string

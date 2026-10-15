@@ -75,6 +75,10 @@ VDM10_EnrollCard(int $InstanzID, string $Nr): string;                  // liefer
 VDM10_DeleteFingerprints / VDM10_DeleteCards / VDM10_DeletePerson(int $InstanzID, string $Nr): bool;
 ```
 
+Die PIN dient zum Öffnen am Tastenfeld (Raum-Nummer + PIN). Das PIN-Feld erscheint im Dialog nur,
+wenn die Türstation ein Tastenfeld-Modul meldet (DS-KD-KP oder Touch-Modul DS-KD-TD/-TDM/-TDE,
+z. B. VDM10-TDM).
+
 Beim Anlernen eines Fingerabdrucks wartet die Türstation etwa 10 Sekunden auf den ersten Kontakt.
 Der Finger wird mehrmals aufgelegt (nach jedem Piepen kurz abheben). Ein bereits angelernter
 Finger wird als Zutrittsversuch gewertet statt aufgenommen. Die Karte wird nach dem Klick einmal
