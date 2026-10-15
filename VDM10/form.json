@@ -195,6 +195,12 @@
                             "add": ""
                         },
                         {
+                            "caption": "Access schedule",
+                            "name": "schedule",
+                            "width": "180px",
+                            "add": ""
+                        },
+                        {
                             "name": "PersonNo",
                             "visible": false,
                             "add": ""
@@ -223,17 +229,173 @@
                             "name": "PersonEnd",
                             "visible": false,
                             "add": ""
+                        },
+                        {
+                            "name": "PersonSchedule",
+                            "visible": false,
+                            "add": 0
                         }
                     ],
                     "values": [],
                     "form": "return json_decode(VDM10_UIPersonForm($id, $Persons['PersonNo'] ?? '', (bool) ($Persons['PersonLimited'] ?? false)), true);",
-                    "onAdd": "echo VDM10_UIPersonSave($id, '', $Persons['PersonName'], $Persons['PersonPin'], $Persons['PersonLimited'], $Persons['PersonBegin'], $Persons['PersonEnd']);",
-                    "onEdit": "echo VDM10_UIPersonSave($id, $Persons['PersonNo'], $Persons['PersonName'], $Persons['PersonPin'], $Persons['PersonLimited'], $Persons['PersonBegin'], $Persons['PersonEnd']);"
+                    "onAdd": "echo VDM10_UIPersonSave($id, '', $Persons['PersonName'], $Persons['PersonPin'], $Persons['PersonLimited'], $Persons['PersonBegin'], $Persons['PersonEnd'], (int) $Persons['PersonSchedule']);",
+                    "onEdit": "echo VDM10_UIPersonSave($id, $Persons['PersonNo'], $Persons['PersonName'], $Persons['PersonPin'], $Persons['PersonLimited'], $Persons['PersonBegin'], $Persons['PersonEnd'], (int) $Persons['PersonSchedule']);"
                 },
                 {
                     "type": "Button",
                     "caption": "Reload",
                     "onClick": "VDM10_UIReloadPersons($id);"
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "name": "SchedulesPanel",
+            "caption": "Access schedules",
+            "expanded": false,
+            "items": [
+                {
+                    "type": "Label",
+                    "caption": "A schedule limits fingerprint, card and PIN of the assigned persons to the time windows. Assign it in the person dialog. Until 23:59 means until midnight."
+                },
+                {
+                    "type": "List",
+                    "name": "Schedules",
+                    "caption": "Schedules on the door station",
+                    "rowCount": 5,
+                    "add": true,
+                    "delete": true,
+                    "columns": [
+                        {
+                            "caption": "No.",
+                            "name": "ScheduleNo",
+                            "width": "60px",
+                            "add": 0
+                        },
+                        {
+                            "caption": "Name",
+                            "name": "name",
+                            "width": "180px",
+                            "add": ""
+                        },
+                        {
+                            "caption": "Times",
+                            "name": "times",
+                            "width": "auto",
+                            "add": ""
+                        },
+                        {
+                            "caption": "Persons",
+                            "name": "persons",
+                            "width": "200px",
+                            "add": ""
+                        },
+                        {
+                            "name": "ScheduleName",
+                            "visible": false,
+                            "add": ""
+                        },
+                        {
+                            "name": "ScheduleWindows",
+                            "visible": false,
+                            "add": [],
+                            "edit": {
+                                "type": "List"
+                            }
+                        }
+                    ],
+                    "values": [],
+                    "form": [
+                        {
+                            "type": "ValidationTextBox",
+                            "name": "ScheduleName",
+                            "caption": "Name",
+                            "width": "320px",
+                            "validate": "^.{1,32}$"
+                        },
+                        {
+                            "type": "List",
+                            "name": "ScheduleWindows",
+                            "caption": "Time windows",
+                            "rowCount": 5,
+                            "add": true,
+                            "delete": true,
+                            "columns": [
+                                {
+                                    "caption": "Days",
+                                    "name": "Days",
+                                    "width": "180px",
+                                    "add": "weekdays",
+                                    "edit": {
+                                        "type": "Select",
+                                        "options": [
+                                            {
+                                                "caption": "Mon–Fri",
+                                                "value": "weekdays"
+                                            },
+                                            {
+                                                "caption": "Sat + Sun",
+                                                "value": "weekend"
+                                            },
+                                            {
+                                                "caption": "Daily",
+                                                "value": "daily"
+                                            },
+                                            {
+                                                "caption": "Monday",
+                                                "value": "mon"
+                                            },
+                                            {
+                                                "caption": "Tuesday",
+                                                "value": "tue"
+                                            },
+                                            {
+                                                "caption": "Wednesday",
+                                                "value": "wed"
+                                            },
+                                            {
+                                                "caption": "Thursday",
+                                                "value": "thu"
+                                            },
+                                            {
+                                                "caption": "Friday",
+                                                "value": "fri"
+                                            },
+                                            {
+                                                "caption": "Saturday",
+                                                "value": "sat"
+                                            },
+                                            {
+                                                "caption": "Sunday",
+                                                "value": "sun"
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "caption": "From",
+                                    "name": "From",
+                                    "width": "120px",
+                                    "add": "{\"hour\":8,\"minute\":0,\"second\":0}",
+                                    "edit": {
+                                        "type": "SelectTime"
+                                    }
+                                },
+                                {
+                                    "caption": "Until",
+                                    "name": "To",
+                                    "width": "120px",
+                                    "add": "{\"hour\":17,\"minute\":0,\"second\":0}",
+                                    "edit": {
+                                        "type": "SelectTime"
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "onAdd": "echo VDM10_UIScheduleSave($id, 0, $Schedules['ScheduleName'], json_encode($Schedules['ScheduleWindows']));",
+                    "onEdit": "echo VDM10_UIScheduleSave($id, (int) $Schedules['ScheduleNo'], $Schedules['ScheduleName'], json_encode($Schedules['ScheduleWindows']));",
+                    "onDelete": "echo VDM10_UIScheduleDelete($id, (int) $Schedules['ScheduleNo']);"
                 }
             ]
         },

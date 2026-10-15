@@ -18,6 +18,8 @@ DS-KD8003(B); geprüft mit Firmware V3.7.1 (build 251112).
   Türstation; „+" legt an, das Stift-Symbol öffnet den Dialog der Person mit Name, PIN,
   Gültigkeitszeitraum (z. B. für Gäste) und den Buttons **Fingerabdruck bzw. Karte am Leser
   anlernen**, löschen und Person löschen
+- **Zugangszeitpläne**: eigene Liste mit Dialog (Name + Zeitfenster wie „Mo–Fr 08:00–12:00");
+  Zuordnung im Personen-Dialog, gilt für alle Türen der Person; leer = rund um die Uhr
 - Neustart der Türstation, generischer ISAPI-Durchgriff `VDM10_Request()` für Skripte
 
 Gegensprechen (Audio) übernimmt dieses Modul nicht. Dafür die Türstation per
@@ -73,7 +75,18 @@ VDM10_SetPersonValidity(int $InstanzID, string $Nr, int $Beginn, int $Ende): boo
 VDM10_EnrollFingerprint(int $InstanzID, string $Nr, int $Finger): bool; // 0 = nächster freier Platz
 VDM10_EnrollCard(int $InstanzID, string $Nr): string;                  // liefert die Kartennummer
 VDM10_DeleteFingerprints / VDM10_DeleteCards / VDM10_DeletePerson(int $InstanzID, string $Nr): bool;
+
+VDM10_GetSchedules(int $InstanzID): array;
+VDM10_SetSchedule(int $InstanzID, int $Nr, string $Name, string $Zeitfenster): int; // Nr 0 = neu
+VDM10_DeleteSchedule(int $InstanzID, int $Nr): bool;                    // verweigert, solange zugeordnet
+VDM10_SetPersonSchedule(int $InstanzID, string $Person, int $Nr): bool; // 0 = rund um die Uhr
 ```
+
+Zeitfenster als JSON-Liste, z. B.
+`[{"days":"weekdays","from":"08:00","to":"12:00"},{"days":"sat","from":"09:00","to":"23:59"}]`
+(`days`: `weekdays`, `weekend`, `daily`, `mon` … `sun`; „23:59" als Ende = bis Mitternacht,
+höchstens 8 Fenster pro Tag). Ein Zeitplan beschränkt Fingerabdruck, Karte und PIN; Klingeln und
+Öffnen per App oder Modul bleiben unberührt. Feiertage werden nicht genutzt.
 
 Die PIN dient zum Öffnen am Tastenfeld (Raum-Nummer + PIN). Das PIN-Feld erscheint im Dialog nur,
 wenn die Türstation ein Tastenfeld-Modul meldet (DS-KD-KP oder Touch-Modul DS-KD-TD/-TDM/-TDE,

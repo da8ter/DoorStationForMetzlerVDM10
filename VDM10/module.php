@@ -8,6 +8,8 @@ require_once __DIR__ . '/libs/VDM10MediaTrait.php';
 require_once __DIR__ . '/libs/VDM10StreamTrait.php';
 require_once __DIR__ . '/libs/VDM10PersonsTrait.php';
 require_once __DIR__ . '/libs/VDM10PersonsUITrait.php';
+require_once __DIR__ . '/libs/VDM10SchedulesTrait.php';
+require_once __DIR__ . '/libs/VDM10SchedulesUITrait.php';
 
 /**
  * Metzler VDM10 Video-Türstation (Hikvision DS-KD8003-Basis) über ISAPI.
@@ -22,6 +24,8 @@ class VDM10 extends IPSModuleStrict
     use VDM10StreamTrait;
     use VDM10PersonsTrait;
     use VDM10PersonsUITrait;
+    use VDM10SchedulesTrait;
+    use VDM10SchedulesUITrait;
 
     private const CLIENT_SOCKET_GUID = '{3CFF0FD9-E306-41DB-9B5A-9D06D38576C3}';
     private const SOCKET_RX = '{018EF6B5-AB94-40C6-AA53-46943E824ACF}';

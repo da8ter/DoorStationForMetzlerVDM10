@@ -22,6 +22,8 @@ trait VDM10PersonsUITrait
                 'validate' => '^.{1,32}$'],
             ['type' => 'PasswordTextBox', 'name' => 'PersonPin', 'width' => '320px', 'visible' => $this->hasKeypad(),
                 'caption' => $EmployeeNo === '' ? $this->Translate('PIN (4-8 digits, optional)') : $this->Translate('New PIN (empty = unchanged)')],
+            ['type' => 'Select', 'name' => 'PersonSchedule', 'caption' => $this->Translate('Access schedule'), 'width' => '320px',
+                'options' => $this->scheduleOptions()],
             ['type' => 'CheckBox', 'name' => 'PersonLimited', 'caption' => $this->Translate('Valid only in a period'),
                 'onChange' => 'VDM10_UIPersonLimited($id, $PersonLimited);'],
             ['type' => 'RowLayout', 'items' => [
@@ -57,7 +59,7 @@ trait VDM10PersonsUITrait
     }
 
     /** onAdd/onEdit: Name, PIN und Gültigkeit speichern. */
-    public function UIPersonSave(string $EmployeeNo, string $Name, string $Pin, bool $Limited, string $Begin, string $End): string
+    public function UIPersonSave(string $EmployeeNo, string $Name, string $Pin, bool $Limited, string $Begin, string $End, int $Schedule): string
     {
         try {
             [$from, $until] = $Limited ? [$this->dateValue($Begin), $this->dateValue($End)] : [0, 0];
@@ -65,6 +67,9 @@ trait VDM10PersonsUITrait
                 $no = $this->AddPerson($Name, $Pin);
                 if ($Limited) {
                     $this->SetPersonValidity($no, $from, $until);
+                }
+                if ($Schedule > 0) {
+                    $this->SetPersonSchedule($no, $Schedule);
                 }
                 $msg = sprintf($this->Translate('Person %s created'), $no);
             } elseif (!in_array($EmployeeNo, array_map(static fn (array $u): string => (string) $u['employeeNo'], $this->GetPersons()), true)) {
@@ -78,6 +83,9 @@ trait VDM10PersonsUITrait
                     $this->SetPersonPin($EmployeeNo, $Pin);
                 }
                 $this->SetPersonValidity($EmployeeNo, $from, $until);
+                if ($Schedule !== $this->personSchedule($person)) {
+                    $this->SetPersonSchedule($EmployeeNo, $Schedule);
+                }
                 $msg = $this->Translate('Saved');
             }
         } catch (Throwable $e) {
@@ -118,21 +126,21 @@ trait VDM10PersonsUITrait
 
     public function UIReloadPersons(): void
     {
-        $this->UpdateFormField('Persons', 'values', json_encode($this->personRows()));
+        $this->refreshScheduleLists();
     }
 
     /** Personenliste im Formular befüllen; neue Personen starten mit heutigem Datum. */
     private function fillPersonsForm(array $form): array
     {
         foreach ($form['actions'] as &$action) {
-            if (($action['name'] ?? '') !== 'PersonsPanel') {
+            if (!in_array($action['name'] ?? '', ['PersonsPanel', 'SchedulesPanel'], true)) {
                 continue;
             }
             foreach ($action['items'] as &$item) {
-                if (($item['name'] ?? '') !== 'Persons') {
+                if (!in_array($item['name'] ?? '', ['Persons', 'Schedules'], true)) {
                     continue;
                 }
-                $item['values'] = $this->personRows();
+                $item['values'] = $item['name'] === 'Persons' ? $this->personRows() : $this->scheduleRows();
                 foreach ($item['columns'] as &$column) {
                     if (in_array($column['name'], ['PersonBegin', 'PersonEnd'], true)) {
                         $column['add'] = $this->dateJson('');
@@ -155,9 +163,15 @@ trait VDM10PersonsUITrait
             $this->SendDebug('Persons', $e->getMessage(), 0);
             return [];
         }
+        try {
+            $names = array_column($this->GetSchedules(), 'name', 'no');
+        } catch (Throwable $e) {
+            $names = [];
+        }
         $rows = [];
         foreach ($persons as $u) {
             $valid = $u['Valid'] ?? [];
+            $schedule = $this->personSchedule($u);
             $limited = !empty($valid['enable']);
             $rows[] = [
                 'employeeNo'    => (string) $u['employeeNo'],
@@ -167,6 +181,8 @@ trait VDM10PersonsUITrait
                 'valid'         => $limited
                     ? substr((string) $valid['beginTime'], 0, 10) . ' – ' . substr((string) $valid['endTime'], 0, 10)
                     : $this->Translate('unlimited'),
+                'schedule'      => $schedule > 0 ? ($names[$schedule] ?? '#' . $schedule) : $this->Translate('Around the clock'),
+                'PersonSchedule' => $schedule,
                 'PersonNo'      => (string) $u['employeeNo'],
                 'PersonName'    => (string) ($u['name'] ?? ''),
                 'PersonPin'     => '',
