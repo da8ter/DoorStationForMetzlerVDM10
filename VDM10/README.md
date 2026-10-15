@@ -179,12 +179,16 @@ ist geprüft (`tests/SecurityModuleEventsTest.php`), ein Test mit angeschlossene
 
 Die Instanz bringt eine eigene HTML-Kachel mit. Sie passt sich der Kachelgröße an:
 
-- **Klein:** Status, Türöffner und letztes Klingeln. Während es klingelt, stehen „Ablehnen“ und
-  „Tür öffnen“ im Vordergrund.
+- **Klein:** Status, Türöffner und letztes Klingeln.
 - **Normal:** zusätzlich der letzte Snapshot mit den Knöpfen „Livebild“ (öffnet das Medienobjekt
   `LIVE`) und „Neues Bild“, je Tür ein Türöffner und der Schalter „Dauerhaft offen“, Schnellschalter
   für Klingelton und Bewegungserkennung, die letzten Zutritte und das Ereignis-Log.
 - **Breit** (z. B. maximiert): zwei Spalten, links Bild und Steuerung, rechts das Log.
+
+Beim Klingeln wird der Türöffner von Tür 1 selbst zum Hinweis: Glocke, „Es klingelt“, orange und
+pulsierend, in exakt derselben Größe; Gedrückthalten öffnet weiterhin die Tür. „Ablehnen“ steht dann
+an der Stelle des Schalters „Dauerhaft offen“, in der kleinen Kachel statt „Letztes Klingeln“. Zum Testen:
+`VDM10_TileTestRing($id, true)` (aus mit `false` oder beim Neuladen des Moduls).
 
 Der Türöffner reagiert erst, wenn er eine Sekunde gedrückt gehalten wird. So öffnet ein
 versehentliches Antippen keine Tür.

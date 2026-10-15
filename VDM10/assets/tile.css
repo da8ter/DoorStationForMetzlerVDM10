@@ -50,13 +50,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   .scroll { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--accent) 70%, transparent) transparent; }
 }
 
-/* Klingel-Hinweis: Puls nur solange es klingelt (keine Dauer-Animation im Ruhezustand) */
-.ring-banner { display: grid; gap: 12px; padding: 14px; border-radius: 16px;
-  background: color-mix(in srgb, var(--orange) 18%, transparent); animation: pulse 1.6s ease-in-out infinite; }
-.ring-title { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 700; }
-.ring-title .fa-icon { width: 22px; height: 22px; color: var(--orange); }
-.ring-actions { display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px; }
-.ring-actions .hold small { display: none; }
+/* Puls des Türöffners beim Klingeln (keine Dauer-Animation im Ruhezustand) */
 @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--orange) 45%, transparent); }
   50% { box-shadow: 0 0 0 8px color-mix(in srgb, var(--orange) 0%, transparent); } }
 
@@ -81,6 +75,10 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .door-status { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0; }
 .door-head .switch-row { gap: 8px; }
 .door-head .switch-row { margin-left: auto; font-weight: 500; flex: none; }
+/* „Ablehnen“ beim Klingeln: so hoch wie der Schalter, damit sich die Türkarte nicht verschiebt */
+.btn-reject { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; border-radius: 999px; flex: none;
+  margin-left: auto; background: color-mix(in srgb, var(--red) 16%, transparent); color: var(--red); font-size: 14px; font-weight: 700; }
+.btn-reject .fa-icon { width: 15px; height: 15px; }
 .door-head .switch-row span { white-space: nowrap; }
 .hold { position: relative; overflow: hidden; width: 100%; padding: 14px 12px; border-radius: 14px; background: var(--accent); color: #fff;
   font-size: 19px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; touch-action: none; user-select: none; -webkit-user-select: none; }
@@ -90,6 +88,9 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .hold span, .hold svg { position: relative; }
 .hold small { position: relative; font-size: 10px; font-weight: 600; opacity: .5; }
 .hold.busy { opacity: .6; }
+/* Klingeln: der Türöffner wird zum Hinweis – gleiche Größe, Orange, Puls nur solange es klingelt */
+.hold.ringing { background: var(--orange); animation: pulse 1.6s ease-in-out infinite; }
+
 .hold.busy small { visibility: hidden; } /* Platz bleibt: Knopfhöhe ändert sich beim Öffnen nicht */
 .hold-no { display: none; }
 .hold-label { white-space: nowrap; }
@@ -162,12 +163,10 @@ html.compact .last-ring { display: block; }
 html.compact .door { padding: 0; background: none; }
 html.compact .door-head { display: none; }
 html.compact .sub { display: none; }
-html.compact .ring-actions { grid-template-columns: 1fr; gap: 8px; }
-html.compact .ring-banner { padding: 10px; gap: 8px; }
-html.compact .ring-banner:not([hidden]) ~ .doors { display: none; }
 html.compact .name { font-size: 16px; }
 html.compact .chips .chip:not(:first-child) { display: none; }
 html.compact .hold { padding: 12px 10px; font-size: 17px; white-space: nowrap; }
+html.compact .hold { flex-wrap: nowrap; } /* ohne Hinweiszeile: Symbol und Text immer in einer Zeile */
 html.compact .hold .fa-icon { width: 21px; height: 21px; }
 html.compact .hold small { display: none; }
 html.compact .doors.multi { grid-template-columns: 1fr 1fr; gap: 8px; }
