@@ -18,7 +18,7 @@ trait VDM10TileTrait
         'Online', 'Offline', 'SIP', 'Stream', 'Live view', 'New picture', 'No picture yet', 'Someone is ringing',
         'Reject', 'Open door', 'Hold to open', 'Opening…', 'Door %d', 'Permanently open', 'Ringtone', 'Motion detection',
         'Recent access', 'No access yet', 'Unknown', 'Events', 'No events yet', 'just now', '%d min ago', '%d h ago',
-        'Yesterday', 'Fingerprint', 'Card', 'PIN', 'Face', 'Open', 'Closed', 'Alarm', 'Security module', 'Close',
+        'Yesterday', 'Fingerprint', 'Card', 'PIN', 'Face', 'Open', 'Closed', 'Alarm', 'Close',
         'Last ring', 'Never', 'Pictures', 'Current picture', 'Previous', 'Next', 'Modules',
     ];
 
@@ -110,7 +110,6 @@ trait VDM10TileTrait
             'motionDet' => (bool) $value('MOTION_DETECTION', false),
             'motion'    => (bool) $value('MOTION', false),
             'tamper'    => (bool) $value('TAMPER', false),
-            'sm'        => $value('SECURITY_MODULE', null),
             'snapshot'  => $snapshot === '' ? null : ['url' => $this->imageUrl('snapshot', '0', 'full', $snapshot),
                 'thumb' => $this->imageUrl('snapshot', '0', 'thumb', $snapshot), 'ts' => (int) (IPS_GetMedia($media)['MediaUpdated'] ?? 0)],
             'live'      => $live,

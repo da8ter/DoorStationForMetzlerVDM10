@@ -186,9 +186,6 @@
       I(on ? icon : offIcon) + esc(T(label)) + '</button>';
     let html = tog('RING_ENABLED', state.ring, 'speaker', 'speakerOff', 'Ringtone') +
       tog('MOTION_DETECTION', state.motionDet, 'motion', 'motion', 'Motion detection');
-    if (state.sm !== null && state.sm !== undefined) {
-      html += '<span class="tog' + (state.sm ? ' on' : '') + '">' + I(state.sm ? 'smOn' : 'smOff') + esc(T('Security module')) + '</span>';
-    }
     $('toggles').innerHTML = html;
   }
 
