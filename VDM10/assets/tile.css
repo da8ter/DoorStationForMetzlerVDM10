@@ -83,8 +83,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .door-head .switch-row { margin-left: auto; font-weight: 500; flex: none; }
 .door-head .switch-row span { white-space: nowrap; }
 .hold { position: relative; overflow: hidden; width: 100%; padding: 14px 12px; border-radius: 14px; background: var(--accent); color: #fff;
-  font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; touch-action: none; user-select: none; -webkit-user-select: none; }
-.hold .fa-icon { width: 18px; height: 18px; }
+  font-size: 19px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; touch-action: none; user-select: none; -webkit-user-select: none; }
+.hold .fa-icon { width: 24px; height: 24px; }
 .hold::before { content: ''; position: absolute; inset: 0; width: 0; background: rgba(255, 255, 255, .28); }
 .hold.holding::before { width: 100%; transition: width 1s linear; }
 .hold span, .hold svg { position: relative; }
@@ -167,7 +167,8 @@ html.compact .ring-banner { padding: 10px; gap: 8px; }
 html.compact .ring-banner:not([hidden]) ~ .doors { display: none; }
 html.compact .name { font-size: 16px; }
 html.compact .chips .chip:not(:first-child) { display: none; }
-html.compact .hold { padding: 12px 10px; font-size: 15px; white-space: nowrap; }
+html.compact .hold { padding: 12px 10px; font-size: 17px; white-space: nowrap; }
+html.compact .hold .fa-icon { width: 21px; height: 21px; }
 html.compact .hold small { display: none; }
 html.compact .doors.multi { grid-template-columns: 1fr 1fr; gap: 8px; }
 html.compact .doors.multi .hold-label { display: none; }
