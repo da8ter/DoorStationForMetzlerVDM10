@@ -7,6 +7,7 @@ require_once __DIR__ . '/libs/VDM10Events.php';
 require_once __DIR__ . '/libs/VDM10MediaTrait.php';
 require_once __DIR__ . '/libs/VDM10StreamTrait.php';
 require_once __DIR__ . '/libs/VDM10PersonsTrait.php';
+require_once __DIR__ . '/libs/VDM10PersonsUITrait.php';
 
 /**
  * Metzler VDM10 Video-Türstation (Hikvision DS-KD8003-Basis) über ISAPI.
@@ -20,6 +21,7 @@ class VDM10 extends IPSModuleStrict
     use VDM10MediaTrait;
     use VDM10StreamTrait;
     use VDM10PersonsTrait;
+    use VDM10PersonsUITrait;
 
     private const CLIENT_SOCKET_GUID = '{3CFF0FD9-E306-41DB-9B5A-9D06D38576C3}';
     private const SOCKET_RX = '{018EF6B5-AB94-40C6-AA53-46943E824ACF}';
@@ -168,16 +170,7 @@ class VDM10 extends IPSModuleStrict
     public function GetConfigurationForm(): string
     {
         $form = json_decode((string) file_get_contents(__DIR__ . '/form.json'), true);
-        foreach ($form['actions'] as &$action) {
-            if (($action['name'] ?? '') === 'PersonsPanel') {
-                foreach ($action['items'] as &$item) {
-                    if (($item['name'] ?? '') === 'Persons') {
-                        $item['values'] = $this->personRows();
-                    }
-                }
-            }
-        }
-        return (string) json_encode($form);
+        return (string) json_encode($this->fillPersonsForm($form));
     }
 
     public function GetConfigurationForParent(): string

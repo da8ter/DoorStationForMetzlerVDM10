@@ -133,34 +133,6 @@ trait VDM10PersonsTrait
         return true;
     }
 
-    /** Formular-Aktionen der Personenliste (ein Einstieg, damit die Auswahl als JSON ankommt). */
-    public function UIPersonAction(string $Action, string $Selected, string $Name, string $Pin): string
-    {
-        $row = json_decode($Selected, true);
-        $no = is_array($row) ? (string) ($row['employeeNo'] ?? '') : '';
-        try {
-            if ($Action !== 'add' && $Action !== 'reload' && $no === '') {
-                throw new InvalidArgumentException($this->Translate('Select a person in the list first'));
-            }
-            $msg = match ($Action) {
-                'reload'      => '',
-                'add'         => sprintf($this->Translate('Person %s created'), $this->AddPerson($Name, $Pin)),
-                'rename'      => $this->RenamePerson($no, $Name) ? $this->Translate('Name changed') : '',
-                'pin'         => $this->SetPersonPin($no, $Pin) ? ($Pin === '' ? $this->Translate('PIN removed') : $this->Translate('PIN set')) : '',
-                'fingerprint' => $this->EnrollFingerprint($no, 0) ? $this->Translate('Fingerprint enrolled') : '',
-                'card'        => sprintf($this->Translate('Card %s enrolled'), $this->EnrollCard($no)),
-                'delfp'       => $this->DeleteFingerprints($no) ? $this->Translate('Fingerprints deleted') : '',
-                'delcard'     => $this->DeleteCards($no) ? $this->Translate('Cards deleted') : '',
-                'delete'      => $this->DeletePerson($no) ? $this->Translate('Person deleted') : '',
-                default       => throw new InvalidArgumentException('Unknown action ' . $Action),
-            };
-        } catch (Throwable $e) {
-            $msg = $this->Translate('Error') . ': ' . $e->getMessage();
-        }
-        $this->UpdateFormField('Persons', 'values', json_encode($this->personRows()));
-        return $msg;
-    }
-
     /** Name (oder Kartennummer) des jüngsten passenden Zutrittsereignisses im Geräteprotokoll. */
     private function accessName(int $major, int $minor): string
     {
@@ -177,34 +149,6 @@ trait VDM10PersonsTrait
             $this->SendDebug('AccessName', $e->getMessage(), 0);
             return '';
         }
-    }
-
-    /** @return array<int, array<string,mixed>> Zeilen für die Formularliste */
-    private function personRows(): array
-    {
-        if ($this->ReadPropertyString('Host') === '') {
-            return [];
-        }
-        try {
-            $persons = $this->GetPersons();
-        } catch (Throwable $e) {
-            $this->SendDebug('Persons', $e->getMessage(), 0);
-            return [];
-        }
-        $rows = [];
-        foreach ($persons as $u) {
-            $valid = $u['Valid'] ?? [];
-            $rows[] = [
-                'employeeNo'   => (string) $u['employeeNo'],
-                'name'         => (string) ($u['name'] ?? ''),
-                'fingerprints' => (int) ($u['numOfFP'] ?? 0),
-                'cards'        => (int) ($u['numOfCard'] ?? 0),
-                'valid'        => !empty($valid['enable'])
-                    ? substr((string) $valid['beginTime'], 0, 10) . ' – ' . substr((string) $valid['endTime'], 0, 10)
-                    : $this->Translate('unlimited'),
-            ];
-        }
-        return $rows;
     }
 
     private function modifyPerson(string $EmployeeNo, array $fields): bool

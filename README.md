@@ -14,9 +14,10 @@ DS-KD8003(B); geprüft mit Firmware V3.7.1 (build 251112).
 - Bewegung, Sabotage, Türkontakt (sofern an der Türstation konfiguriert)
 - **Snapshot** beim Klingeln und auf Knopfdruck, mit Archiv der letzten Bilder
 - **Livebild** als Symcon-Medienobjekt (RTSP, H.264) für Kachel-Visualisierung und App
-- **Personenverwaltung** im Konfigurationsformular und per Skript: Personen anlegen, umbenennen,
-  löschen; PIN setzen oder entfernen; Gültigkeitszeitraum (z. B. für Gäste);
-  **Fingerabdruck und Karte am Leser der Türstation anlernen** und wieder löschen
+- **Personenverwaltung** im Konfigurationsformular und per Skript: Liste der Personen auf der
+  Türstation; „+" legt an, das Stift-Symbol öffnet den Dialog der Person mit Name, PIN,
+  Gültigkeitszeitraum (z. B. für Gäste) und den Buttons **Fingerabdruck bzw. Karte am Leser
+  anlernen**, löschen und Person löschen
 - Neustart der Türstation, generischer ISAPI-Durchgriff `VDM10_Request()` für Skripte
 
 Gegensprechen (Audio) übernimmt dieses Modul nicht. Dafür die Türstation per

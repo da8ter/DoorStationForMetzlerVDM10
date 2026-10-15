@@ -161,108 +161,79 @@
                     "name": "Persons",
                     "caption": "Persons on the door station",
                     "rowCount": 6,
-                    "add": false,
+                    "add": true,
                     "delete": false,
                     "columns": [
                         {
                             "caption": "No.",
                             "name": "employeeNo",
-                            "width": "70px"
+                            "width": "70px",
+                            "add": ""
                         },
                         {
                             "caption": "Name",
                             "name": "name",
-                            "width": "auto"
+                            "width": "auto",
+                            "add": ""
                         },
                         {
                             "caption": "Fingerprints",
                             "name": "fingerprints",
-                            "width": "110px"
+                            "width": "110px",
+                            "add": 0
                         },
                         {
                             "caption": "Cards",
                             "name": "cards",
-                            "width": "80px"
+                            "width": "80px",
+                            "add": 0
                         },
                         {
                             "caption": "Valid",
                             "name": "valid",
-                            "width": "200px"
+                            "width": "200px",
+                            "add": ""
+                        },
+                        {
+                            "name": "PersonNo",
+                            "visible": false,
+                            "add": ""
+                        },
+                        {
+                            "name": "PersonName",
+                            "visible": false,
+                            "add": ""
+                        },
+                        {
+                            "name": "PersonPin",
+                            "visible": false,
+                            "add": ""
+                        },
+                        {
+                            "name": "PersonLimited",
+                            "visible": false,
+                            "add": false
+                        },
+                        {
+                            "name": "PersonBegin",
+                            "visible": false,
+                            "add": ""
+                        },
+                        {
+                            "name": "PersonEnd",
+                            "visible": false,
+                            "add": ""
                         }
                     ],
-                    "values": []
+                    "values": [],
+                    "form": "return json_decode(VDM10_UIPersonForm($id, $Persons['PersonNo'] ?? '', (bool) ($Persons['PersonLimited'] ?? false)), true);",
+                    "onAdd": "echo VDM10_UIPersonSave($id, '', $Persons['PersonName'], $Persons['PersonPin'], $Persons['PersonLimited'], $Persons['PersonBegin'], $Persons['PersonEnd']);",
+                    "onEdit": "echo VDM10_UIPersonSave($id, $Persons['PersonNo'], $Persons['PersonName'], $Persons['PersonPin'], $Persons['PersonLimited'], $Persons['PersonBegin'], $Persons['PersonEnd']);"
                 },
                 {
-                    "type": "RowLayout",
-                    "items": [
-                        {
-                            "type": "ValidationTextBox",
-                            "name": "NewName",
-                            "caption": "Name"
-                        },
-                        {
-                            "type": "PasswordTextBox",
-                            "name": "NewPin",
-                            "caption": "PIN (4-8 digits, optional)"
-                        },
-                        {
-                            "type": "Button",
-                            "caption": "Add person",
-                            "onClick": "echo VDM10_UIPersonAction($id, 'add', json_encode($Persons), $NewName, $NewPin);"
-                        },
-                        {
-                            "type": "Button",
-                            "caption": "Rename selected",
-                            "onClick": "echo VDM10_UIPersonAction($id, 'rename', json_encode($Persons), $NewName, $NewPin);"
-                        },
-                        {
-                            "type": "Button",
-                            "caption": "Set PIN of selected",
-                            "onClick": "echo VDM10_UIPersonAction($id, 'pin', json_encode($Persons), $NewName, $NewPin);"
-                        }
-                    ]
-                },
-                {
-                    "type": "Label",
-                    "caption": "Enrolling: click the button, then within 10 seconds place the finger on the reader of the door station (lift and place it again after each beep) or hold the card in front of it."
-                },
-                {
-                    "type": "RowLayout",
-                    "items": [
-                        {
-                            "type": "Button",
-                            "caption": "Enroll fingerprint",
-                            "onClick": "echo VDM10_UIPersonAction($id, 'fingerprint', json_encode($Persons), $NewName, $NewPin);"
-                        },
-                        {
-                            "type": "Button",
-                            "caption": "Enroll card",
-                            "onClick": "echo VDM10_UIPersonAction($id, 'card', json_encode($Persons), $NewName, $NewPin);"
-                        },
-                        {
-                            "type": "Button",
-                            "caption": "Delete fingerprints",
-                            "onClick": "echo VDM10_UIPersonAction($id, 'delfp', json_encode($Persons), $NewName, $NewPin);",
-                            "confirm": "Delete all fingerprints of the selected person?"
-                        },
-                        {
-                            "type": "Button",
-                            "caption": "Delete cards",
-                            "onClick": "echo VDM10_UIPersonAction($id, 'delcard', json_encode($Persons), $NewName, $NewPin);",
-                            "confirm": "Delete all cards of the selected person?"
-                        },
-                        {
-                            "type": "Button",
-                            "caption": "Delete person",
-                            "onClick": "echo VDM10_UIPersonAction($id, 'delete', json_encode($Persons), $NewName, $NewPin);",
-                            "confirm": "Delete the selected person from the door station?"
-                        },
-                        {
-                            "type": "Button",
-                            "caption": "Reload",
-                            "onClick": "echo VDM10_UIPersonAction($id, 'reload', json_encode($Persons), $NewName, $NewPin);"
-                        }
-                    ]
+                    "type": "Button",
+                    "caption": "Reload",
+                    "onClick": "VDM10_UIReloadPersons($id);"
                 }
             ]
         },
