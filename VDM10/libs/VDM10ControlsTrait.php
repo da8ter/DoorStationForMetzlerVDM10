@@ -71,17 +71,24 @@ trait VDM10ControlsTrait
         }
     }
 
+    /** Nur den Türzustand (dauerhaft offen) nachlesen, z. B. nach einem Öffnen/Verriegeln-Ereignis. */
+    private function refreshDoorHold(): void
+    {
+        $ws = $this->json($this->isapi()->request('GET', self::PATH_WORK_STATUS, '', 5))['AcsWorkStatus'] ?? [];
+        foreach ([1, 2] as $door) {
+            if (@$this->GetIDForIdent('DOOR' . $door . '_HOLD') && isset($ws['doorStatus'][$door - 1])) {
+                $this->SetValue('DOOR' . $door . '_HOLD', (int) $ws['doorStatus'][$door - 1] === self::DOOR_STATUS_ALWAYS_OPEN);
+            }
+        }
+    }
+
     /** Liest Türzustand, SIP, Bewegungserkennung, Audio und Beleuchtung und aktualisiert die Variablen. */
     public function RefreshStatus(): void
     {
         $api = $this->isapi();
         try {
+            $this->refreshDoorHold();
             $ws = $this->json($api->request('GET', self::PATH_WORK_STATUS, '', 5))['AcsWorkStatus'] ?? [];
-            foreach ([1, 2] as $door) {
-                if (@$this->GetIDForIdent('DOOR' . $door . '_HOLD') && isset($ws['doorStatus'][$door - 1])) {
-                    $this->SetValue('DOOR' . $door . '_HOLD', (int) $ws['doorStatus'][$door - 1] === self::DOOR_STATUS_ALWAYS_OPEN);
-                }
-            }
             if (isset($ws['voipStatus'])) {
                 $this->SetValue('SIP_STATUS', (string) $ws['voipStatus']);
             }

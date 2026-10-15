@@ -410,6 +410,10 @@ class VDM10 extends IPSModuleStrict
                 $door = $e['door'] >= 1 && $e['door'] <= $this->ReadPropertyInteger('DoorCount') ? $e['door'] : 1;
                 $this->SetValue('DOOR' . $door, true);
                 $this->SetTimerInterval('DoorReset', self::DOOR_PULSE_MS);
+                $this->refreshDoorHold();
+                break;
+            case VDM10Events::KIND_LOCK:
+                $this->refreshDoorHold();
                 break;
             case VDM10Events::KIND_ACCESS_OK:
             case VDM10Events::KIND_ACCESS_FAIL:
