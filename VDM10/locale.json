@@ -224,7 +224,16 @@
             "Save to the door station": "In die Türstation schreiben",
             "Write the changed settings to the door station now?": "Geänderte Einstellungen jetzt in die Türstation schreiben?",
             "No changes": "Keine Änderungen",
-            "The door station must be restarted for the change to take effect (button “Reboot door station”).": "Die Türstation muss neu gestartet werden, damit die Änderung wirkt (Button „Türstation neu starten“)."
+            "The door station must be restarted for the change to take effect (button “Reboot door station”).": "Die Türstation muss neu gestartet werden, damit die Änderung wirkt (Button „Türstation neu starten“).",
+            "Security module": "Sicherheitsmodul",
+            "Door %d": "Tür %d",
+            "Closed": "Geschlossen",
+            "Open": "Offen",
+            "Door %d alarm": "Tür %d Alarm",
+            "Metzler security module (Metzler-SM) installed": "Metzler-Sicherheitsmodul (Metzler-SM) installiert",
+            "Door contact connected (at the security module or an input set to “Door contact”)": "Türkontakt angeschlossen (am Sicherheitsmodul oder an einem Eingang mit Funktion „Türkontakt“)",
+            "Tamper alarm of the security module": "Sabotagealarm des Sicherheitsmoduls",
+            "Security module tamper alarm": "Sabotagealarm Sicherheitsmodul"
         }
     }
 }

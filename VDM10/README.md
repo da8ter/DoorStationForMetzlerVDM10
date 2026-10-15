@@ -50,6 +50,8 @@ der Türstation-Instanz.
 | Rufstatus abfragen alle | Rückfallebene ohne Stream (0 = aus) |
 | Klingel / Bewegung zurücksetzen nach | Wie lange die Variablen aktiv bleiben |
 | Türöffner | 1 oder 2 (zweiter Türöffner an Ausgang 2) |
+| Metzler-Sicherheitsmodul installiert | Legt die Variable „Sicherheitsmodul“ (online/offline) an und zeigt den Sabotage-Schalter |
+| Türkontakt angeschlossen | Legt je Tür „Tür n“ (offen/geschlossen) und „Tür n Alarm“ (zu lange oder gewaltsam geöffnet) an |
 | Snapshot beim Klingeln, Archiv, Bildquelle | Bilder beim Klingeln |
 | RTSP-Livebild, Livebild-Quelle | Medienobjekt mit dem Videostream |
 
@@ -74,6 +76,9 @@ Rückfallebene Klingeln und Zutritte mit einigen Sekunden Verzögerung.
 | `RING_ENABLED`, `RING_VOLUME`, `TALK_VOLUME` | Boolean, Integer | Klingelton, Lautstärken 0–10 |
 | `BACKLIGHT` | String | Tastenbeleuchtung: auto, on, off, custom |
 | `FIRMWARE` | String | Firmware der Türstation |
+| `SECURITY_MODULE` | Boolean | Metzler-Sicherheitsmodul online (nur wenn installiert) |
+| `DOOR1_CONTACT`, `DOOR2_CONTACT` | Boolean | Türkontakt: true = offen (nur mit Türkontakt) |
+| `DOOR1_ALARM`, `DOOR2_ALARM` | Boolean | Tür zu lange oder gewaltsam geöffnet |
 
 Medien: `SNAPSHOT`, `SNAPSHOT_1` … `SNAPSHOT_n` (Archiv), `LIVE` (RTSP).
 
@@ -84,7 +89,7 @@ Medien: `SNAPSHOT`, `SNAPSHOT_1` … `SNAPSHOT_n` (Archiv), `LIVE` (RTSP).
   Anlernen und Löschen.
 - **Zugangszeitpläne:** Zeitfenster je Tagesgruppe; gelten für alle Türen der Person.
 - **Einstellungen der Türstation:** Öffnungsdauer je Tür, Ausgang 2, Eingänge 1–4,
-  Fingerabdruck-Sicherheitsstufe. „In die Türstation schreiben“ überträgt nur geänderte Werte; manche
+  Fingerabdruck-Sicherheitsstufe, Sabotagealarm des Sicherheitsmoduls (nur wenn installiert). „In die Türstation schreiben“ überträgt nur geänderte Werte; manche
   Änderungen (z. B. Ausgang 2) wirken erst nach einem Neustart der Türstation.
 
 Alle Änderungen gehen sofort an die Türstation.
@@ -117,3 +122,12 @@ VDM10_DeleteSchedule(int $InstanzID, int $Nr): bool;
 ```
 
 Schaltbare Variablen lassen sich zusätzlich mit `RequestAction` setzen.
+
+## 8. Metzler-Sicherheitsmodul
+
+Mit dem Sicherheitsmodul (Metzler-SM) hängt der Türöffner nicht mehr an der Türstation, sondern am
+Modul im geschützten Innenbereich. Das Modul ist per RS-485 an die Türstation angeschlossen und bindet
+sich beim ersten Start fest an deren Seriennummer. Türöffnen, „dauerhaft offen“ und die Öffnungsdauer
+funktionieren unverändert, die Türstation leitet die Befehle weiter (DIP-Schalter ID 1 = Relais 1).
+Am Sicherheitsmodul lassen sich Türkontakt und Exit-Taster anschließen. Die Zuordnung der Ereignisse
+ist geprüft (`tests/SecurityModuleEventsTest.php`), ein Test mit angeschlossenem Modul steht aus.

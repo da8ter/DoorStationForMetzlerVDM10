@@ -15,7 +15,7 @@ trait VDM10DeviceFormTrait
     private const PATH_INPUT = '/ISAPI/System/IO/inputs/';
     private const PATH_READER = '/ISAPI/AccessControl/CardReaderCfg/1?format=json';
 
-    public function UIDeviceSave(float $Open1, float $Open2, string $Output2, string $Input1, string $Input2, string $Input3, string $Input4, int $FpLevel): string
+    public function UIDeviceSave(float $Open1, float $Open2, string $Output2, string $Input1, string $Input2, string $Input3, string $Input4, int $FpLevel, bool $SmTamper): string
     {
         try {
             $now = $this->deviceSettings();
@@ -44,6 +44,10 @@ trait VDM10DeviceFormTrait
                 $reboot = $this->writeChecked('PUT', self::PATH_READER, (string) json_encode($cfg)) || $reboot;
                 $changed[] = $this->Translate('Fingerprint security level');
             }
+            if ($this->ReadPropertyBoolean('SecurityModule') && $SmTamper !== $now['smTamper']) {
+                $reboot = $this->securityModuleTamperAlarm($SmTamper) || $reboot;
+                $changed[] = $this->Translate('Security module tamper alarm');
+            }
             if ($changed === []) {
                 return $this->Translate('No changes');
             }
@@ -71,7 +75,7 @@ trait VDM10DeviceFormTrait
                 continue;
             }
             $values = ['DevOpen1' => $now['open'][1] / 1000, 'DevOpen2' => $now['open'][2] / 1000, 'DevOutput2' => $now['output2'],
-                'DevFpLevel' => $now['fpLevel']];
+                'DevFpLevel' => $now['fpLevel'], 'DevSmTamper' => $now['smTamper']];
             foreach ([1, 2, 3, 4] as $no) {
                 $values['DevInput' . $no] = $now['inputs'][$no];
             }
@@ -90,6 +94,9 @@ trait VDM10DeviceFormTrait
             if (array_key_exists($name, $values)) {
                 $item['value'] = $values[$name];
             }
+            if ($name === 'DevSmTamper') {
+                $item['visible'] = $this->ReadPropertyBoolean('SecurityModule');
+            }
             if (str_starts_with($name, 'DevInput')) {
                 $item['options'] = array_map(fn (string $o): array => ['caption' => $this->Translate('input_' . $o), 'value' => $o],
                     $inputOptions[(int) substr($name, 8)] ?? ['custom']);
@@ -98,7 +105,7 @@ trait VDM10DeviceFormTrait
         return $items;
     }
 
-    /** @return array{open: array<int,int>, output2: string, inputs: array<int,string>, inputOptions: array<int,array<int,string>>, fpLevel: int} */
+    /** @return array{open: array<int,int>, output2: string, inputs: array<int,string>, inputOptions: array<int,array<int,string>>, fpLevel: int, smTamper: bool} */
     private function deviceSettings(): array
     {
         $api = $this->isapi();
@@ -123,6 +130,7 @@ trait VDM10DeviceFormTrait
             'inputs'       => $inputs,
             'inputOptions' => $inputOptions,
             'fpLevel'      => (int) ($reader['CardReaderCfg']['fingerPrintCheckLevel'] ?? 0),
+            'smTamper'     => $this->securityModuleTamperAlarm(),
         ];
     }
 }

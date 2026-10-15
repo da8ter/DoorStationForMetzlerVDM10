@@ -75,6 +75,7 @@ trait VDM10ControlsTrait
     private function refreshDoorHold(): void
     {
         $ws = $this->json($this->isapi()->request('GET', self::PATH_WORK_STATUS, '', 5))['AcsWorkStatus'] ?? [];
+        $this->applyMagneticStatus($ws);
         foreach ([1, 2] as $door) {
             if (@$this->GetIDForIdent('DOOR' . $door . '_HOLD') && isset($ws['doorStatus'][$door - 1])) {
                 $this->SetValue('DOOR' . $door . '_HOLD', (int) $ws['doorStatus'][$door - 1] === self::DOOR_STATUS_ALWAYS_OPEN);
@@ -88,6 +89,7 @@ trait VDM10ControlsTrait
         $api = $this->isapi();
         try {
             $this->refreshDoorHold();
+            $this->refreshSecurityModule();
             $ws = $this->json($api->request('GET', self::PATH_WORK_STATUS, '', 5))['AcsWorkStatus'] ?? [];
             if (isset($ws['voipStatus'])) {
                 $this->SetValue('SIP_STATUS', (string) $ws['voipStatus']);

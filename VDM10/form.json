@@ -92,6 +92,16 @@
                 },
                 {
                     "type": "CheckBox",
+                    "name": "SecurityModule",
+                    "caption": "Metzler security module (Metzler-SM) installed"
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "DoorContact",
+                    "caption": "Door contact connected (at the security module or an input set to “Door contact”)"
+                },
+                {
+                    "type": "CheckBox",
                     "name": "SnapshotOnRing",
                     "caption": "Take a snapshot when the doorbell rings"
                 },
@@ -527,10 +537,15 @@
                     ]
                 },
                 {
+                    "type": "CheckBox",
+                    "name": "DevSmTamper",
+                    "caption": "Tamper alarm of the security module"
+                },
+                {
                     "type": "Button",
                     "caption": "Save to the door station",
                     "confirm": "Write the changed settings to the door station now?",
-                    "onClick": "echo VDM10_UIDeviceSave($id, $DevOpen1, $DevOpen2, $DevOutput2, $DevInput1, $DevInput2, $DevInput3, $DevInput4, (int) $DevFpLevel);"
+                    "onClick": "echo VDM10_UIDeviceSave($id, $DevOpen1, $DevOpen2, $DevOutput2, $DevInput1, $DevInput2, $DevInput3, $DevInput4, (int) $DevFpLevel, $DevSmTamper);"
                 }
             ]
         },

@@ -12,6 +12,7 @@ require_once __DIR__ . '/libs/VDM10SchedulesTrait.php';
 require_once __DIR__ . '/libs/VDM10SchedulesUITrait.php';
 require_once __DIR__ . '/libs/VDM10ControlsTrait.php';
 require_once __DIR__ . '/libs/VDM10DeviceFormTrait.php';
+require_once __DIR__ . '/libs/VDM10SecurityModuleTrait.php';
 
 /**
  * Metzler VDM10 Video-Türstation (Hikvision DS-KD8003-Basis) über ISAPI.
@@ -30,6 +31,7 @@ class VDM10 extends IPSModuleStrict
     use VDM10SchedulesUITrait;
     use VDM10ControlsTrait;
     use VDM10DeviceFormTrait;
+    use VDM10SecurityModuleTrait;
 
     private const CLIENT_SOCKET_GUID = '{3CFF0FD9-E306-41DB-9B5A-9D06D38576C3}';
     private const SOCKET_RX = '{018EF6B5-AB94-40C6-AA53-46943E824ACF}';
@@ -63,6 +65,7 @@ class VDM10 extends IPSModuleStrict
         $this->RegisterPropertyInteger('RingTimeout', 30);
         $this->RegisterPropertyInteger('MotionReset', 10);
         $this->RegisterPropertyInteger('DoorCount', 1);
+        $this->registerSecurityModuleProperties();
         $this->RegisterPropertyBoolean('SnapshotOnRing', true);
         $this->RegisterPropertyInteger('SnapshotArchive', 3);
         $this->RegisterPropertyInteger('SnapshotChannel', 101);
@@ -151,6 +154,7 @@ class VDM10 extends IPSModuleStrict
             $this->EnableAction('DOOR2');
         }
         $this->maintainMedia();
+        $this->maintainSecurityModuleVariables();
 
         $host = $this->ReadPropertyString('Host');
         $this->SetSummary($host);
@@ -402,6 +406,9 @@ class VDM10 extends IPSModuleStrict
             return; // Wiedergabe alter Ereignisse bzw. Bedienprotokoll (Anmeldungen, u. a. die eigenen Abrufe)
         }
         $this->SetValue('LAST_EVENT', $this->Translate($e['label']) . ' (' . $e['raw'] . ')');
+        if ($this->securityModuleEvent($e)) {
+            return;
+        }
         switch ($e['kind']) {
             case VDM10Events::KIND_RING:
                 $this->ring($source);
