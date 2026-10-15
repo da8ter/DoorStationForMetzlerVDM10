@@ -70,8 +70,12 @@ VDM10_ReconnectStream(int $InstanzID): void;
 - Heartbeat: alle 10 s ein `videoloss/inactive`-Paket; bleibt es aus, wird neu verbunden.
 - Klingeltaster = AccessControllerEvent 1/3 (Alarmeingang), einige Sekunden bevor `callStatus`
   auf `ring` wechselt; Fingerabdruck abgelehnt = 5/39, Schloss geöffnet = 5/21.
-- HTTP-Listening (`httpHosts`) nimmt die Firmware zwar an, liefert aber keine Ereignisse
-  („Device Error" beim Test) – deshalb der Stream.
+- HTTP-Listening (`httpHosts`) ist auf Firmware V3.7.1 nicht funktionsfähig: Die Konfiguration
+  wird gespeichert (HTTP/HTTPS, IP/Hostname, XML/JSON, mit/ohne Digest), der Test antwortet mit
+  „Device Error", und bei echten Ereignissen (Klingeln, Fingerabdruck) baut die Türstation keine
+  TCP-Verbindung zum eingetragenen Host auf (am 15.10.2026 mit Paketlogger geprüft). Die
+  Bewegungserkennung lässt sich nicht auf `notificationMethod` HTTP umstellen, `subscribeEvent`
+  wird nicht unterstützt. Deshalb der Alert-Stream.
 - Befehle: `PUT /ISAPI/AccessControl/RemoteControl/door/<n>`, `PUT /ISAPI/VideoIntercom/callSignal`,
   `GET /ISAPI/VideoIntercom/callStatus`, `GET /ISAPI/Streaming/channels/101/picture`,
   `PUT /ISAPI/System/reboot`, Zutrittsereignisse `POST /ISAPI/AccessControl/AcsEvent`.
