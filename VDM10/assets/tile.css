@@ -78,6 +78,10 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .door { display: grid; gap: 10px; padding: 12px; border-radius: 16px; background: var(--surface); }
 .door-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-weight: 700; }
 .door-head .chip { font-weight: 600; }
+.door-status { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0; }
+.door-head .switch-row { gap: 8px; }
+.door-head .switch-row { margin-left: auto; font-weight: 500; flex: none; }
+.door-head .switch-row span { white-space: nowrap; }
 .hold { position: relative; overflow: hidden; width: 100%; padding: 14px 12px; border-radius: 14px; background: var(--accent); color: #fff;
   font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; touch-action: none; user-select: none; -webkit-user-select: none; }
 .hold .fa-icon { width: 18px; height: 18px; }

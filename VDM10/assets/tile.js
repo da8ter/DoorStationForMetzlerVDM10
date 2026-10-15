@@ -173,11 +173,13 @@
       // Gesperrt: kein Schalter; steht die Tür trotzdem dauerhaft offen (Gerät/Weboberfläche), Warn-Chip
       const allowed = state.holdAllowed !== false;
       const held = !allowed && d.hold ? '<span class="chip warn">' + esc(T('Permanently open')) + '</span>' : '';
+      // Kopfzeile: links Tür-Name und Status-Chips, rechts „Dauerhaft offen“ mit Schalter
+      const left = (multi ? '<span>' + esc(T('Door %d', d.no)) + '</span>' : '') + contact + held;
+      const right = allowed ? '<div class="switch-row"><span>' + esc(T('Permanently open')) + '</span><button class="switch' + (d.hold ? ' on' : '') +
+        '" data-hold="' + d.no + '" aria-pressed="' + d.hold + '"></button></div>' : '';
       return '<div class="door">' +
-        (multi || contact || held ? '<div class="door-head"><span>' + esc(multi ? T('Door %d', d.no) : '') + '</span>' + held + contact + '</div>' : '') +
-        holdButton(d.no) +
-        (allowed ? '<div class="switch-row"><span>' + esc(T('Permanently open')) + '</span><button class="switch' + (d.hold ? ' on' : '') +
-        '" data-hold="' + d.no + '" aria-pressed="' + d.hold + '"></button></div>' : '') + '</div>';
+        (left || right ? '<div class="door-head"><div class="door-status">' + left + '</div>' + right + '</div>' : '') +
+        holdButton(d.no) + '</div>';
     }).join('');
   }
 
