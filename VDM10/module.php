@@ -10,6 +10,8 @@ require_once __DIR__ . '/libs/VDM10PersonsTrait.php';
 require_once __DIR__ . '/libs/VDM10PersonsUITrait.php';
 require_once __DIR__ . '/libs/VDM10SchedulesTrait.php';
 require_once __DIR__ . '/libs/VDM10SchedulesUITrait.php';
+require_once __DIR__ . '/libs/VDM10ControlsTrait.php';
+require_once __DIR__ . '/libs/VDM10DeviceFormTrait.php';
 
 /**
  * Metzler VDM10 Video-Türstation (Hikvision DS-KD8003-Basis) über ISAPI.
@@ -26,9 +28,12 @@ class VDM10 extends IPSModuleStrict
     use VDM10PersonsUITrait;
     use VDM10SchedulesTrait;
     use VDM10SchedulesUITrait;
+    use VDM10ControlsTrait;
+    use VDM10DeviceFormTrait;
 
     private const CLIENT_SOCKET_GUID = '{3CFF0FD9-E306-41DB-9B5A-9D06D38576C3}';
     private const SOCKET_RX = '{018EF6B5-AB94-40C6-AA53-46943E824ACF}';
+    private const SOCKET_TX = '{79827379-F36E-4ADA-8A95-5F8D1DC92FA9}';
     private const PRESENTATION_DATE_TIME = '{497C4845-27FA-6E4F-AE37-5D951D3BDBF9}';
 
     private const STATUS_NO_HOST = 104;
@@ -113,13 +118,13 @@ class VDM10 extends IPSModuleStrict
         $this->RegisterVariableBoolean('ONLINE', $this->Translate('Door station'), $this->boolPresentation('Network', 'Offline', 'Online', 0xFF0000, 0x00C000), 120);
         $this->RegisterVariableBoolean('STREAM_CONNECTED', $this->Translate('Event stream'), $this->boolPresentation('Network', 'Disconnected', 'Connected', 0x808080, 0x00C000), 130);
 
+        $this->registerControlVariables();
         $this->RegisterTimer('Poll', 0, 'VDM10_Poll($_IPS[\'TARGET\']);');
         $this->RegisterTimer('Watchdog', 0, 'VDM10_Watchdog($_IPS[\'TARGET\']);');
         $this->RegisterTimer('RingReset', 0, 'VDM10_ResetRing($_IPS[\'TARGET\']);');
         $this->RegisterTimer('MotionReset', 0, 'VDM10_ResetMotion($_IPS[\'TARGET\']);');
         $this->RegisterTimer('DoorReset', 0, 'VDM10_ResetDoors($_IPS[\'TARGET\']);');
 
-        $this->RequireParent(self::CLIENT_SOCKET_GUID);
     }
 
     public function Destroy(): void
@@ -150,18 +155,21 @@ class VDM10 extends IPSModuleStrict
         $host = $this->ReadPropertyString('Host');
         $this->SetSummary($host);
         if ($host === '') {
+            $this->maintainControlVariables(false);
             $this->SetTimerInterval('Poll', 0);
             $this->SetTimerInterval('Watchdog', 0);
             $this->SetStatus(self::STATUS_NO_HOST);
             return;
         }
-        $this->ensureSocket();
-        $this->configureSocket();
+        // Socket nachträglich verbunden oder getrennt (Konsole): neu einrichten
+        $this->RegisterMessage($this->InstanceID, FM_CONNECT);
+        $this->RegisterMessage($this->InstanceID, FM_DISCONNECT);
         $io = $this->ioId();
         if ($io > 0) {
             $this->RegisterMessage($io, IM_CHANGESTATUS);
         }
         $this->refreshDeviceInfo();
+        $this->maintainControlVariables($this->GetStatus() === IS_ACTIVE);
         $this->SetTimerInterval('Poll', max(0, $this->ReadPropertyInteger('PollInterval')) * 1000);
         $this->SetTimerInterval('Watchdog', 30000);
         if ($this->ReadPropertyBoolean('StreamEnabled') && $this->HasActiveParent()) {
@@ -174,7 +182,13 @@ class VDM10 extends IPSModuleStrict
     public function GetConfigurationForm(): string
     {
         $form = json_decode((string) file_get_contents(__DIR__ . '/form.json'), true);
-        return (string) json_encode($this->fillPersonsForm($form));
+        return (string) json_encode($this->fillDeviceForm($this->fillPersonsForm($form)));
+    }
+
+    /** Beim Anlegen einen eigenen Client Socket anfordern (Module Strict: Ersatz für RequireParent). */
+    public function GetCompatibleParents(): string
+    {
+        return (string) json_encode(['type' => 'require', 'moduleIDs' => [self::CLIENT_SOCKET_GUID]]);
     }
 
     public function GetConfigurationForParent(): string
@@ -187,7 +201,7 @@ class VDM10 extends IPSModuleStrict
 
     public function MessageSink(int $TimeStamp, int $SenderID, int $Message, array $Data): void
     {
-        if ($Message === IPS_KERNELSTARTED) {
+        if ($Message === IPS_KERNELSTARTED || $Message === FM_CONNECT || $Message === FM_DISCONNECT) {
             $this->ApplyChanges();
             return;
         }
@@ -217,7 +231,9 @@ class VDM10 extends IPSModuleStrict
                 $this->SetValue('CALL_CONTROL', self::CTRL_NONE);
                 break;
             default:
-                throw new Exception('Invalid ident ' . $Ident);
+                if (!$this->controlAction($Ident, $Value)) {
+                    throw new Exception('Invalid ident ' . $Ident);
+                }
         }
     }
 
@@ -382,8 +398,8 @@ class VDM10 extends IPSModuleStrict
             return;
         }
         $this->SendDebug('Event', sprintf('%s %s %s%s%s', $source, $e['kind'], $e['raw'], $e['name'] !== '' ? ' ' . $e['name'] : '', $e['current'] ? '' : ' (history)'), 0);
-        if (!$e['current']) {
-            return;
+        if (!$e['current'] || $e['major'] === 3) {
+            return; // Wiedergabe alter Ereignisse bzw. Bedienprotokoll (Anmeldungen, u. a. die eigenen Abrufe)
         }
         $this->SetValue('LAST_EVENT', $this->Translate($e['label']) . ' (' . $e['raw'] . ')');
         switch ($e['kind']) {
@@ -439,42 +455,4 @@ class VDM10 extends IPSModuleStrict
         }
     }
 
-    /** Rückfallebene ohne Stream: neue Zutrittsereignisse aus dem Gerätespeicher holen. */
-    private function pollAccessEvents(): void
-    {
-        $tick = (int) $this->GetBuffer('EventTick') + 1;
-        $this->SetBuffer('EventTick', (string) $tick);
-        if ($tick % 3 !== 0) {
-            return;
-        }
-        $last = $this->ReadAttributeString('LastEventTime');
-        $events = $this->isapi()->recentEvents(10);
-        $newest = $last;
-        foreach ($events as $info) {
-            $time = (string) ($info['time'] ?? '');
-            if ($time === '' || $time <= $last) {
-                continue;
-            }
-            $newest = max($newest, $time);
-            if ($last !== '') {
-                $this->handleEvent(VDM10Events::fromAcsEvent($info), 'poll');
-            }
-        }
-        if ($newest !== $last) {
-            $this->WriteAttributeString('LastEventTime', $newest);
-        }
-    }
-
-    private function boolPresentation(string $icon, string $falseCaption, string $trueCaption, int $falseColor, int $trueColor): array
-    {
-        $opt = fn (bool $v, string $c, int $color): array => ['Value' => $v, 'Caption' => $this->Translate($c), 'IconActive' => false, 'IconValue' => '',
-            'ColorActive' => true, 'ColorValue' => $color, 'ContentColorActive' => false, 'ContentColorValue' => -1];
-        return ['PRESENTATION' => VARIABLE_PRESENTATION_VALUE_PRESENTATION, 'ICON' => $icon,
-            'OPTIONS' => json_encode([$opt(false, $falseCaption, $falseColor), $opt(true, $trueCaption, $trueColor)], JSON_UNESCAPED_UNICODE)];
-    }
-
-    private function doorPresentation(): array
-    {
-        return ['PRESENTATION' => VARIABLE_PRESENTATION_SWITCH, 'ICON_TRUE' => 'Door', 'ICON_FALSE' => 'Door', 'USE_ICON_FALSE' => false, 'USAGE_TYPE' => 2];
-    }
 }

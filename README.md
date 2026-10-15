@@ -20,6 +20,11 @@ DS-KD8003(B); geprüft mit Firmware V3.7.1 (build 251112).
   anlernen**, löschen und Person löschen
 - **Zugangszeitpläne**: eigene Liste mit Dialog (Name + Zeitfenster wie „Mo–Fr 08:00–12:00");
   Zuordnung im Personen-Dialog, gilt für alle Türen der Person; leer = rund um die Uhr
+- **Schaltbar als Variablen:** Tür dauerhaft offen, Bewegungserkennung und Empfindlichkeit,
+  Klingelton an/aus, Klingelton- und Sprechlautstärke, Tastenbeleuchtung; Anzeige von SIP-Anmeldung
+  und Firmware
+- **Einstellungen der Türstation** im Formular: Öffnungsdauer je Tür, Ausgang 2, Eingänge 1–4,
+  Fingerabdruck-Sicherheitsstufe
 - Neustart der Türstation, generischer ISAPI-Durchgriff `VDM10_Request()` für Skripte
 
 Gegensprechen (Audio) übernimmt dieses Modul nicht. Dafür die Türstation per
@@ -39,6 +44,8 @@ Standard-SIP am Symcon-Modul „Türsprechanlage" (DoorIP) oder an einer FRITZ!B
    als übergeordnete Instanz an.
 2. IP-Adresse und admin-Passwort eintragen, „Verbindung testen".
 3. Optional: Anzahl Türöffner, Snapshot-Archiv, Stream-Kanal anpassen.
+
+Ausführliche Beschreibung aller Einstellungen, Variablen und Befehle: [VDM10/README.md](VDM10/README.md).
 
 ## Variablen
 
@@ -101,7 +108,9 @@ vor den Leser gehalten.
 
 - Ereignisse: `GET /ISAPI/Event/notification/alertStream` (multipart/mixed). Die Türstation erlaubt
   nur **eine** Stream-Verbindung; nach einem Verbindungsabbruch antwortet sie bis zu etwa einer
-  Minute mit HTTP 500, bis sie den Slot freigibt. Der Watchdog verbindet dann neu.
+  Minute mit HTTP 500 und schließt die Verbindung. Symcon öffnet den Client Socket nach 60 Sekunden
+  selbst neu, das Modul sendet die Anfrage dann erneut. Den Socket konfiguriert das Modul nur über
+  `GetConfigurationForParent` und `GetCompatibleParents` (Store-Vorgaben).
 - Heartbeat: alle 10 s ein `videoloss/inactive`-Paket; bleibt es aus, wird neu verbunden.
 - Klingeltaster = AccessControllerEvent 1/3 (Alarmeingang), einige Sekunden bevor `callStatus`
   auf `ring` wechselt; Fingerabdruck abgelehnt = 5/39, Schloss geöffnet = 5/21.

@@ -400,6 +400,141 @@
             ]
         },
         {
+            "type": "ExpansionPanel",
+            "name": "DevicePanel",
+            "caption": "Door station settings",
+            "expanded": false,
+            "items": [
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "DevOpen1",
+                            "caption": "Opening time door 1",
+                            "digits": 1,
+                            "minimum": 0.1,
+                            "maximum": 600,
+                            "suffix": "s"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "DevOpen2",
+                            "caption": "Opening time door 2",
+                            "digits": 1,
+                            "minimum": 0.1,
+                            "maximum": 600,
+                            "suffix": "s"
+                        }
+                    ]
+                },
+                {
+                    "type": "Select",
+                    "name": "DevOutput2",
+                    "caption": "Output 2",
+                    "width": "320px",
+                    "options": [
+                        {
+                            "caption": "Disabled",
+                            "value": "disable"
+                        },
+                        {
+                            "caption": "Second door opener",
+                            "value": "electricLock"
+                        },
+                        {
+                            "caption": "External door chime",
+                            "value": "mechanicalDoorbell"
+                        },
+                        {
+                            "caption": "On motion at night",
+                            "value": "motionDeteAndNight"
+                        },
+                        {
+                            "caption": "In night mode",
+                            "value": "night"
+                        }
+                    ]
+                },
+                {
+                    "type": "Label",
+                    "caption": "For a second door opener set output 2 to “Second door opener” and the number of door openers to 2."
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "DevInput1",
+                            "caption": "Input 1",
+                            "width": "260px",
+                            "options": []
+                        },
+                        {
+                            "type": "Select",
+                            "name": "DevInput2",
+                            "caption": "Input 2",
+                            "width": "260px",
+                            "options": []
+                        }
+                    ]
+                },
+                {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "DevInput3",
+                            "caption": "Input 3",
+                            "width": "260px",
+                            "options": []
+                        },
+                        {
+                            "type": "Select",
+                            "name": "DevInput4",
+                            "caption": "Input 4",
+                            "width": "260px",
+                            "options": []
+                        }
+                    ]
+                },
+                {
+                    "type": "Select",
+                    "name": "DevFpLevel",
+                    "caption": "Fingerprint security level",
+                    "width": "320px",
+                    "options": [
+                        {
+                            "caption": "1 (tolerant)",
+                            "value": 1
+                        },
+                        {
+                            "caption": "2",
+                            "value": 2
+                        },
+                        {
+                            "caption": "3",
+                            "value": 3
+                        },
+                        {
+                            "caption": "4",
+                            "value": 4
+                        },
+                        {
+                            "caption": "5 (strict)",
+                            "value": 5
+                        }
+                    ]
+                },
+                {
+                    "type": "Button",
+                    "caption": "Save to the door station",
+                    "confirm": "Write the changed settings to the door station now?",
+                    "onClick": "echo VDM10_UIDeviceSave($id, $DevOpen1, $DevOpen2, $DevOutput2, $DevInput1, $DevInput2, $DevInput3, $DevInput4, (int) $DevFpLevel);"
+                }
+            ]
+        },
+        {
             "type": "RowLayout",
             "items": [
                 {

@@ -129,9 +129,29 @@ trait VDM10PersonsUITrait
         $this->refreshScheduleLists();
     }
 
+    /**
+     * Personen und Zeitpläne einmal pro Aufruf von der Türstation holen. Ist die Instanz nicht
+     * verbunden, bleibt es bei leeren Listen, damit das Formular ohne Wartezeit öffnet.
+     *
+     * @return array{persons: array<int, array<string,mixed>>, schedules: array<int, array<string,mixed>>}
+     */
+    private function listData(): array
+    {
+        if ($this->ReadPropertyString('Host') === '' || $this->GetStatus() !== IS_ACTIVE) {
+            return ['persons' => [], 'schedules' => []];
+        }
+        try {
+            return ['persons' => $this->GetPersons(), 'schedules' => $this->GetSchedules()];
+        } catch (Throwable $e) {
+            $this->SendDebug('Lists', $e->getMessage(), 0);
+            return ['persons' => [], 'schedules' => []];
+        }
+    }
+
     /** Personenliste im Formular befüllen; neue Personen starten mit heutigem Datum. */
     private function fillPersonsForm(array $form): array
     {
+        $data = null;
         foreach ($form['actions'] as &$action) {
             if (!in_array($action['name'] ?? '', ['PersonsPanel', 'SchedulesPanel'], true)) {
                 continue;
@@ -140,7 +160,8 @@ trait VDM10PersonsUITrait
                 if (!in_array($item['name'] ?? '', ['Persons', 'Schedules'], true)) {
                     continue;
                 }
-                $item['values'] = $item['name'] === 'Persons' ? $this->personRows() : $this->scheduleRows();
+                $data ??= $this->listData();
+                $item['values'] = $item['name'] === 'Persons' ? $this->personRows($data) : $this->scheduleRows($data);
                 foreach ($item['columns'] as &$column) {
                     if (in_array($column['name'], ['PersonBegin', 'PersonEnd'], true)) {
                         $column['add'] = $this->dateJson('');
@@ -152,22 +173,11 @@ trait VDM10PersonsUITrait
     }
 
     /** @return array<int, array<string,mixed>> Zeilen der Formularliste inkl. Dialogwerten */
-    private function personRows(): array
+    private function personRows(?array $data = null): array
     {
-        if ($this->ReadPropertyString('Host') === '') {
-            return [];
-        }
-        try {
-            $persons = $this->GetPersons();
-        } catch (Throwable $e) {
-            $this->SendDebug('Persons', $e->getMessage(), 0);
-            return [];
-        }
-        try {
-            $names = array_column($this->GetSchedules(), 'name', 'no');
-        } catch (Throwable $e) {
-            $names = [];
-        }
+        $data ??= $this->listData();
+        $persons = $data['persons'];
+        $names = array_column($data['schedules'], 'name', 'no');
         $rows = [];
         foreach ($persons as $u) {
             $valid = $u['Valid'] ?? [];

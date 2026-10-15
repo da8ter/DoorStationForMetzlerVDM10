@@ -1,0 +1,119 @@
+# VDM10 (Metzler VDM10 Türstation)
+
+Gerätemodul für die Video-Türstation **Metzler VDM10 (2.0)** über die lokale ISAPI-Schnittstelle
+(Hikvision DS-KD8003-Basis). Keine Cloud, kein Hik-Connect.
+
+## Inhaltsverzeichnis
+
+1. [Funktionsumfang](#1-funktionsumfang)
+2. [Voraussetzungen](#2-voraussetzungen)
+3. [Software-Installation](#3-software-installation)
+4. [Einrichten der Instanz](#4-einrichten-der-instanz)
+5. [Statusvariablen und Medien](#5-statusvariablen-und-medien)
+6. [Konfigurationsbereiche im Aktionsteil](#6-konfigurationsbereiche-im-aktionsteil)
+7. [PHP-Befehlsreferenz](#7-php-befehlsreferenz)
+
+## 1. Funktionsumfang
+
+- Klingeln, Bewegung, Sabotage und Zutritte (Fingerabdruck, Karte, PIN) in Echtzeit über den ISAPI-Alert-Stream
+- Rufstatus, Anruf annehmen/ablehnen/auflegen
+- Türöffner 1 und 2, „Tür dauerhaft offen“
+- Snapshot beim Klingeln mit Archiv, RTSP-Livebild als Medienobjekt
+- Bewegungserkennung, Empfindlichkeit, Lautstärken, Klingelton, Tastenbeleuchtung schaltbar
+- Personen, Fingerabdrücke, Karten, PIN, Gültigkeit und Zugangszeitpläne verwalten
+- Öffnungsdauer, Ausgang 2, Eingänge 1–4 und Fingerabdruck-Sicherheitsstufe einstellen
+
+Gegensprechen (Audio) übernimmt das Symcon-Modul „Türsprechanlage“ (SIP) oder eine FRITZ!Box.
+
+## 2. Voraussetzungen
+
+- Symcon ab Version 8.2
+- Metzler VDM10 (2.0) im lokalen Netz, HTTP aktiv (Port 80), RTSP (Port 554)
+- Benutzer `admin` mit dem bei der Aktivierung vergebenen Passwort
+- Für das Livebild: Passwort ohne Zeichen, die in einer URL eine Bedeutung haben
+
+## 3. Software-Installation
+
+Über den Module Store oder im Module Control die Bibliothek „Metzler VDM10“ hinzufügen.
+
+## 4. Einrichten der Instanz
+
+Unter „Instanz hinzufügen“ die Instanz **Metzler VDM10 Türstation** anlegen. Die Konsole legt dabei
+einen **Client Socket** an, über den der Ereignis-Stream läuft. Host und Port übernimmt der Socket aus
+der Türstation-Instanz.
+
+| Eigenschaft | Beschreibung |
+|---|---|
+| IP-Adresse / Hostname, HTTP-Port, HTTPS | Adresse der Türstation |
+| Benutzername, Passwort | Zugang zur Türstation (Digest) |
+| Ereignisse über den ISAPI-Alert-Stream | Echtzeit-Ereignisse über den Client Socket |
+| Rufstatus abfragen alle | Rückfallebene ohne Stream (0 = aus) |
+| Klingel / Bewegung zurücksetzen nach | Wie lange die Variablen aktiv bleiben |
+| Türöffner | 1 oder 2 (zweiter Türöffner an Ausgang 2) |
+| Snapshot beim Klingeln, Archiv, Bildquelle | Bilder beim Klingeln |
+| RTSP-Livebild, Livebild-Quelle | Medienobjekt mit dem Videostream |
+
+Bricht die Verbindung ab, öffnet Symcon den Client Socket nach spätestens 60 Sekunden neu; die
+Türstation gibt einen abgebrochenen Stream erst nach etwa einer Minute frei. In dieser Zeit liefert die
+Rückfallebene Klingeln und Zutritte mit einigen Sekunden Verzögerung.
+
+## 5. Statusvariablen und Medien
+
+| Ident | Typ | Beschreibung |
+|---|---|---|
+| `CALL_STATUS` | Integer | 0 Frei, 1 Klingelt, 2 Gespräch |
+| `DOORBELL`, `LAST_RING` | Boolean, Integer | Klingeln und Zeitpunkt |
+| `DOOR1`, `DOOR2` | Boolean | Türöffner (Impuls) |
+| `DOOR1_HOLD`, `DOOR2_HOLD` | Boolean | Tür dauerhaft offen |
+| `CALL_CONTROL` | Integer | Annehmen, Ablehnen, Auflegen |
+| `MOTION`, `TAMPER` | Boolean | Bewegung, Sabotage |
+| `LAST_ACCESS`, `LAST_ACCESS_TIME` | String, Integer | Letzter Zutritt mit Name |
+| `LAST_EVENT` | String | Letztes Ereignis im Klartext |
+| `ONLINE`, `STREAM_CONNECTED`, `SIP_STATUS` | | Erreichbarkeit, Stream, SIP-Anmeldung |
+| `MOTION_DETECTION`, `MOTION_SENSITIVITY` | Boolean, Integer | Bewegungserkennung, Stufe 1–6 |
+| `RING_ENABLED`, `RING_VOLUME`, `TALK_VOLUME` | Boolean, Integer | Klingelton, Lautstärken 0–10 |
+| `BACKLIGHT` | String | Tastenbeleuchtung: auto, on, off, custom |
+| `FIRMWARE` | String | Firmware der Türstation |
+
+Medien: `SNAPSHOT`, `SNAPSHOT_1` … `SNAPSHOT_n` (Archiv), `LIVE` (RTSP).
+
+## 6. Konfigurationsbereiche im Aktionsteil
+
+- **Personen, Fingerabdrücke und Karten:** Liste der Personen; „+“ legt an, das Stift-Symbol öffnet den
+  Dialog mit Name, PIN (nur mit Tastenfeld-Modul), Gültigkeit, Zugangszeitplan und den Buttons zum
+  Anlernen und Löschen.
+- **Zugangszeitpläne:** Zeitfenster je Tagesgruppe; gelten für alle Türen der Person.
+- **Einstellungen der Türstation:** Öffnungsdauer je Tür, Ausgang 2, Eingänge 1–4,
+  Fingerabdruck-Sicherheitsstufe. „In die Türstation schreiben“ überträgt nur geänderte Werte; manche
+  Änderungen (z. B. Ausgang 2) wirken erst nach einem Neustart der Türstation.
+
+Alle Änderungen gehen sofort an die Türstation.
+
+## 7. PHP-Befehlsreferenz
+
+```php
+VDM10_UnlockDoor(int $InstanzID, int $Tuer): bool;
+VDM10_TakeSnapshot(int $InstanzID): bool;
+VDM10_UpdateCallStatus(int $InstanzID): string;            // idle | ring | onCall
+VDM10_AnswerCall / VDM10_RejectCall / VDM10_HangUp(int $InstanzID): bool;
+VDM10_Reboot(int $InstanzID): bool;
+VDM10_RefreshStatus(int $InstanzID): void;
+VDM10_ReconnectStream(int $InstanzID): void;
+VDM10_Request(int $InstanzID, string $Methode, string $Pfad, string $Body = ''): string;
+
+VDM10_GetPersons(int $InstanzID): array;
+VDM10_AddPerson(int $InstanzID, string $Name, string $Pin): string;
+VDM10_RenamePerson(int $InstanzID, string $Nr, string $Name): bool;
+VDM10_SetPersonPin(int $InstanzID, string $Nr, string $Pin): bool;
+VDM10_SetPersonValidity(int $InstanzID, string $Nr, int $Beginn, int $Ende): bool;
+VDM10_SetPersonSchedule(int $InstanzID, string $Nr, int $Zeitplan): bool;
+VDM10_EnrollFingerprint(int $InstanzID, string $Nr, int $Finger): bool;
+VDM10_EnrollCard(int $InstanzID, string $Nr): string;
+VDM10_DeleteFingerprints / VDM10_DeleteCards / VDM10_DeletePerson(int $InstanzID, string $Nr): bool;
+
+VDM10_GetSchedules(int $InstanzID): array;
+VDM10_SetSchedule(int $InstanzID, int $Nr, string $Name, string $Zeitfenster): int;
+VDM10_DeleteSchedule(int $InstanzID, int $Nr): bool;
+```
+
+Schaltbare Variablen lassen sich zusätzlich mit `RequestAction` setzen.

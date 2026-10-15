@@ -44,23 +44,17 @@ trait VDM10SchedulesUITrait
 
     private function refreshScheduleLists(): void
     {
-        $this->UpdateFormField('Schedules', 'values', json_encode($this->scheduleRows()));
-        $this->UpdateFormField('Persons', 'values', json_encode($this->personRows()));
+        $data = $this->listData();
+        $this->UpdateFormField('Schedules', 'values', json_encode($this->scheduleRows($data)));
+        $this->UpdateFormField('Persons', 'values', json_encode($this->personRows($data)));
     }
 
     /** @return array<int, array<string,mixed>> */
-    private function scheduleRows(): array
+    private function scheduleRows(?array $data = null): array
     {
-        if ($this->ReadPropertyString('Host') === '') {
-            return [];
-        }
-        try {
-            $schedules = $this->GetSchedules();
-            $persons = $this->GetPersons();
-        } catch (Throwable $e) {
-            $this->SendDebug('Schedules', $e->getMessage(), 0);
-            return [];
-        }
+        $data ??= $this->listData();
+        $schedules = $data['schedules'];
+        $persons = $data['persons'];
         $rows = [];
         foreach ($schedules as $s) {
             $users = array_filter($persons, fn (array $u): bool => $this->personSchedule($u) === $s['no']);

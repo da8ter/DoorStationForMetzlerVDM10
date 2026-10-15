@@ -44,6 +44,7 @@ trait VDM10StreamTrait
                 return '';
             }
             $this->SetBuffer('Handshake', 'stream');
+            $this->SetBuffer('PollPrimed', ''); // Rückfallebene beginnt beim nächsten Ausfall neu
             $this->SetValue('STREAM_CONNECTED', true);
             $this->SetValue('ONLINE', true);
             $buffer = substr($buffer, $end + 4);
@@ -64,83 +65,35 @@ trait VDM10StreamTrait
         return '';
     }
 
+    /**
+     * Überwacht den Alert-Stream. Den Socket selbst schaltet das Modul nicht (Store-Regel: keine
+     * Eigenschaften anderer Instanzen setzen); nach einem Verbindungsabbruch verbindet der Client
+     * Socket von allein neu, und IM_CHANGESTATUS startet den Stream wieder. Bleibt der Stream auf
+     * einer offenen Verbindung stumm oder wurde abgewiesen, wird die Anfrage erneut gesendet.
+     */
     public function Watchdog(): void
     {
-        if (!$this->ReadPropertyBoolean('StreamEnabled') || $this->ReadPropertyString('Host') === '') {
-            return;
-        }
-        $io = $this->ioId();
-        if ($io === 0) {
-            return;
-        }
-        if (IPS_GetInstance($io)['InstanceStatus'] !== IS_ACTIVE) {
-            $this->SendDebug('Watchdog', 'socket not active, reconnecting', 0);
-            $this->reconnectSocket();
+        if (!$this->ReadPropertyBoolean('StreamEnabled') || $this->ReadPropertyString('Host') === '' || !$this->HasActiveParent()) {
             return;
         }
         $silent = time() - (int) $this->GetBuffer('LastRx');
         $state = $this->GetBuffer('Handshake');
         if ($state === 'error' || $state === '' || $silent > VDM10Events::HEARTBEAT_SECONDS * 3 + 5) {
-            $this->SendDebug('Watchdog', sprintf('state=%s silent=%ds, reconnecting', $state, $silent), 0);
-            $this->reconnectSocket();
+            $this->SendDebug('Watchdog', sprintf('state=%s silent=%ds, request again', $state, $silent), 0);
+            $this->SetBuffer('Handshake', '');
+            $this->startStream();
         }
     }
 
     public function ReconnectStream(): void
     {
-        $this->reconnectSocket();
+        $this->SetBuffer('Handshake', '');
+        $this->startStream();
     }
 
     private function ioId(): int
     {
-        return (int) (@IPS_GetInstance($this->InstanceID)['ConnectionID'] ?? 0);
-    }
-
-    /** Legt den Client Socket an, falls die Instanz (z. B. per API erstellt) noch keinen Parent hat. */
-    private function ensureSocket(): void
-    {
-        if ($this->ioId() > 0 || !$this->ReadPropertyBoolean('StreamEnabled')) {
-            return;
-        }
-        $io = IPS_CreateInstance(self::CLIENT_SOCKET_GUID);
-        IPS_SetName($io, 'VDM10 Client Socket');
-        IPS_SetParent($io, IPS_GetParent($this->InstanceID));
-        IPS_SetProperty($io, 'Open', false);
-        IPS_ApplyChanges($io);
-        IPS_ConnectInstance($this->InstanceID, $io);
-        $this->SendDebug('Socket', 'created #' . $io, 0);
-    }
-
-    private function configureSocket(): void
-    {
-        $io = $this->ioId();
-        if ($io === 0) {
-            return;
-        }
-        $wanted = json_decode($this->GetConfigurationForParent(), true);
-        $changed = false;
-        foreach ($wanted as $key => $value) {
-            if (IPS_GetProperty($io, $key) !== $value) {
-                IPS_SetProperty($io, $key, $value);
-                $changed = true;
-            }
-        }
-        if ($changed) {
-            IPS_ApplyChanges($io);
-        }
-    }
-
-    private function reconnectSocket(): void
-    {
-        $io = $this->ioId();
-        if ($io === 0) {
-            return;
-        }
-        $this->streamDown();
-        IPS_SetProperty($io, 'Open', false);
-        IPS_ApplyChanges($io);
-        IPS_SetProperty($io, 'Open', true);
-        IPS_ApplyChanges($io);
+        return IPS_InstanceExists($this->InstanceID) ? (int) IPS_GetInstance($this->InstanceID)['ConnectionID'] : 0;
     }
 
     private function startStream(): void
@@ -148,8 +101,7 @@ trait VDM10StreamTrait
         if (!$this->ReadPropertyBoolean('StreamEnabled') || $this->ReadPropertyString('Host') === '') {
             return;
         }
-        $io = $this->ioId();
-        if ($io === 0 || !function_exists('CSCK_SendText')) {
+        if (!$this->HasActiveParent()) {
             return;
         }
         $state = $this->GetBuffer('Handshake');
@@ -166,7 +118,8 @@ trait VDM10StreamTrait
         $this->SetBuffer('Handshake', 'head');
         $this->SetBuffer('LastRx', (string) time());
         $this->SendDebug('Stream', 'request sent', 0);
-        @CSCK_SendText($io, $this->isapi()->alertStreamRequest($this->ReadPropertyString('Host'), $challenge));
+        $this->SendDataToParent((string) json_encode(['DataID' => self::SOCKET_TX,
+            'Buffer' => bin2hex($this->isapi()->alertStreamRequest($this->ReadPropertyString('Host'), $challenge))]));
     }
 
     private function streamDown(): void
@@ -175,6 +128,36 @@ trait VDM10StreamTrait
         $this->SetBuffer('RX', '');
         if ($this->GetValue('STREAM_CONNECTED')) {
             $this->SetValue('STREAM_CONNECTED', false);
+        }
+    }
+
+    /** Rückfallebene ohne Stream: neue Zutrittsereignisse aus dem Gerätespeicher holen. */
+    private function pollAccessEvents(): void
+    {
+        $tick = (int) $this->GetBuffer('EventTick') + 1;
+        $this->SetBuffer('EventTick', (string) $tick);
+        if ($tick % 3 !== 0) {
+            return;
+        }
+        $last = $this->ReadAttributeString('LastEventTime');
+        $events = $this->isapi()->recentEvents(10);
+        // Erster Abruf nach dem Ausfall des Streams: nur den Stand merken. Sonst gelten Ereignisse,
+        // die der Stream schon gemeldet hat, als neu (z. B. ein altes Klingeln).
+        $primed = $this->GetBuffer('PollPrimed') === '1';
+        $this->SetBuffer('PollPrimed', '1');
+        $newest = $last;
+        foreach ($events as $info) {
+            $time = (string) ($info['time'] ?? '');
+            if ($time === '' || $time <= $last) {
+                continue;
+            }
+            $newest = max($newest, $time);
+            if ($primed && $last !== '') {
+                $this->handleEvent(VDM10Events::fromAcsEvent($info), 'poll');
+            }
+        }
+        if ($newest !== $last) {
+            $this->WriteAttributeString('LastEventTime', $newest);
         }
     }
 }
