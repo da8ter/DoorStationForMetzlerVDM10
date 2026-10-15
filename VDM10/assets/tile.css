@@ -85,6 +85,13 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .hold small { position: relative; font-size: 11px; font-weight: 600; opacity: .85; }
 .hold.busy { opacity: .6; }
 .hold-no { display: none; }
+.hold-label { white-space: nowrap; }
+/* Schmale Türkarte: „Zum Öffnen gedrückt halten“ in eine eigene Zeile unter „Tür öffnen“ */
+.door { container-type: inline-size; }
+@container (max-width: 440px) {
+  .hold { flex-wrap: wrap; row-gap: 3px; padding: 12px; }
+  .hold small { flex-basis: 100%; text-align: center; }
+}
 .btn { padding: 12px; border-radius: 12px; font-weight: 700; background: var(--surface2); display: flex; align-items: center; justify-content: center; gap: 8px; }
 .btn.danger { color: var(--red); }
 .btn .fa-icon { width: 16px; height: 16px; }
