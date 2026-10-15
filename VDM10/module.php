@@ -238,7 +238,13 @@ class VDM10 extends IPSModuleStrict
             $this->ring('poll');
         }
         $this->SetValue('CALL_STATUS', $new);
-        if ($new === self::CALL_IDLE && $this->GetValue('DOORBELL') && time() - $this->GetValue('LAST_RING') > self::RING_DEDUPE_SECONDS) {
+        // Die Klingel erlischt vorzeitig nur, wenn die Türstation selbst einen Ruf gemeldet hat
+        // und dieser beendet ist. Der Tastendruck (Alarmeingang) kommt im Stream einige Sekunden
+        // vor dem Rufaufbau an; in dieser Lücke meldet callStatus noch "idle".
+        if ($new === self::CALL_RING) {
+            $this->SetBuffer('DeviceRing', '1');
+        } elseif ($new === self::CALL_IDLE && $this->GetBuffer('DeviceRing') === '1') {
+            $this->SetBuffer('DeviceRing', '');
             $this->ResetRing();
         }
         return $status;

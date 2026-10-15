@@ -62,8 +62,9 @@ final class VDM10Events
     ];
 
     /**
-     * Alarme (majorEventType 1). Minor 3 ist an der VDM10 der Alarmeingang
-     * (Klingeltaster an AIN1-4), 0x404/0x40a/0x40f Sabotage.
+     * Alarme (majorEventType 1). Minor 3 ist an der VDM10 der Klingeltaster
+     * (Alarmeingang AIN1-4; am 15.10.2026 live bestätigt, kommt einige Sekunden
+     * vor callStatus=ring), 0x404/0x40a/0x40f Sabotage.
      *
      * @var array<int, array{0:string,1:string}>
      */

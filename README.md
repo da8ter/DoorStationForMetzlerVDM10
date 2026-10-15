@@ -68,6 +68,8 @@ VDM10_ReconnectStream(int $InstanzID): void;
   nur **eine** Stream-Verbindung; nach einem Verbindungsabbruch antwortet sie bis zu etwa einer
   Minute mit HTTP 500, bis sie den Slot freigibt. Der Watchdog verbindet dann neu.
 - Heartbeat: alle 10 s ein `videoloss/inactive`-Paket; bleibt es aus, wird neu verbunden.
+- Klingeltaster = AccessControllerEvent 1/3 (Alarmeingang), einige Sekunden bevor `callStatus`
+  auf `ring` wechselt; Fingerabdruck abgelehnt = 5/39, Schloss geöffnet = 5/21.
 - HTTP-Listening (`httpHosts`) nimmt die Firmware zwar an, liefert aber keine Ereignisse
   („Device Error" beim Test) – deshalb der Stream.
 - Befehle: `PUT /ISAPI/AccessControl/RemoteControl/door/<n>`, `PUT /ISAPI/VideoIntercom/callSignal`,
