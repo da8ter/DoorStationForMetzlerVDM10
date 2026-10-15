@@ -60,12 +60,23 @@ class VDM10 extends IPSModuleStrict
         $this->RegisterAttributeString('LastEventTime', '');
 
         $option = fn (int $v, string $c, string $icon, int $color): array => ['Value' => $v, 'Caption' => $this->Translate($c), 'IconValue' => $icon, 'IconActive' => true, 'Color' => $color];
+        // Nur lesbar: Aufzählung braucht eine Aktion, deshalb Wertanzeige mit Intervallen je Wert.
+        $state = fn (int $v, string $caption, string $icon, int $color): array => [
+            'IntervalMinValue' => $v, 'IntervalMaxValue' => $v, 'ConversionFactor' => 1,
+            'ConstantActive' => true, 'ConstantValue' => $this->Translate($caption),
+            'PrefixActive' => false, 'PrefixValue' => '', 'SuffixActive' => false, 'SuffixValue' => '',
+            'DigitsActive' => false, 'DigitsValue' => 0,
+            'IconActive' => true, 'IconValue' => $icon,
+            'ColorActive' => $color >= 0, 'ColorValue' => $color,
+            'ContentColorActive' => false, 'ContentColorValue' => -1,
+        ];
         $this->RegisterVariableInteger('CALL_STATUS', $this->Translate('Call status'), [
-            'PRESENTATION' => VARIABLE_PRESENTATION_ENUMERATION, 'ICON' => 'Telephone',
-            'OPTIONS' => json_encode([
-                $option(self::CALL_IDLE, 'Idle', 'Telephone', 0x808080),
-                $option(self::CALL_RING, 'Ringing', 'Alert', 0xFF8000),
-                $option(self::CALL_ON_CALL, 'Talking', 'Talk', 0x00C000),
+            'PRESENTATION' => VARIABLE_PRESENTATION_VALUE_PRESENTATION, 'ICON' => 'Telephone', 'DIGITS' => 0,
+            'INTERVALS_ACTIVE' => true,
+            'INTERVALS' => json_encode([
+                $state(self::CALL_IDLE, 'Idle', 'Telephone', -1),
+                $state(self::CALL_RING, 'Ringing', 'Alert', 0xFF8000),
+                $state(self::CALL_ON_CALL, 'Talking', 'Talk', 0x00C000),
             ], JSON_UNESCAPED_UNICODE),
         ], 10);
         $this->RegisterVariableBoolean('DOORBELL', $this->Translate('Doorbell'), $this->boolPresentation('Alert', 'Quiet', 'Ringing', 0x808080, 0xFF8000), 20);
