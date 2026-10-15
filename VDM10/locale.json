@@ -377,7 +377,8 @@
             "The door station synchronises its clock via NTP with a host name. If it cannot resolve host names, its clock drifts and call times and access schedules run wrong. The variable “Clock deviation” shows the difference to Symcon.": "Die Türstation stellt ihre Uhr per NTP über einen Hostnamen. Kann sie keine Namen auflösen, driftet die Uhr, und Rufzeiten sowie Zugangszeitpläne laufen falsch. Die Variable „Uhrzeit-Abweichung“ zeigt den Unterschied zu Symcon.",
             "Send test notification": "Testnachricht senden",
             "Set clock of the door station now": "Uhr der Türstation jetzt stellen",
-            "Take a picture on motion (for the log and gallery, the last 10 are kept)": "Bei Bewegung ein Bild aufnehmen (für Log und Galerie, die letzten 10 bleiben)"
+            "Take a picture on motion (for the log and gallery, the last 10 are kept)": "Bei Bewegung ein Bild aufnehmen (für Log und Galerie, die letzten 10 bleiben)",
+            "Poll call status every (s, 0 = off) – detects the doorbell": "Rufstatus abfragen alle (s, 0 = aus) – erkennt das Klingeln"
         }
     }
 }

@@ -55,7 +55,7 @@
                 {
                     "type": "NumberSpinner",
                     "name": "PollInterval",
-                    "caption": "Poll call status every (s, 0 = off)",
+                    "caption": "Poll call status every (s, 0 = off) – detects the doorbell",
                     "minimum": 0,
                     "maximum": 3600,
                     "suffix": "s"

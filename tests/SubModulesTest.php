@@ -80,13 +80,13 @@ $check('Wiegand am Sicherheitsmodul: Karte', VDM10SubModules::credentials($mod('
 // Tastenerkennung in Ereignissen
 $ring = '{"eventType":"AccessControllerEvent","eventState":"active","dateTime":"2026-10-14T22:59:09+01:00","AccessControllerEvent":{"deviceName":"Türklingel","majorEventType":1,"subEventType":3,"serialNo":46,"currentEvent":true}}';
 $e = VDM10Events::parseNotification($ring);
-$check('Klingeln der VDM10 ohne Tastennummer', $e['kind'] === VDM10Events::KIND_RING && $e['key'] === 0 && $e['room'] === 0);
+$check('1/3 ist Bewegung, ohne Tastennummer', $e['kind'] === VDM10Events::KIND_MOTION && $e['key'] === 0 && $e['room'] === 0);
 $e = VDM10Events::parseNotification(str_replace('"serialNo":46', '"serialNo":46,"buttonNo":3', $ring));
 $check('buttonNo erkannt', $e['key'] === 3);
 $e = VDM10Events::parseNotification('{"eventType":"VideoIntercomEvent","VideoIntercomEvent":{"CallerInfo":{"callNumber":"12"}}}');
 $check('Zimmernummer verschachtelt erkannt', $e['room'] === 12 && $e['key'] === 0);
 $e = VDM10Events::parseNotification('<EventNotificationAlert><eventType>AccessControllerEvent</eventType><majorEventType>1</majorEventType><subEventType>3</subEventType><keyNo>2</keyNo></EventNotificationAlert>');
-$check('keyNo im XML erkannt', $e['key'] === 2 && $e['kind'] === VDM10Events::KIND_RING);
+$check('keyNo im XML erkannt', $e['key'] === 2);
 $check('Abfrage-Ereignis ohne Taste', VDM10Events::fromAcsEvent(['major' => 1, 'minor' => 3])['key'] === 0);
 
 exit($fails === 0 ? 0 : 1);

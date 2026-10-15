@@ -68,14 +68,15 @@ final class VDM10Events
     ];
 
     /**
-     * Alarme (majorEventType 1). Minor 3 ist an der VDM10 der Klingeltaster
-     * (Alarmeingang AIN1-4; am 15.10.2026 live bestätigt, kommt einige Sekunden
-     * vor callStatus=ring), 0x404/0x40a/0x40f Sabotage.
+     * Alarme (majorEventType 1). Minor 3 ist an der VDM10 die Bewegungserkennung der Kamera:
+     * kommt beim Annähern (daher kurz vor dem Klingeln), ohne Klingeln, nachts und alle ~8 s,
+     * solange Bewegung anhält (am 15.10.2026 belegt). Das Klingeln selbst meldet der Stream
+     * nicht; es wird über callStatus=ring erkannt. 0x404/0x40a/0x40f Sabotage.
      *
      * @var array<int, array{0:string,1:string}>
      */
     private const ALARM_MINOR = [
-        3      => [self::KIND_RING, 'Doorbell button'],
+        3      => [self::KIND_MOTION, 'Motion'],
         0x404  => [self::KIND_TAMPER, 'Tamper'],
         0x40A  => [self::KIND_TAMPER, 'Reader tamper'],
         0x40F  => [self::KIND_TAMPER, 'Secure module tamper'],
@@ -177,7 +178,7 @@ final class VDM10Events
 
     /**
      * Welche Klingeltaste gedrückt wurde, sofern die Türstation es mitschickt. Die VDM10 mit
-     * Firmware V3.7.1 sendet beim Hauptmodul-Taster (1/3) nur deviceName/serialNo; mit
+     * Firmware V3.7.1 meldet das Klingeln im Stream gar nicht (nur callStatus); mit
      * Tasten- oder Touch-Modulen sind diese Felder aus anderen Hikvision-Integrationen bekannt.
      *
      * @return array{key:int,room:int}

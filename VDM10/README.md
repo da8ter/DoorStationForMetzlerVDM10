@@ -52,7 +52,7 @@ der Türstation-Instanz.
 | IP-Adresse / Hostname, HTTP-Port, HTTPS | Adresse der Türstation |
 | Benutzername, Passwort | Zugang zur Türstation (Digest) |
 | Ereignisse über den ISAPI-Alert-Stream | Echtzeit-Ereignisse über den Client Socket |
-| Rufstatus abfragen alle | Rückfallebene ohne Stream (0 = aus) |
+| Rufstatus abfragen alle | Erkennt das Klingeln (der Stream meldet es nicht); 0 = aus, dann kein Klingeln |
 | Klingel / Bewegung zurücksetzen nach | Wie lange die Variablen aktiv bleiben |
 | Türöffner | 1 oder 2 (zweiter Türöffner an Ausgang 2) |
 | Metzler-Sicherheitsmodul installiert | Legt die Variable „Sicherheitsmodul“ (online/offline) an und zeigt den Sabotage-Schalter |
@@ -62,7 +62,7 @@ der Türstation-Instanz.
 
 Bricht die Verbindung ab, öffnet Symcon den Client Socket nach spätestens 60 Sekunden neu; die
 Türstation gibt einen abgebrochenen Stream erst nach etwa einer Minute frei. In dieser Zeit liefert die
-Rückfallebene Klingeln und Zutritte mit einigen Sekunden Verzögerung.
+Rückfallebene Zutritte mit einigen Sekunden Verzögerung; das Klingeln läuft ohnehin über den Rufstatus.
 
 ## 5. Statusvariablen und Medien
 

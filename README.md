@@ -6,8 +6,8 @@ DS-KD8003(B); geprüft mit Firmware V3.7.1 (build 251112).
 
 ## Funktionen
 
-- **Klingeln** in Echtzeit über den ISAPI-Alert-Stream (dauerhafte Verbindung per Client Socket),
-  Rückfallebene: Abfrage des Rufstatus im Sekundentakt
+- **Klingeln** über den Rufstatus der Türstation (Abfrage im Sekundentakt), Bewegung, Zutritte und
+  Alarme in Echtzeit über den ISAPI-Alert-Stream (dauerhafte Verbindung per Client Socket)
 - Rufstatus (Frei / Klingelt / Gespräch), Anruf annehmen, ablehnen, auflegen
 - **Türöffner 1 und 2** (Relais der Türstation), Rückmeldung „Schloss geöffnet"
 - **Zutrittsereignisse** mit Personenname: Fingerabdruck, Karte, PIN, abgelehnte Versuche
@@ -122,8 +122,10 @@ vor den Leser gehalten.
   selbst neu, das Modul sendet die Anfrage dann erneut. Den Socket konfiguriert das Modul nur über
   `GetConfigurationForParent` und `GetCompatibleParents` (Store-Vorgaben).
 - Heartbeat: alle 10 s ein `videoloss/inactive`-Paket; bleibt es aus, wird neu verbunden.
-- Klingeltaster = AccessControllerEvent 1/3 (Alarmeingang), einige Sekunden bevor `callStatus`
-  auf `ring` wechselt; Fingerabdruck abgelehnt = 5/39, Schloss geöffnet = 5/21.
+- Klingeln meldet der Alert-Stream nicht; das Modul erkennt es am Rufstatus (`callStatus` = `ring`,
+  Abfrage im eingestellten Takt). AccessControllerEvent 1/3 ist die Bewegungserkennung der Kamera
+  (kommt beim Annähern, alle ~8 s, solange Bewegung anhält). Fingerabdruck abgelehnt = 5/39,
+  Schloss geöffnet = 5/21.
 - HTTP-Listening (`httpHosts`) ist auf Firmware V3.7.1 nicht funktionsfähig: Die Konfiguration
   wird gespeichert (HTTP/HTTPS, IP/Hostname, XML/JSON, mit/ohne Digest), der Test antwortet mit
   „Device Error", und bei echten Ereignissen (Klingeln, Fingerabdruck) baut die Türstation keine

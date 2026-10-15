@@ -51,8 +51,8 @@ class VDM10 extends IPSModuleStrict
     private const CTRL_REJECT = 2;
     private const CTRL_HANGUP = 3;
     private const DOOR_PULSE_MS = 3000;
-    // Ein Besuch: Solange der Ruf läuft, wiederholt die Türstation den Taster (1/3) alle ~8 s; der Rufstatus
-    // „ring“ kommt 4–8 s danach. Neues Klingeln erst nach so vielen Sekunden ohne Klingelmeldung.
+    // Ein Besuch: Klingelmeldungen (Rufstatus, ggf. Stream) innerhalb dieser Zeit zählen als dasselbe Klingeln;
+    // jede Folgemeldung verlängert das Fenster.
     private const RING_DEDUPE_SECONDS = 20;
 
     public function Create(): void
