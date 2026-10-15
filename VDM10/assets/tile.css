@@ -86,6 +86,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .hold span, .hold svg { position: relative; }
 .hold small { position: relative; font-size: 10px; font-weight: 600; opacity: .5; }
 .hold.busy { opacity: .6; }
+.hold.busy small { visibility: hidden; } /* Platz bleibt: Knopfhöhe ändert sich beim Öffnen nicht */
 .hold-no { display: none; }
 .hold-label { white-space: nowrap; }
 /* Schmale Türkarte: „Zum Öffnen gedrückt halten“ in eine eigene Zeile unter „Tür öffnen“ */

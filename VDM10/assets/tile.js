@@ -81,7 +81,7 @@
     const opening = (busy[door] || 0) > Date.now();
     return '<button class="hold' + (opening ? ' busy' : '') + '" data-door="' + door + '">' + I('unlock') +
       '<span class="hold-label">' + esc(T(opening ? 'Opening…' : 'Open door')) + '</span><span class="hold-no">' + esc(T('Door %d', door)) + '</span>' +
-      (opening ? '' : '<small>' + esc(T('Hold to open')) + '</small>') + '</button>';
+      '<small>' + esc(T('Hold to open')) + '</small></button>'; // bleibt beim Öffnen (unsichtbar), damit die Höhe gleich bleibt
   }
 
   function renderBanner() {
