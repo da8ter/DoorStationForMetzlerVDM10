@@ -68,6 +68,15 @@ $small = VDM10SubModules::payload(VDM10SubModules::parseCaps('{"SubModulesCfg":{
 $check('nur unterstützte Felder', array_keys($small) === ['Backlight'] && $small['Backlight']['brightness'] === 5);
 $check('Modul ohne Einstellungen', VDM10SubModules::parseCaps('{"statusCode":4}')['brightness'] === null);
 
+// Zugangsarten je nach Modulen
+$mod = static fn (string ...$types): array => array_map(static fn (string $t): array => ['type' => $t], $types);
+$check('ohne Module: nichts', VDM10SubModules::credentials([]) === ['finger' => false, 'card' => false, 'pin' => false]);
+$check('Liste unbekannt: alles', VDM10SubModules::credentials(null) === ['finger' => true, 'card' => true, 'pin' => true]);
+$check('Finger-/Kartenleser (eure Anlage)', VDM10SubModules::credentials($mod('DS-KD-MFB')) === ['finger' => true, 'card' => true, 'pin' => false]);
+$check('Touch-Display: Karte und PIN', VDM10SubModules::credentials($mod('DS-KD-TDM', 'DS-KD-KK')) === ['finger' => false, 'card' => true, 'pin' => true]);
+$check('Tastenfeld: nur PIN', VDM10SubModules::credentials($mod('ds-kd-kp')) === ['finger' => false, 'card' => false, 'pin' => true]);
+$check('Wiegand am Sicherheitsmodul: Karte', VDM10SubModules::credentials($mod('DS-KD-KK'), true)['card'] === true);
+
 // Tastenerkennung in Ereignissen
 $ring = '{"eventType":"AccessControllerEvent","eventState":"active","dateTime":"2026-10-14T22:59:09+01:00","AccessControllerEvent":{"deviceName":"Türklingel","majorEventType":1,"subEventType":3,"serialNo":46,"currentEvent":true}}';
 $e = VDM10Events::parseNotification($ring);

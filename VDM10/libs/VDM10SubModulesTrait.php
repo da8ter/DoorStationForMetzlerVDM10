@@ -24,7 +24,7 @@ trait VDM10SubModulesTrait
     private function registerSubModuleProperties(): void
     {
         $this->RegisterPropertyBoolean('SubModuleVariables', true);
-        $this->RegisterAttributeString('SubModules', '[]');
+        $this->RegisterAttributeString('SubModules', ''); // '' = noch nie gelesen
         $this->RegisterAttributeString('Keys', '[]');
     }
 
@@ -52,6 +52,21 @@ trait VDM10SubModulesTrait
         return is_array($list) ? $list : [];
     }
 
+    /**
+     * Welche Zugangsarten die Türstation hat (Fingerabdruck, Karte, PIN). Grundlage ist die
+     * zuletzt gelesene Modulliste; wurde sie noch nie gelesen, wird alles angeboten.
+     *
+     * @return array{finger:bool,card:bool,pin:bool}
+     */
+    private function credentials(): array
+    {
+        if ($this->ReadAttributeString('SubModules') === '' && $this->ReadPropertyString('Host') !== '' && $this->GetStatus() === IS_ACTIVE) {
+            $this->refreshSubModules();
+        }
+        $list = json_decode($this->ReadAttributeString('SubModules'), true);
+        return VDM10SubModules::credentials(is_array($list) ? $list : null, $this->ReadPropertyBoolean('SecurityModule'));
+    }
+
     /** Modulliste lesen, Statusvariablen und Display-Helligkeit aktualisieren (aus RefreshStatus). */
     private function refreshSubModules(): void
     {
@@ -60,7 +75,10 @@ trait VDM10SubModulesTrait
         if ($modules === null) {
             return; // Türstation ohne Modulbus oder nicht erreichbar: letzten Stand behalten
         }
-        $this->WriteAttributeString('SubModules', (string) json_encode($modules));
+        if ((string) json_encode($modules) !== $this->ReadAttributeString('SubModules')) {
+            $this->WriteAttributeString('SubModules', (string) json_encode($modules));
+            $this->tileChanged(); // Leser hinzugekommen oder entfernt: Kachel anpassen
+        }
         if (!$this->ReadPropertyBoolean('SubModuleVariables')) {
             return;
         }

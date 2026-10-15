@@ -10,9 +10,6 @@ declare(strict_types=1);
  */
 trait VDM10PersonsUITrait
 {
-    /** Untermodule mit Tastenfeld (PIN-Eingabe): Tastenmodul und Touch-Module (VDM10-TDM = DS-KD-TDM). */
-    private const KEYPAD_MODULES = ['DS-KD-KP', 'DS-KD-TD', 'DS-KD-TDM', 'DS-KD-TDE'];
-
     /** Dialog für eine Zeile; leere Nummer = neue Person. */
     public function UIPersonForm(string $EmployeeNo, bool $Limited): string
     {
@@ -33,7 +30,12 @@ trait VDM10PersonsUITrait
             ]],
         ];
         if ($EmployeeNo === '') {
-            $form[] = ['type' => 'Label', 'caption' => $this->Translate('Fingerprints and cards can be enrolled after the person has been created.')];
+            $has = $this->credentials();
+            if ($has['finger'] || $has['card']) {
+                $form[] = ['type' => 'Label', 'caption' => $this->Translate($has['finger'] && $has['card']
+                    ? 'Fingerprints and cards can be enrolled after the person has been created.'
+                    : ($has['finger'] ? 'Fingerprints can be enrolled after the person has been created.' : 'Cards can be enrolled after the person has been created.'))];
+            }
             return (string) json_encode($form);
         }
         $button = fn (string $caption, string $action, string $confirm = ''): array => array_filter([
@@ -41,19 +43,26 @@ trait VDM10PersonsUITrait
             'onClick' => "echo VDM10_UIPersonAction(\$id, '$action', \$PersonNo);",
             'confirm' => $confirm !== '' ? $this->Translate($confirm) : null,
         ], static fn ($v) => $v !== null);
+        $has = $this->credentials();
         $form[] = ['type' => 'Label', 'name' => 'PersonCredentials', 'caption' => $this->credentialText($EmployeeNo), 'bold' => true];
-        $form[] = ['type' => 'Label', 'caption' => $this->Translate('Enrolling: click the button, then within 10 seconds place the finger on the reader of the door station (lift and place it again after each beep) or hold the card in front of it.')];
-        $first = [$button('Enroll fingerprint', 'fingerprint'), $button('Enroll card', 'card')];
-        if ($this->hasKeypad()) {
-            $first[] = $button('Remove PIN', 'nopin', 'Remove the PIN of this person?');
+        if ($has['finger'] || $has['card']) {
+            $form[] = ['type' => 'Label', 'caption' => $this->Translate(match (true) {
+                $has['finger'] && $has['card'] => 'Enrolling: click the button, then within 10 seconds place the finger on the reader of the door station (lift and place it again after each beep) or hold the card in front of it.',
+                $has['finger']                 => 'Enrolling: click the button, then within 10 seconds place the finger on the reader of the door station (lift and place it again after each beep).',
+                default                        => 'Enrolling: click the button, then within 10 seconds hold the card in front of the reader of the door station.',
+            })];
         }
-        $form[] = ['type' => 'RowLayout', 'items' => $first];
-        $form[] = ['type' => 'RowLayout', 'items' => [
-            $button('Delete fingerprints', 'delfp', 'Delete all fingerprints of this person?'),
-            $button('Delete cards', 'delcard', 'Delete all cards of this person?'),
-            $button('Delete person', 'delete', 'Delete this person from the door station?'),
-        ]];
-        $form[] = ['type' => 'Label', 'caption' => $this->Translate($this->hasKeypad()
+        $first = array_merge($has['finger'] ? [$button('Enroll fingerprint', 'fingerprint')] : [], $has['card'] ? [$button('Enroll card', 'card')] : [],
+            $has['pin'] ? [$button('Remove PIN', 'nopin', 'Remove the PIN of this person?')] : []);
+        if ($first !== []) {
+            $form[] = ['type' => 'RowLayout', 'items' => $first];
+        }
+        $form[] = ['type' => 'RowLayout', 'items' => array_merge(
+            $has['finger'] ? [$button('Delete fingerprints', 'delfp', 'Delete all fingerprints of this person?')] : [],
+            $has['card'] ? [$button('Delete cards', 'delcard', 'Delete all cards of this person?')] : [],
+            [$button('Delete person', 'delete', 'Delete this person from the door station?')]
+        )];
+        $form[] = ['type' => 'Label', 'caption' => $this->Translate($has['pin']
             ? 'Name, PIN and validity are saved with OK; the buttons act immediately.'
             : 'Name and validity are saved with OK; the buttons act immediately.')];
         return (string) json_encode($form);
@@ -155,9 +164,18 @@ trait VDM10PersonsUITrait
     private function fillPersonsForm(array $form): array
     {
         $data = null;
+        $has = $this->credentials();
         foreach ($form['actions'] as &$action) {
             if (!in_array($action['name'] ?? '', ['PersonsPanel', 'SchedulesPanel'], true)) {
                 continue;
+            }
+            if ($action['name'] === 'PersonsPanel') {
+                $action['caption'] = $this->Translate(match (true) {
+                    $has['finger'] && $has['card'] => 'Persons, fingerprints and cards',
+                    $has['finger']                 => 'Persons and fingerprints',
+                    $has['card']                   => 'Persons and cards',
+                    default                        => 'Persons',
+                });
             }
             foreach ($action['items'] as &$item) {
                 if (!in_array($item['name'] ?? '', ['Persons', 'Schedules'], true)) {
@@ -168,6 +186,9 @@ trait VDM10PersonsUITrait
                 foreach ($item['columns'] as &$column) {
                     if (in_array($column['name'], ['PersonBegin', 'PersonEnd'], true)) {
                         $column['add'] = $this->dateJson('');
+                    }
+                    if ($column['name'] === 'fingerprints' || $column['name'] === 'cards') {
+                        $column['visible'] = $has[$column['name'] === 'fingerprints' ? 'finger' : 'card'];
                     }
                 }
             }
@@ -210,33 +231,25 @@ trait VDM10PersonsUITrait
         return $rows;
     }
 
-    /**
-     * Hat die Türstation ein Tastenfeld? Nur dann ist eine persönliche PIN nutzbar
-     * (Eingabe Raum-Nummer + PIN). Ergebnis 10 Minuten gepuffert; im Zweifel true.
-     */
+    /** Hat die Türstation ein Tastenfeld? Nur dann ist eine persönliche PIN nutzbar (Raum-Nummer + PIN). */
     private function hasKeypad(): bool
     {
-        $cached = json_decode($this->GetBuffer('Keypad'), true);
-        if (is_array($cached) && time() - (int) $cached['t'] < 600) {
-            return (bool) $cached['v'];
-        }
-        $r = $this->isapi()->request('GET', '/ISAPI/VideoIntercom/SubModules?format=json', '', 5);
-        $modules = json_decode($r['body'], true)['SubModules'] ?? null;
-        if ($r['code'] !== 200 || !is_array($modules)) {
-            return true;
-        }
-        $types = array_map(static fn (array $m): string => strtoupper((string) ($m['moduleType'] ?? '')), $modules);
-        $keypad = array_intersect($types, self::KEYPAD_MODULES) !== [];
-        $this->SendDebug('Keypad', implode(', ', $types) . ' -> ' . ($keypad ? 'yes' : 'no'), 0);
-        $this->SetBuffer('Keypad', (string) json_encode(['t' => time(), 'v' => $keypad]));
-        return $keypad;
+        return $this->credentials()['pin'];
     }
 
     private function credentialText(string $EmployeeNo): string
     {
         try {
             $p = $this->person($EmployeeNo);
-            return sprintf($this->Translate('No. %s · Fingerprints: %d · Cards: %d'), $EmployeeNo, (int) ($p['numOfFP'] ?? 0), (int) ($p['numOfCard'] ?? 0));
+            $has = $this->credentials();
+            $parts = [sprintf($this->Translate('No. %s'), $EmployeeNo)];
+            if ($has['finger']) {
+                $parts[] = sprintf($this->Translate('Fingerprints: %d'), (int) ($p['numOfFP'] ?? 0));
+            }
+            if ($has['card']) {
+                $parts[] = sprintf($this->Translate('Cards: %d'), (int) ($p['numOfCard'] ?? 0));
+            }
+            return implode(' · ', $parts);
         } catch (Throwable $e) {
             return $e->getMessage();
         }

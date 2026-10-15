@@ -188,6 +188,10 @@
 
   function renderAccess() {
     const list = state.access || [];
+    const r = state.readers || { finger: true, card: true, pin: true };
+    // Ohne Finger-/Kartenleser und Tastenfeld gibt es keine Zutritte: Bereich ausblenden
+    $('access').hidden = !(r.finger || r.card || r.pin);
+    if ($('access').hidden) { $('access').innerHTML = ''; return; }
     $('access').innerHTML = '<h3>' + I('access') + esc(T('Recent access')) + '</h3>' + (list.length === 0 ?
       '<div class="empty">' + esc(T('No access yet')) + '</div>' :
       '<div class="people scroll-x">' + list.map(p => {

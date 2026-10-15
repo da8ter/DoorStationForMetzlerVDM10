@@ -35,6 +35,16 @@ final class VDM10SubModules
     /** Module mit eigenen Einstellungen (Helligkeit, Tastenton, Oberfläche). */
     public const DISPLAY_TYPES = ['DS-KD-TD', 'DS-KD-TDM', 'DS-KD-TDE', 'DS-KD-DIS', 'DS-KD-INFO'];
 
+    /**
+     * Welche Module welche Zugangsart liefern (Metzler-Systemanleitung UI 3.0): Das Hauptmodul
+     * VDM10-VM hat keinen Leser. Fingerabdruck nur über den Finger- und Kartenleser
+     * (Metzler-FP-RFID = DS-KD-MFB), Karten zusätzlich über Kartenleser- und Touch-Module,
+     * PIN über das Tastenfeld und die Touch-Module (Touch = Tastatur + Kartenleser + Anzeige).
+     */
+    public const FINGER_TYPES = ['DS-KD-MFB', 'DS-KD-MFB/S'];
+    public const CARD_TYPES = ['DS-KD-MFB', 'DS-KD-MFB/S', 'DS-KD-M', 'DS-KD-E', 'DS-KD-TD', 'DS-KD-TDM', 'DS-KD-TDE'];
+    public const PIN_TYPES = ['DS-KD-KP', 'DS-KD-TD', 'DS-KD-TDM', 'DS-KD-TDE'];
+
     /** Startbildschirm der Touch-Module und Darstellung. */
     public const START_SCREENS = ['dial' => 'Dial pad', 'contacts' => 'Contacts', 'callButton' => 'Call buttons', 'card' => 'Card'];
     public const THEMES = ['dark' => 'Dark', 'light' => 'Light'];
@@ -42,6 +52,25 @@ final class VDM10SubModules
     public static function name(string $type): string
     {
         return self::NAMES[strtoupper($type)] ?? 'Extension module';
+    }
+
+    /**
+     * Vorhandene Zugangsarten zur Modulliste; null (Liste unbekannt) = alles anbieten.
+     * $wiegand: am Sicherheitsmodul kann ein Wiegand-Kartenleser hängen.
+     *
+     * @return array{finger:bool,card:bool,pin:bool}
+     */
+    public static function credentials(?array $modules, bool $wiegand = false): array
+    {
+        if ($modules === null) {
+            return ['finger' => true, 'card' => true, 'pin' => true];
+        }
+        $types = array_map(static fn (array $m): string => strtoupper((string) $m['type']), $modules);
+        return [
+            'finger' => array_intersect($types, self::FINGER_TYPES) !== [],
+            'card'   => $wiegand || array_intersect($types, self::CARD_TYPES) !== [],
+            'pin'    => array_intersect($types, self::PIN_TYPES) !== [],
+        ];
     }
 
     public static function isDisplay(string $type): bool

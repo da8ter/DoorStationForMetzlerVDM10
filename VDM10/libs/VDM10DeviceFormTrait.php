@@ -97,6 +97,9 @@ trait VDM10DeviceFormTrait
             if ($name === 'DevSmTamper') {
                 $item['visible'] = $this->ReadPropertyBoolean('SecurityModule');
             }
+            if ($name === 'DevFpLevel') {
+                $item['visible'] = $this->credentials()['finger']; // ohne Fingerleser keine Sicherheitsstufe
+            }
             if (str_starts_with($name, 'DevInput')) {
                 $item['options'] = array_map(fn (string $o): array => ['caption' => $this->Translate('input_' . $o), 'value' => $o],
                     $inputOptions[(int) substr($name, 8)] ?? ['custom']);

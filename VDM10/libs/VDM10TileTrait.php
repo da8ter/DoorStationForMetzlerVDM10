@@ -114,6 +114,7 @@ trait VDM10TileTrait
                 'thumb' => $this->imageUrl('snapshot', '0', 'thumb', $snapshot), 'ts' => (int) (IPS_GetMedia($media)['MediaUpdated'] ?? 0)],
             'live'      => $live,
             'modules'   => $this->tileModules(),
+            'readers'   => $this->credentials(),
             'access'    => $this->tileAccess($log),
             'log'       => array_map(fn (array $e): array => [
                 'id' => $e['id'], 'ts' => $e['ts'], 'kind' => $e['kind'], 'text' => $e['text'], 'name' => $e['name'] ?? '',

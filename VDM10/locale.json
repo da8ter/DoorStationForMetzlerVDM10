@@ -140,7 +140,6 @@
             "Name, PIN and validity are saved with OK; the buttons act immediately.": "Name, PIN und Gültigkeit werden mit OK gespeichert; die Buttons wirken sofort.",
             "Saved": "Gespeichert",
             "Person deleted. Close the dialog with Cancel.": "Person gelöscht. Dialog mit Abbrechen schließen.",
-            "No. %s · Fingerprints: %d · Cards: %d": "Nr. %s · Fingerabdrücke: %d · Karten: %d",
             "Please select a date": "Bitte ein Datum wählen",
             "Name and validity are saved with OK; the buttons act immediately.": "Name und Gültigkeit werden mit OK gespeichert; die Buttons wirken sofort.",
             "Access schedule": "Zugangszeitplan",
@@ -332,7 +331,16 @@
             "Modules on the RS-485 bus of the door station (e.g. VDM10-TDM touch display, name plate, button, keypad and info modules, fingerprint and card reader). Display modules can be set up with the edit button.": "Module am RS-485-Bus der Türstation (z. B. Touch-Display VDM10-TDM, Namensschild-, Taster-, Tastenfeld- und Info-Module, Finger- und Kartenleser). Display-Module lassen sich über das Bearbeiten-Symbol einstellen.",
             "Each bell button calls the indoor station with the given room number. Virtual buttons of a touch display appear here as well.": "Jede Klingeltaste ruft die Innenstation mit der angegebenen Zimmernummer. Virtuelle Tasten eines Touch-Displays erscheinen hier ebenfalls.",
             "Bell buttons": "Klingeltasten",
-            "The door station keeps labels only for buttons of a touch display.": "Die Türstation speichert Beschriftungen nur für Tasten eines Touch-Displays."
+            "The door station keeps labels only for buttons of a touch display.": "Die Türstation speichert Beschriftungen nur für Tasten eines Touch-Displays.",
+            "Persons and fingerprints": "Personen und Fingerabdrücke",
+            "Persons and cards": "Personen und Karten",
+            "No. %s": "Nr. %s",
+            "Fingerprints: %d": "Fingerabdrücke: %d",
+            "Cards: %d": "Karten: %d",
+            "Enrolling: click the button, then within 10 seconds place the finger on the reader of the door station (lift and place it again after each beep).": "Anlernen: Button klicken, dann innerhalb von 10 Sekunden den Finger auf den Leser der Türstation legen (nach jedem Piepen kurz abheben und wieder auflegen).",
+            "Enrolling: click the button, then within 10 seconds hold the card in front of the reader of the door station.": "Anlernen: Button klicken, dann innerhalb von 10 Sekunden die Karte vor den Leser der Türstation halten.",
+            "Fingerprints can be enrolled after the person has been created.": "Fingerabdrücke lassen sich anlernen, sobald die Person angelegt ist.",
+            "Cards can be enrolled after the person has been created.": "Karten lassen sich anlernen, sobald die Person angelegt ist."
         }
     }
 }

@@ -193,6 +193,14 @@ Kartenleser.
   Hauptmoduls beides nicht: Das Ereignis enthält keine Nummer, und `callerInfo` meldet beim Klingeln
   nur `status: ring` mit `devNo: 0` (gemessen am 15.10.2026).
 
+**Optionale Leser:** Fingerabdruck, Karte und PIN erscheinen nur, wenn ein passendes Modul am Bus
+hängt. Fingerabdruck liefert nur der Finger- und Kartenleser (Metzler-FP-RFID). Karten lesen auch das
+Touch-Display VDM10-TDM, die Kartenleser-Module und ein Wiegand-Leser am Sicherheitsmodul. Die PIN
+setzt ein Tastenfeld oder ein Touch-Display voraus. Fehlt ein Leser, blendet das Formular die
+zugehörigen Spalten, Buttons und die Fingerabdruck-Sicherheitsstufe aus. Ohne jeden Leser zeigt die
+Kachel keinen Bereich „Letzte Zutritte“. Solange die Modulliste nie gelesen werden konnte, bleibt
+alles sichtbar.
+
 Geprüft ist der Finger- und Kartenleser DS-KD-MFB. Display-, Taster- und Info-Module sind nach der
 Weboberfläche der Türstation umgesetzt und ohne Hardware getestet (`php tests/SubModulesTest.php`).
 Die Option „Variablen für Erweiterungsmodule“ in der Konfiguration schaltet die Variablen ab.
