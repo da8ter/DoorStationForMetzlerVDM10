@@ -233,7 +233,9 @@
             "Metzler security module (Metzler-SM) installed": "Metzler-Sicherheitsmodul (Metzler-SM) installiert",
             "Door contact connected (at the security module or an input set to “Door contact”)": "Türkontakt angeschlossen (am Sicherheitsmodul oder an einem Eingang mit Funktion „Türkontakt“)",
             "Tamper alarm of the security module": "Sabotagealarm des Sicherheitsmoduls",
-            "Security module tamper alarm": "Sabotagealarm Sicherheitsmodul"
+            "Security module tamper alarm": "Sabotagealarm Sicherheitsmodul",
+            "Note: Reducing the door openers or switching off the security module or door contact deletes the related variables including their archive data. Links, events and visualisation entries pointing to them stop working.": "Hinweis: Wer die Zahl der Türöffner verringert oder Sicherheitsmodul bzw. Türkontakt ausschaltet, löscht die zugehörigen Variablen samt Archivdaten. Links, Ereignisse und Kacheln, die darauf zeigen, funktionieren danach nicht mehr.",
+            "A smaller snapshot archive or switching off the live view deletes the media objects that are no longer needed.": "Ein kleineres Bildarchiv oder ein ausgeschaltetes Livebild löscht die nicht mehr benötigten Medienobjekte."
         }
     }
 }

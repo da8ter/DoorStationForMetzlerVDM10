@@ -101,6 +101,10 @@
                     "caption": "Door contact connected (at the security module or an input set to “Door contact”)"
                 },
                 {
+                    "type": "Label",
+                    "caption": "Note: Reducing the door openers or switching off the security module or door contact deletes the related variables including their archive data. Links, events and visualisation entries pointing to them stop working."
+                },
+                {
                     "type": "CheckBox",
                     "name": "SnapshotOnRing",
                     "caption": "Take a snapshot when the doorbell rings"
@@ -146,6 +150,10 @@
                             "value": 102
                         }
                     ]
+                },
+                {
+                    "type": "Label",
+                    "caption": "A smaller snapshot archive or switching off the live view deletes the media objects that are no longer needed."
                 },
                 {
                     "type": "Label",
