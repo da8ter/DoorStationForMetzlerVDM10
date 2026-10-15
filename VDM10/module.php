@@ -51,7 +51,8 @@ class VDM10 extends IPSModuleStrict
     private const CTRL_REJECT = 2;
     private const CTRL_HANGUP = 3;
     private const DOOR_PULSE_MS = 3000;
-    // Ein Besuch: Taster (1/3) kommt oft doppelt im Abstand von 7–14 s, der Rufstatus „ring“ 4–8 s danach.
+    // Ein Besuch: Solange der Ruf läuft, wiederholt die Türstation den Taster (1/3) alle ~8 s; der Rufstatus
+    // „ring“ kommt 4–8 s danach. Neues Klingeln erst nach so vielen Sekunden ohne Klingelmeldung.
     private const RING_DEDUPE_SECONDS = 20;
 
     public function Create(): void
@@ -464,7 +465,12 @@ class VDM10 extends IPSModuleStrict
     private function ring(string $source, int $key = 0, int $room = 0): void
     {
         $now = time();
-        if ($this->GetValue('DOORBELL') && $now - $this->GetValue('LAST_RING') <= self::RING_DEDUPE_SECONDS) {
+        $last = (int) $this->GetBuffer('RingTrigger');
+        $this->SetBuffer('RingTrigger', (string) $now);
+        if ($now - $last <= self::RING_DEDUPE_SECONDS) { // Folgemeldung desselben Besuchs: Klingel nur verlängern
+            if ($this->GetValue('DOORBELL')) {
+                $this->SetTimerInterval('RingReset', max(5, $this->ReadPropertyInteger('RingTimeout')) * 1000);
+            }
             return;
         }
         $this->SendDebug('Ring', $source, 0);
