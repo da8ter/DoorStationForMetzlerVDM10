@@ -132,7 +132,8 @@
             "Card outside validity": "Karte außerhalb der Gültigkeit",
             "Expired card": "Abgelaufene Karte",
             "Unknown card": "Unbekannte Karte",
-            "Enrolling: click the button, then within 10 seconds place the finger on the reader of the door station (lift and place it again after each beep) or hold the card in front of it.": "Anlernen: Button klicken, dann innerhalb von 10 Sekunden den Finger auf den Leser der Türstation legen (nach jedem Piepen kurz abheben und wieder auflegen) bzw. die Karte davorhalten."
+            "Enrolling: click the button, then within 10 seconds place the finger on the reader of the door station (lift and place it again after each beep) or hold the card in front of it.": "Anlernen: Button klicken, dann innerhalb von 10 Sekunden den Finger auf den Leser der Türstation legen (nach jedem Piepen kurz abheben und wieder auflegen) bzw. die Karte davorhalten.",
+            "Connected\nModel: %s\nFirmware: %s %s\nSerial number: %s": "Verbunden\nModell: %s\nFirmware: %s %s\nSeriennummer: %s"
         }
     }
 }

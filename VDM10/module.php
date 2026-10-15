@@ -305,14 +305,15 @@ class VDM10 extends IPSModuleStrict
         return $r['body'] !== '' ? $r['body'] : VDM10Isapi::errorText($r);
     }
 
-    public function TestConnection(): void
+    public function TestConnection(): string
     {
         try {
             $info = $this->isapi()->deviceInfo();
             $this->applyDeviceInfo($info);
-            echo sprintf("%s\n%s %s\n%s", $info['model'] ?? '?', $info['firmwareVersion'] ?? '', $info['firmwareReleasedDate'] ?? '', $info['serialNumber'] ?? '');
+            return sprintf($this->Translate("Connected\nModel: %s\nFirmware: %s %s\nSerial number: %s"),
+                $info['model'] ?? '?', $info['firmwareVersion'] ?? '', $info['firmwareReleasedDate'] ?? '', $info['serialNumber'] ?? '');
         } catch (Throwable $e) {
-            echo $this->Translate('Connection failed') . ': ' . $e->getMessage();
+            return $this->Translate('Connection failed') . ': ' . $e->getMessage();
         }
     }
 

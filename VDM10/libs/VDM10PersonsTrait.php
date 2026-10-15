@@ -134,7 +134,7 @@ trait VDM10PersonsTrait
     }
 
     /** Formular-Aktionen der Personenliste (ein Einstieg, damit die Auswahl als JSON ankommt). */
-    public function UIPersonAction(string $Action, string $Selected, string $Name, string $Pin): void
+    public function UIPersonAction(string $Action, string $Selected, string $Name, string $Pin): string
     {
         $row = json_decode($Selected, true);
         $no = is_array($row) ? (string) ($row['employeeNo'] ?? '') : '';
@@ -158,9 +158,7 @@ trait VDM10PersonsTrait
             $msg = $this->Translate('Error') . ': ' . $e->getMessage();
         }
         $this->UpdateFormField('Persons', 'values', json_encode($this->personRows()));
-        if ($msg !== '') {
-            echo $msg;
-        }
+        return $msg;
     }
 
     /** Name (oder Kartennummer) des jüngsten passenden Zutrittsereignisses im Geräteprotokoll. */
