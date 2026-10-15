@@ -132,8 +132,15 @@ trait VDM10LogTrait
             return; // Wert unverändert
         }
         $ident = IPS_GetObject($variableId)['ObjectIdent'];
+        $this->SendDebug('VM_UPDATE', $ident . ' ' . json_encode($data), 0);
         if ($ident === 'SIP_STATUS') {
-            $this->logEvent($data[0] === 'connect' ? 'sip_on' : 'sip_off');
+            // Nur echte Wechsel: angemeldet ↔ nicht angemeldet. „nicht aktiviert“ und das erste Lesen sind keine Störung.
+            $old = (string) ($data[2] ?? '');
+            if ($data[0] === 'connect' && $old === 'unregistered') {
+                $this->logEvent('sip_on');
+            } elseif ($data[0] === 'unregistered' && $old === 'connect') {
+                $this->logEvent('sip_off');
+            }
             return;
         }
         if (str_starts_with($ident, 'SUBMODULE_')) {

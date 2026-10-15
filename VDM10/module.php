@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 foreach (['VDM10Isapi', 'VDM10Events', 'VDM10MediaTrait', 'VDM10StreamTrait', 'VDM10PersonsTrait', 'VDM10PersonsUITrait', 'VDM10SchedulesTrait',
     'VDM10SchedulesUITrait', 'VDM10ControlsTrait', 'VDM10DeviceFormTrait', 'VDM10SecurityModuleTrait', 'VDM10LogTrait', 'VDM10ImageHookTrait', 'VDM10TileTrait',
-    'VDM10SubModules', 'VDM10SubModulesTrait', 'VDM10SubModulesUITrait', 'VDM10CallTimesTrait', 'VDM10NotifyTrait', 'VDM10DisplayTextTrait'] as $lib) {
+    'VDM10SubModules', 'VDM10SubModulesTrait', 'VDM10SubModulesUITrait', 'VDM10CallTimesTrait', 'VDM10NotifyTrait', 'VDM10DisplayTextTrait', 'VDM10RingTrait'] as $lib) {
     require_once __DIR__ . '/libs/' . $lib . '.php';
 }
 
@@ -34,6 +34,7 @@ class VDM10 extends IPSModuleStrict
     use VDM10CallTimesTrait;
     use VDM10NotifyTrait;
     use VDM10DisplayTextTrait;
+    use VDM10RingTrait;
 
     private const CLIENT_SOCKET_GUID = '{3CFF0FD9-E306-41DB-9B5A-9D06D38576C3}';
     private const SOCKET_RX = '{018EF6B5-AB94-40C6-AA53-46943E824ACF}';
@@ -52,6 +53,7 @@ class VDM10 extends IPSModuleStrict
     private const CTRL_REJECT = 2;
     private const CTRL_HANGUP = 3;
     private const DOOR_PULSE_MS = 3000;
+    private const RETRY_MS = 300000;
     // Ein Besuch: Klingelmeldungen (Rufstatus, ggf. Stream) innerhalb dieser Zeit zählen als dasselbe Klingeln;
     // jede Folgemeldung verlängert das Fenster.
     private const RING_DEDUPE_SECONDS = 20;
@@ -135,6 +137,7 @@ class VDM10 extends IPSModuleStrict
         $this->RegisterTimer('MotionReset', 0, 'VDM10_ResetMotion($_IPS[\'TARGET\']);');
         $this->RegisterTimer('DoorReset', 0, 'VDM10_ResetDoors($_IPS[\'TARGET\']);');
         $this->RegisterTimer('TilePush', 0, 'VDM10_TilePush($_IPS[\'TARGET\']);');
+        $this->RegisterTimer('Retry', 0, 'VDM10_Retry($_IPS[\'TARGET\']);');
         $this->RegisterAttributeString('EventLog', '[]');
         $this->RegisterAttributeString('ImageHookToken', '');
         $this->RegisterAttributeString('PersonPhotos', '{}');
@@ -176,6 +179,7 @@ class VDM10 extends IPSModuleStrict
             $this->maintainSubModules(false);
             $this->SetTimerInterval('Poll', 0);
             $this->SetTimerInterval('Watchdog', 0);
+            $this->SetTimerInterval('Retry', 0);
             $this->SetStatus(self::STATUS_NO_HOST);
             $this->registerTileMessages();
             return;
@@ -188,11 +192,14 @@ class VDM10 extends IPSModuleStrict
             $this->RegisterMessage($io, IM_CHANGESTATUS);
         }
         $this->refreshDeviceInfo();
-        $this->maintainControlVariables($this->GetStatus() === IS_ACTIVE);
-        $this->maintainSubModules($this->GetStatus() === IS_ACTIVE);
-        $this->SetTimerInterval('Poll', max(0, $this->ReadPropertyInteger('PollInterval')) * 1000);
-        $this->SetTimerInterval('Watchdog', 30000);
-        if ($this->ReadPropertyBoolean('StreamEnabled') && $this->HasActiveParent()) {
+        $active = $this->GetStatus() === IS_ACTIVE;
+        $this->maintainControlVariables($active);
+        $this->maintainSubModules($active);
+        // Nicht erreichbar oder falsches Passwort: keine Dauerabfragen (Kontosperre), alle 5 min neu versuchen
+        $this->SetTimerInterval('Poll', $active ? max(0, $this->ReadPropertyInteger('PollInterval')) * 1000 : 0);
+        $this->SetTimerInterval('Watchdog', $active ? 30000 : 0);
+        $this->SetTimerInterval('Retry', $active ? 0 : self::RETRY_MS);
+        if ($active && $this->ReadPropertyBoolean('StreamEnabled') && $this->HasActiveParent()) {
             $this->startStream();
         } else {
             $this->streamDown();
@@ -216,6 +223,8 @@ class VDM10 extends IPSModuleStrict
     {
         return (string) json_encode([
             'Host' => $this->ReadPropertyString('Host'), 'Port' => $this->ReadPropertyInteger('Port'),
+            // HTTPS: verschlüsselter Socket; die Türstation nutzt ein selbst signiertes Zertifikat
+            'UseSSL' => $this->ReadPropertyBoolean('UseHttps'), 'VerifyPeer' => false, 'VerifyHost' => false,
             'Open' => $this->ReadPropertyBoolean('StreamEnabled') && $this->ReadPropertyString('Host') !== '',
         ]);
     }
@@ -291,38 +300,6 @@ class VDM10 extends IPSModuleStrict
         return true;
     }
 
-    public function UpdateCallStatus(): string
-    {
-        $status = $this->isapi()->callStatus();
-        if ($status === '') {
-            if (!$this->GetValue('STREAM_CONNECTED')) {
-                $this->SetValue('ONLINE', false);
-            }
-            return '';
-        }
-        $this->SetValue('ONLINE', true);
-        $map = ['idle' => self::CALL_IDLE, 'ring' => self::CALL_RING, 'onCall' => self::CALL_ON_CALL];
-        $new = $map[$status] ?? self::CALL_IDLE;
-        $old = $this->GetValue('CALL_STATUS');
-        if ($new === self::CALL_RING && $old !== self::CALL_RING) {
-            $this->ring('poll');
-        }
-        if ($new === self::CALL_RING && $this->GetBuffer('DeviceRing') !== '1') {
-            $this->callerButton('call'); // Ruf aufgebaut: jetzt steht der Anrufer fest
-        }
-        $this->SetValue('CALL_STATUS', $new);
-        // Die Klingel erlischt vorzeitig nur, wenn die Türstation selbst einen Ruf gemeldet hat
-        // und dieser beendet ist. Der Tastendruck (Alarmeingang) kommt im Stream einige Sekunden
-        // vor dem Rufaufbau an; in dieser Lücke meldet callStatus noch "idle".
-        if ($new === self::CALL_RING) {
-            $this->SetBuffer('DeviceRing', '1');
-        } elseif ($new === self::CALL_IDLE && $this->GetBuffer('DeviceRing') === '1') {
-            $this->SetBuffer('DeviceRing', '');
-            $this->ResetRing();
-        }
-        return $status;
-    }
-
     /** Generischer ISAPI-Durchgriff für Skripte; liefert den Antwortrumpf. */
     public function Request(string $Method, string $Path, string $Body = ''): string
     {
@@ -342,25 +319,6 @@ class VDM10 extends IPSModuleStrict
                 $info['model'] ?? '?', $info['firmwareVersion'] ?? '', $info['firmwareReleasedDate'] ?? '', $info['serialNumber'] ?? '');
         } catch (Throwable $e) {
             return $this->Translate('Connection failed') . ': ' . $e->getMessage();
-        }
-    }
-
-    public function Poll(): void
-    {
-        $this->UpdateCallStatus();
-        if (!$this->GetValue('STREAM_CONNECTED') && $this->GetValue('ONLINE')) {
-            $this->pollAccessEvents();
-        }
-    }
-
-    public function ResetRing(): void
-    {
-        $this->SetTimerInterval('RingReset', 0);
-        $this->SetValue('DOORBELL', false);
-        // Ruft die Türstation noch (bis ~60 s), bleibt der Rufstatus „Klingelt“ – sonst meldet die
-        // nächste Abfrage einen Wechsel frei→klingelt und damit ein zweites Klingeln.
-        if ($this->GetValue('CALL_STATUS') === self::CALL_RING && $this->GetBuffer('DeviceRing') !== '1') {
-            $this->SetValue('CALL_STATUS', self::CALL_IDLE);
         }
     }
 
@@ -468,30 +426,4 @@ class VDM10 extends IPSModuleStrict
         }
     }
 
-    private function ring(string $source, int $key = 0, int $room = 0): void
-    {
-        $now = time();
-        $last = (int) $this->GetBuffer('RingTrigger');
-        $this->SetBuffer('RingTrigger', (string) $now);
-        if ($now - $last <= self::RING_DEDUPE_SECONDS) { // Folgemeldung desselben Besuchs: Klingel nur verlängern
-            if ($this->GetValue('DOORBELL')) {
-                $this->SetTimerInterval('RingReset', max(5, $this->ReadPropertyInteger('RingTimeout')) * 1000);
-            }
-            return;
-        }
-        $this->SendDebug('Ring', $source, 0);
-        $this->SetValue('DOORBELL', true);
-        $this->SetValue('LAST_RING', $now);
-        if ($this->GetValue('CALL_STATUS') === self::CALL_IDLE) {
-            $this->SetValue('CALL_STATUS', self::CALL_RING);
-        }
-        $this->SetTimerInterval('RingReset', max(5, $this->ReadPropertyInteger('RingTimeout')) * 1000);
-        if ($this->ReadPropertyBoolean('SnapshotOnRing')) {
-            $this->TakeSnapshot();
-        }
-        $this->logRing($source, $this->ringButton($key, $room));
-        if ($key === 0 && $room === 0) {
-            $this->callerButton($source);
-        }
-    }
 }

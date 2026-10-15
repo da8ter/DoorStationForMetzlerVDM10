@@ -80,7 +80,7 @@ trait VDM10StreamTrait
         $state = $this->GetBuffer('Handshake');
         if ($state === 'error' || $state === '' || $silent > VDM10Events::HEARTBEAT_SECONDS * 3 + 5) {
             $this->SendDebug('Watchdog', sprintf('state=%s silent=%ds, request again', $state, $silent), 0);
-            $this->SetBuffer('Handshake', '');
+            $this->streamDown(); // halboffene Verbindung: als getrennt melden, damit „Online“/Log/Push stimmen
             $this->startStream();
         }
     }
