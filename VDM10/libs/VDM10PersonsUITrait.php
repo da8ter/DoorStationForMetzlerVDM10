@@ -91,7 +91,7 @@ trait VDM10PersonsUITrait
         } catch (Throwable $e) {
             $msg = $this->Translate('Error') . ': ' . $e->getMessage();
         }
-        $this->UpdateFormField('Persons', 'values', json_encode($this->personRows()));
+        $this->refreshScheduleLists(); // beide Listen: die Zeitplanliste zeigt die zugeordneten Personen
         return $msg;
     }
 
@@ -114,7 +114,7 @@ trait VDM10PersonsUITrait
         } catch (Throwable $e) {
             $msg = $this->Translate('Error') . ': ' . $e->getMessage();
         }
-        $this->UpdateFormField('Persons', 'values', json_encode($this->personRows()));
+        $this->refreshScheduleLists(); // beide Listen: die Zeitplanliste zeigt die zugeordneten Personen
         return $msg;
     }
 
