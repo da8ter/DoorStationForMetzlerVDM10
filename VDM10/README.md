@@ -139,6 +139,14 @@ auch nicht über RequestAction oder `VDM10_Request()`, selbst wenn der Befehl ko
 (`php tests/HoldOpenGuardTest.php`). Die Weboberfläche der Türstation und Hik-Connect sperrt das
 nicht. Steht die Tür über diese Wege trotzdem dauerhaft offen, zeigt die Kachel einen orangen Hinweis.
 
+**Rufzeiten der Klingeltasten („Bitte nicht stören“):** Im Aktionsbereich legt man fest, zu welchen
+Zeiten ein Tastendruck ins Haus ruft (Innenstation bzw. per SIP die FRITZ!Box), bis zu fünf Zeitfenster
+je Tag. Außerhalb dieser Zeiten klingelt es im Haus nicht. Ist die Option an und kein Zeitfenster
+eingetragen, rufen die Tasten nie ins Haus. Technisch ist das der Anrufplan der Türstation
+(Wochenplan 1 und Vorlage 1, jede Taste verweist darauf); abgewählt rufen die Tasten wieder rund um
+die Uhr, die Zeitfenster bleiben gespeichert. Per Skript: `VDM10_SetCallTimes($id, true,
+'[{"days":"daily","from":"07:00","to":"21:00"}]')`.
+
 ## 8. Metzler-Sicherheitsmodul
 
 Mit dem Sicherheitsmodul (Metzler-SM) hängt der Türöffner nicht mehr an der Türstation, sondern am

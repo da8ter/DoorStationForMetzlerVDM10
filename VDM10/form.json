@@ -463,6 +463,108 @@
         },
         {
             "type": "ExpansionPanel",
+            "name": "CallTimesPanel",
+            "caption": "Call times of the bell buttons (do not disturb)",
+            "expanded": false,
+            "items": [
+                {
+                    "type": "Label",
+                    "caption": "Outside these times a bell button does not call into the house (indoor station, FRITZ!Box via SIP). Symcon still receives the ring with picture and log entry, and the ring tone outside still plays. No time window with the option switched on: the buttons never call into the house."
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "CallTimesEnabled",
+                    "caption": "Call into the house only at the following times"
+                },
+                {
+                    "type": "List",
+                    "name": "CallTimesWindows",
+                    "caption": "Calls into the house only at these times",
+                    "rowCount": 5,
+                    "add": true,
+                    "delete": true,
+                    "columns": [
+                        {
+                            "caption": "Days",
+                            "name": "Days",
+                            "width": "180px",
+                            "add": "weekdays",
+                            "edit": {
+                                "type": "Select",
+                                "options": [
+                                    {
+                                        "caption": "Mon–Fri",
+                                        "value": "weekdays"
+                                    },
+                                    {
+                                        "caption": "Sat + Sun",
+                                        "value": "weekend"
+                                    },
+                                    {
+                                        "caption": "Daily",
+                                        "value": "daily"
+                                    },
+                                    {
+                                        "caption": "Monday",
+                                        "value": "mon"
+                                    },
+                                    {
+                                        "caption": "Tuesday",
+                                        "value": "tue"
+                                    },
+                                    {
+                                        "caption": "Wednesday",
+                                        "value": "wed"
+                                    },
+                                    {
+                                        "caption": "Thursday",
+                                        "value": "thu"
+                                    },
+                                    {
+                                        "caption": "Friday",
+                                        "value": "fri"
+                                    },
+                                    {
+                                        "caption": "Saturday",
+                                        "value": "sat"
+                                    },
+                                    {
+                                        "caption": "Sunday",
+                                        "value": "sun"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "caption": "From",
+                            "name": "From",
+                            "width": "120px",
+                            "add": "{\"hour\":8,\"minute\":0,\"second\":0}",
+                            "edit": {
+                                "type": "SelectTime"
+                            }
+                        },
+                        {
+                            "caption": "Until",
+                            "name": "To",
+                            "width": "120px",
+                            "add": "{\"hour\":17,\"minute\":0,\"second\":0}",
+                            "edit": {
+                                "type": "SelectTime"
+                            }
+                        }
+                    ],
+                    "values": []
+                },
+                {
+                    "type": "Button",
+                    "caption": "Save to the door station",
+                    "onClick": "$r = []; foreach ($CallTimesWindows as $row) { $r[] = $row; } echo VDM10_UICallTimesSave($id, $CallTimesEnabled, json_encode($r));"
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
             "name": "DevicePanel",
             "caption": "Door station settings",
             "expanded": false,

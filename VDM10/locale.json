@@ -348,7 +348,14 @@
             "“Permanently open” keeps the relay of the door opener switched on until it is switched off again. Fail-secure door openers then carry current all the time: use this only if the door opener is rated for 100 % duty cycle (continuous current) or has a day release. Limit at the Metzler security module: 12 V DC, 1 A.": "Hinweis: „Dauerhaft offen“ hält das Relais des Türöffners eingeschaltet, bis es wieder ausgeschaltet wird. Ein Arbeitsstrom-Türöffner steht dann ständig unter Strom. Nur verwenden, wenn der Türöffner für 100 % Einschaltdauer (Dauerstrom) freigegeben ist oder eine Tagesentriegelung hat. Grenze am Metzler-Sicherheitsmodul: 12 V DC, 1 A.",
             "Switched off, the module never sends “permanently open”: not from the tile, the variable, RequestAction or VDM10_Request(). The variable then only shows the state of the door station. The web interface of the door station and Hik-Connect are not affected.": "Abgewählt sendet das Modul „dauerhaft offen“ nie: weder aus der Kachel noch über die Variable, RequestAction oder VDM10_Request(). Die Variable zeigt dann nur noch den Zustand der Türstation. Die Weboberfläche der Türstation und Hik-Connect sind davon nicht betroffen.",
             "“Permanently open” is disabled in the instance configuration.": "„Dauerhaft offen“ ist in der Instanzkonfiguration gesperrt.",
-            "Ring tone outside": "Rufton außen"
+            "Ring tone outside": "Rufton außen",
+            "Calls into the house only at these times": "Ruft nur zu diesen Zeiten ins Haus",
+            "Call times of the bell buttons (do not disturb)": "Rufzeiten der Klingeltasten (bitte nicht stören)",
+            "Outside these times a bell button does not call into the house (indoor station, FRITZ!Box via SIP). Symcon still receives the ring with picture and log entry, and the ring tone outside still plays. No time window with the option switched on: the buttons never call into the house.": "Außerhalb dieser Zeiten ruft eine Klingeltaste nicht ins Haus (Innenstation, FRITZ!Box per SIP). Symcon erhält das Klingeln weiterhin mit Bild und Log-Eintrag, und der Rufton außen ertönt. Ist die Option an und kein Zeitfenster eingetragen, rufen die Tasten nie ins Haus.",
+            "Call into the house only at the following times": "Nur zu folgenden Zeiten ins Haus rufen",
+            "Saved: the bell buttons no longer call into the house.": "Gespeichert: Die Klingeltasten rufen nicht mehr ins Haus.",
+            "Saved: the bell buttons call into the house only within these times.": "Gespeichert: Die Klingeltasten rufen nur noch zu diesen Zeiten ins Haus.",
+            "Saved: the bell buttons call around the clock.": "Gespeichert: Die Klingeltasten rufen wieder rund um die Uhr."
         }
     }
 }

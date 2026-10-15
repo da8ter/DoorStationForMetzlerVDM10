@@ -19,6 +19,7 @@ require_once __DIR__ . '/libs/VDM10TileTrait.php';
 require_once __DIR__ . '/libs/VDM10SubModules.php';
 require_once __DIR__ . '/libs/VDM10SubModulesTrait.php';
 require_once __DIR__ . '/libs/VDM10SubModulesUITrait.php';
+require_once __DIR__ . '/libs/VDM10CallTimesTrait.php';
 
 /**
  * Metzler VDM10 Video-Türstation (Hikvision DS-KD8003-Basis) über ISAPI.
@@ -43,6 +44,7 @@ class VDM10 extends IPSModuleStrict
     use VDM10TileTrait;
     use VDM10SubModulesTrait;
     use VDM10SubModulesUITrait;
+    use VDM10CallTimesTrait;
 
     private const CLIENT_SOCKET_GUID = '{3CFF0FD9-E306-41DB-9B5A-9D06D38576C3}';
     private const SOCKET_RX = '{018EF6B5-AB94-40C6-AA53-46943E824ACF}';
@@ -210,7 +212,7 @@ class VDM10 extends IPSModuleStrict
     public function GetConfigurationForm(): string
     {
         $form = json_decode((string) file_get_contents(__DIR__ . '/form.json'), true);
-        return (string) json_encode($this->fillSubModulesForm($this->fillDeviceForm($this->fillPersonsForm($form))));
+        return (string) json_encode($this->fillCallTimesForm($this->fillSubModulesForm($this->fillDeviceForm($this->fillPersonsForm($form)))));
     }
 
     /** Beim Anlegen einen eigenen Client Socket anfordern (Module Strict: Ersatz für RequireParent). */
