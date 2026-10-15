@@ -14,6 +14,9 @@ DS-KD8003(B); geprüft mit Firmware V3.7.1 (build 251112).
 - Bewegung, Sabotage, Türkontakt (sofern an der Türstation konfiguriert)
 - **Snapshot** beim Klingeln und auf Knopfdruck, mit Archiv der letzten Bilder
 - **Livebild** als Symcon-Medienobjekt (RTSP, H.264) für Kachel-Visualisierung und App
+- **Personenverwaltung** im Konfigurationsformular und per Skript: Personen anlegen, umbenennen,
+  löschen; PIN setzen oder entfernen; Gültigkeitszeitraum (z. B. für Gäste);
+  **Fingerabdruck und Karte am Leser der Türstation anlernen** und wieder löschen
 - Neustart der Türstation, generischer ISAPI-Durchgriff `VDM10_Request()` für Skripte
 
 Gegensprechen (Audio) übernimmt dieses Modul nicht. Dafür die Türstation per
@@ -60,7 +63,21 @@ VDM10_AnswerCall / VDM10_RejectCall / VDM10_HangUp(int $InstanzID): bool;
 VDM10_Reboot(int $InstanzID): bool;
 VDM10_Request(int $InstanzID, string $Methode, string $Pfad, string $Body = ''): string;
 VDM10_ReconnectStream(int $InstanzID): void;
+
+VDM10_GetPersons(int $InstanzID): array;
+VDM10_AddPerson(int $InstanzID, string $Name, string $Pin): string;   // liefert die Personennummer
+VDM10_RenamePerson(int $InstanzID, string $Nr, string $Name): bool;
+VDM10_SetPersonPin(int $InstanzID, string $Nr, string $Pin): bool;     // '' entfernt die PIN
+VDM10_SetPersonValidity(int $InstanzID, string $Nr, int $Beginn, int $Ende): bool; // 0/0 = unbegrenzt
+VDM10_EnrollFingerprint(int $InstanzID, string $Nr, int $Finger): bool; // 0 = nächster freier Platz
+VDM10_EnrollCard(int $InstanzID, string $Nr): string;                  // liefert die Kartennummer
+VDM10_DeleteFingerprints / VDM10_DeleteCards / VDM10_DeletePerson(int $InstanzID, string $Nr): bool;
 ```
+
+Beim Anlernen eines Fingerabdrucks wartet die Türstation etwa 10 Sekunden auf den ersten Kontakt.
+Der Finger wird mehrmals aufgelegt (nach jedem Piepen kurz abheben). Ein bereits angelernter
+Finger wird als Zutrittsversuch gewertet statt aufgenommen. Die Karte wird nach dem Klick einmal
+vor den Leser gehalten.
 
 ## Technischer Hintergrund
 
@@ -79,4 +96,8 @@ VDM10_ReconnectStream(int $InstanzID): void;
 - Befehle: `PUT /ISAPI/AccessControl/RemoteControl/door/<n>`, `PUT /ISAPI/VideoIntercom/callSignal`,
   `GET /ISAPI/VideoIntercom/callStatus`, `GET /ISAPI/Streaming/channels/101/picture`,
   `PUT /ISAPI/System/reboot`, Zutrittsereignisse `POST /ISAPI/AccessControl/AcsEvent`.
+- Personen: `UserInfo/Record|Modify|Search|Delete`, Fingerabdruck `CaptureFingerPrint` +
+  `FingerPrint/SetUp` (Suche `FingerPrintUpload`, Löschen `FingerPrint/Delete`), Karte
+  `CaptureCardInfo` + `CardInfo/Record|Delete`. Der Alert-Stream liefert bei Zutritten keinen
+  Namen; das Modul holt ihn aus dem Ereignisprotokoll der Türstation.
 - Probe-Skript für andere Firmware-Stände: `php tests/probe-isapi.php <IP> admin <Passwort>`.

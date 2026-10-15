@@ -6,6 +6,7 @@ require_once __DIR__ . '/libs/VDM10Isapi.php';
 require_once __DIR__ . '/libs/VDM10Events.php';
 require_once __DIR__ . '/libs/VDM10MediaTrait.php';
 require_once __DIR__ . '/libs/VDM10StreamTrait.php';
+require_once __DIR__ . '/libs/VDM10PersonsTrait.php';
 
 /**
  * Metzler VDM10 Video-Türstation (Hikvision DS-KD8003-Basis) über ISAPI.
@@ -18,6 +19,7 @@ class VDM10 extends IPSModuleStrict
 {
     use VDM10MediaTrait;
     use VDM10StreamTrait;
+    use VDM10PersonsTrait;
 
     private const CLIENT_SOCKET_GUID = '{3CFF0FD9-E306-41DB-9B5A-9D06D38576C3}';
     private const SOCKET_RX = '{018EF6B5-AB94-40C6-AA53-46943E824ACF}';
@@ -161,6 +163,21 @@ class VDM10 extends IPSModuleStrict
         } else {
             $this->streamDown();
         }
+    }
+
+    public function GetConfigurationForm(): string
+    {
+        $form = json_decode((string) file_get_contents(__DIR__ . '/form.json'), true);
+        foreach ($form['actions'] as &$action) {
+            if (($action['name'] ?? '') === 'PersonsPanel') {
+                foreach ($action['items'] as &$item) {
+                    if (($item['name'] ?? '') === 'Persons') {
+                        $item['values'] = $this->personRows();
+                    }
+                }
+            }
+        }
+        return (string) json_encode($form);
     }
 
     public function GetConfigurationForParent(): string
@@ -386,7 +403,9 @@ class VDM10 extends IPSModuleStrict
                 if ($e['kind'] === VDM10Events::KIND_ACCESS_FAIL) {
                     $text .= ' ' . $this->Translate('(denied)');
                 }
-                $this->SetValue('LAST_ACCESS', $e['name'] !== '' ? $text . ': ' . $e['name'] : $text);
+                // Der Alert-Stream liefert keinen Namen; das Ereignisprotokoll der Türstation schon.
+                $name = $e['name'] !== '' ? $e['name'] : $this->accessName($e['major'], $e['minor']);
+                $this->SetValue('LAST_ACCESS', $name !== '' ? $text . ': ' . $name : $text);
                 $this->SetValue('LAST_ACCESS_TIME', time());
                 break;
             case VDM10Events::KIND_MOTION:
