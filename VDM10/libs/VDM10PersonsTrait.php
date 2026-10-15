@@ -76,6 +76,7 @@ trait VDM10PersonsTrait
         $this->acs('PUT', '/ISAPI/AccessControl/UserInfo/Delete?format=json',
             ['UserInfoDelCond' => ['EmployeeNoList' => [['employeeNo' => $EmployeeNo]]]]);
         $this->SendDebug('Persons', 'deleted ' . $EmployeeNo, 0);
+        $this->setPersonPhoto($EmployeeNo, 0);
         return true;
     }
 
@@ -133,8 +134,13 @@ trait VDM10PersonsTrait
         return true;
     }
 
-    /** Name (oder Kartennummer) des jüngsten passenden Zutrittsereignisses im Geräteprotokoll. */
-    private function accessName(int $major, int $minor): string
+    /**
+     * Name (oder Kartennummer) und Personennummer des jüngsten passenden Zutrittsereignisses im
+     * Geräteprotokoll; der Alert-Stream liefert beides nicht.
+     *
+     * @return array{0:string,1:string}
+     */
+    private function accessInfo(int $major, int $minor): array
     {
         try {
             $from = date('Y-m-d\\TH:i:sP', time() - 60);
@@ -144,10 +150,11 @@ trait VDM10PersonsTrait
             ]]), 5);
             $list = json_decode($r['body'], true)['AcsEvent']['InfoList'] ?? [];
             $last = is_array($list) && $list !== [] ? end($list) : [];
-            return (string) ($last['name'] ?? '') ?: (string) ($last['cardNo'] ?? '');
+            $name = (string) ($last['name'] ?? '') ?: (string) ($last['cardNo'] ?? '');
+            return [$name, (string) ($last['employeeNoString'] ?? '')];
         } catch (Throwable $e) {
             $this->SendDebug('AccessName', $e->getMessage(), 0);
-            return '';
+            return ['', ''];
         }
     }
 

@@ -13,6 +13,9 @@ require_once __DIR__ . '/libs/VDM10SchedulesUITrait.php';
 require_once __DIR__ . '/libs/VDM10ControlsTrait.php';
 require_once __DIR__ . '/libs/VDM10DeviceFormTrait.php';
 require_once __DIR__ . '/libs/VDM10SecurityModuleTrait.php';
+require_once __DIR__ . '/libs/VDM10LogTrait.php';
+require_once __DIR__ . '/libs/VDM10ImageHookTrait.php';
+require_once __DIR__ . '/libs/VDM10TileTrait.php';
 
 /**
  * Metzler VDM10 Video-Türstation (Hikvision DS-KD8003-Basis) über ISAPI.
@@ -32,6 +35,9 @@ class VDM10 extends IPSModuleStrict
     use VDM10ControlsTrait;
     use VDM10DeviceFormTrait;
     use VDM10SecurityModuleTrait;
+    use VDM10LogTrait;
+    use VDM10ImageHookTrait;
+    use VDM10TileTrait;
 
     private const CLIENT_SOCKET_GUID = '{3CFF0FD9-E306-41DB-9B5A-9D06D38576C3}';
     private const SOCKET_RX = '{018EF6B5-AB94-40C6-AA53-46943E824ACF}';
@@ -127,11 +133,16 @@ class VDM10 extends IPSModuleStrict
         $this->RegisterTimer('RingReset', 0, 'VDM10_ResetRing($_IPS[\'TARGET\']);');
         $this->RegisterTimer('MotionReset', 0, 'VDM10_ResetMotion($_IPS[\'TARGET\']);');
         $this->RegisterTimer('DoorReset', 0, 'VDM10_ResetDoors($_IPS[\'TARGET\']);');
-
+        $this->RegisterTimer('TilePush', 0, 'VDM10_TilePush($_IPS[\'TARGET\']);');
+        $this->RegisterAttributeString('EventLog', '[]');
+        $this->RegisterAttributeString('ImageHookToken', '');
+        $this->RegisterAttributeString('PersonPhotos', '{}');
+        $this->SetVisualizationType(defined('INSTANCE_VISUALIZATION_TYPE_HTML_FULLSCREEN') ? INSTANCE_VISUALIZATION_TYPE_HTML_FULLSCREEN : 1);
     }
 
     public function Destroy(): void
     {
+        $this->removeLogImages();
         parent::Destroy();
     }
 
@@ -144,7 +155,7 @@ class VDM10 extends IPSModuleStrict
         }
         foreach ($this->GetMessageList() as $sender => $messages) {
             foreach ($messages as $message) {
-                if ($message === IM_CHANGESTATUS) {
+                if ($message === IM_CHANGESTATUS || $message === VM_UPDATE) {
                     $this->UnregisterMessage((int) $sender, $message);
                 }
             }
@@ -155,6 +166,7 @@ class VDM10 extends IPSModuleStrict
         }
         $this->maintainMedia();
         $this->maintainSecurityModuleVariables();
+        $this->registerImageHook();
 
         $host = $this->ReadPropertyString('Host');
         $this->SetSummary($host);
@@ -163,6 +175,7 @@ class VDM10 extends IPSModuleStrict
             $this->SetTimerInterval('Poll', 0);
             $this->SetTimerInterval('Watchdog', 0);
             $this->SetStatus(self::STATUS_NO_HOST);
+            $this->registerTileMessages();
             return;
         }
         // Socket nachträglich verbunden oder getrennt (Konsole): neu einrichten
@@ -181,6 +194,7 @@ class VDM10 extends IPSModuleStrict
         } else {
             $this->streamDown();
         }
+        $this->registerTileMessages();
     }
 
     public function GetConfigurationForm(): string
@@ -209,6 +223,10 @@ class VDM10 extends IPSModuleStrict
             $this->ApplyChanges();
             return;
         }
+        if ($Message === VM_UPDATE) {
+            $this->logVariableChange($SenderID, $Data);
+            return;
+        }
         if ($Message === IM_CHANGESTATUS && $SenderID === $this->ioId()) {
             if ((int) ($Data[0] ?? 0) === IS_ACTIVE) {
                 $this->startStream();
@@ -235,7 +253,7 @@ class VDM10 extends IPSModuleStrict
                 $this->SetValue('CALL_CONTROL', self::CTRL_NONE);
                 break;
             default:
-                if (!$this->controlAction($Ident, $Value)) {
+                if (!$this->controlAction($Ident, $Value) && !$this->tileAction($Ident, $Value)) {
                     throw new Exception('Invalid ident ' . $Ident);
                 }
         }
@@ -418,6 +436,9 @@ class VDM10 extends IPSModuleStrict
                 $this->SetValue('DOOR' . $door, true);
                 $this->SetTimerInterval('DoorReset', self::DOOR_PULSE_MS);
                 $this->refreshDoorHold();
+                if (!(@$this->GetIDForIdent('DOOR' . $door . '_HOLD') && $this->GetValue('DOOR' . $door . '_HOLD'))) {
+                    $this->logEvent('unlock', ['door' => $door]); // „dauerhaft offen“ loggt der Schalter selbst
+                }
                 break;
             case VDM10Events::KIND_LOCK:
                 $this->refreshDoorHold();
@@ -429,9 +450,11 @@ class VDM10 extends IPSModuleStrict
                     $text .= ' ' . $this->Translate('(denied)');
                 }
                 // Der Alert-Stream liefert keinen Namen; das Ereignisprotokoll der Türstation schon.
-                $name = $e['name'] !== '' ? $e['name'] : $this->accessName($e['major'], $e['minor']);
+                [$name, $employee] = $this->accessInfo($e['major'], $e['minor']);
+                $name = $e['name'] !== '' ? $e['name'] : $name;
                 $this->SetValue('LAST_ACCESS', $name !== '' ? $text . ': ' . $name : $text);
                 $this->SetValue('LAST_ACCESS_TIME', time());
+                $this->logAccess($e, $name, $employee);
                 break;
             case VDM10Events::KIND_MOTION:
                 $this->SetValue('MOTION', true);
@@ -464,6 +487,7 @@ class VDM10 extends IPSModuleStrict
         if ($this->ReadPropertyBoolean('SnapshotOnRing')) {
             $this->TakeSnapshot();
         }
+        $this->logRing($source);
     }
 
 }

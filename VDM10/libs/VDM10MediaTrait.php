@@ -88,6 +88,7 @@ trait VDM10MediaTrait
         }
         IPS_SetMediaContent($current, base64_encode($jpeg));
         IPS_SendMediaEvent($current);
+        $this->tileChanged();
         $this->SendDebug('Snapshot', sprintf('%d bytes', strlen($jpeg)), 0);
     }
 }

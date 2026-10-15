@@ -22,6 +22,7 @@ trait VDM10PersonsUITrait
                 'validate' => '^.{1,32}$'],
             ['type' => 'PasswordTextBox', 'name' => 'PersonPin', 'width' => '320px', 'visible' => $this->hasKeypad(),
                 'caption' => $EmployeeNo === '' ? $this->Translate('PIN (4-8 digits, optional)') : $this->Translate('New PIN (empty = unchanged)')],
+            ['type' => 'SelectMedia', 'name' => 'PersonPhoto', 'caption' => $this->Translate('Photo (for the tile)'), 'width' => '320px'],
             ['type' => 'Select', 'name' => 'PersonSchedule', 'caption' => $this->Translate('Access schedule'), 'width' => '320px',
                 'options' => $this->scheduleOptions()],
             ['type' => 'CheckBox', 'name' => 'PersonLimited', 'caption' => $this->Translate('Valid only in a period'),
@@ -59,7 +60,7 @@ trait VDM10PersonsUITrait
     }
 
     /** onAdd/onEdit: Name, PIN und Gültigkeit speichern. */
-    public function UIPersonSave(string $EmployeeNo, string $Name, string $Pin, bool $Limited, string $Begin, string $End, int $Schedule): string
+    public function UIPersonSave(string $EmployeeNo, string $Name, string $Pin, bool $Limited, string $Begin, string $End, int $Schedule, int $Photo): string
     {
         try {
             [$from, $until] = $Limited ? [$this->dateValue($Begin), $this->dateValue($End)] : [0, 0];
@@ -71,6 +72,7 @@ trait VDM10PersonsUITrait
                 if ($Schedule > 0) {
                     $this->SetPersonSchedule($no, $Schedule);
                 }
+                $this->setPersonPhoto($no, $Photo);
                 $msg = sprintf($this->Translate('Person %s created'), $no);
             } elseif (!in_array($EmployeeNo, array_map(static fn (array $u): string => (string) $u['employeeNo'], $this->GetPersons()), true)) {
                 $msg = ''; // im Dialog gelöscht und dann mit OK geschlossen
@@ -86,6 +88,7 @@ trait VDM10PersonsUITrait
                 if ($Schedule !== $this->personSchedule($person)) {
                     $this->SetPersonSchedule($EmployeeNo, $Schedule);
                 }
+                $this->setPersonPhoto($EmployeeNo, $Photo);
                 $msg = $this->Translate('Saved');
             }
         } catch (Throwable $e) {
@@ -193,6 +196,9 @@ trait VDM10PersonsUITrait
                     : $this->Translate('unlimited'),
                 'schedule'      => $schedule > 0 ? ($names[$schedule] ?? '#' . $schedule) : $this->Translate('Around the clock'),
                 'PersonSchedule' => $schedule,
+                'PersonPhoto'   => (int) ($this->personPhotos()[(string) $u['employeeNo']] ?? 0),
+                'photo'         => $this->personPhotoId((string) $u['employeeNo']) > 0
+                    ? IPS_GetName($this->personPhotoId((string) $u['employeeNo'])) : '–',
                 'PersonNo'      => (string) $u['employeeNo'],
                 'PersonName'    => (string) ($u['name'] ?? ''),
                 'PersonPin'     => '',

@@ -188,6 +188,18 @@ final class VDM10Events
         return [self::KIND_OTHER, $type !== '' ? $type : 'unknown'];
     }
 
+    /** Zutrittsart zu einem Zutritts-Ereignis (majorEventType 5): finger, card, face, pin oder ''. */
+    public static function accessMethod(int $minor): string
+    {
+        return match (true) {
+            in_array($minor, [38, 39], true)           => 'finger',
+            in_array($minor, [75, 76], true)           => 'face',
+            $minor === 92                              => 'pin',
+            in_array($minor, [1, 2, 3, 4, 6, 7, 8, 9], true) => 'card',
+            default                                    => '',
+        };
+    }
+
     /** Ereignis aus der AcsEvent-Suche (JSON-InfoList) in dieselbe Form bringen. */
     public static function fromAcsEvent(array $info): array
     {

@@ -219,6 +219,12 @@
                             "add": ""
                         },
                         {
+                            "caption": "Photo",
+                            "name": "photo",
+                            "width": "150px",
+                            "add": "–"
+                        },
+                        {
                             "name": "PersonNo",
                             "visible": false,
                             "add": ""
@@ -252,12 +258,17 @@
                             "name": "PersonSchedule",
                             "visible": false,
                             "add": 0
+                        },
+                        {
+                            "name": "PersonPhoto",
+                            "visible": false,
+                            "add": 0
                         }
                     ],
                     "values": [],
                     "form": "return json_decode(VDM10_UIPersonForm($id, $Persons['PersonNo'] ?? '', (bool) ($Persons['PersonLimited'] ?? false)), true);",
-                    "onAdd": "echo VDM10_UIPersonSave($id, '', $Persons['PersonName'], $Persons['PersonPin'], $Persons['PersonLimited'], $Persons['PersonBegin'], $Persons['PersonEnd'], (int) $Persons['PersonSchedule']);",
-                    "onEdit": "echo VDM10_UIPersonSave($id, $Persons['PersonNo'], $Persons['PersonName'], $Persons['PersonPin'], $Persons['PersonLimited'], $Persons['PersonBegin'], $Persons['PersonEnd'], (int) $Persons['PersonSchedule']);"
+                    "onAdd": "echo VDM10_UIPersonSave($id, '', $Persons['PersonName'], $Persons['PersonPin'], $Persons['PersonLimited'], $Persons['PersonBegin'], $Persons['PersonEnd'], (int) $Persons['PersonSchedule'], (int) $Persons['PersonPhoto']);",
+                    "onEdit": "echo VDM10_UIPersonSave($id, $Persons['PersonNo'], $Persons['PersonName'], $Persons['PersonPin'], $Persons['PersonLimited'], $Persons['PersonBegin'], $Persons['PersonEnd'], (int) $Persons['PersonSchedule'], (int) $Persons['PersonPhoto']);"
                 },
                 {
                     "type": "Button",

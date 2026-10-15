@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>/*STYLE*/</style>
+<!-- Font Awesome Light der Visualisierung; icons.js baut die SVGs selbst, deshalb ohne <i>-Ersetzung und DOM-Beobachtung -->
+<script>window.FontAwesomeConfig = { autoReplaceSvg: false, observeMutations: false, autoAddCss: false };</script>
+<script src="/icons.js"></script>
+</head>
+<body>
+<div class="app">
+  <header class="head">
+    <div class="head-title"><span id="name" class="name"></span><span id="sub" class="sub"></span></div>
+    <div id="chips" class="chips"></div>
+  </header>
+  <div id="body" class="body scroll">
+    <div class="col col-main scroll">
+      <section id="ringBanner" class="ring-banner" hidden></section>
+      <section id="photo" class="photo"></section>
+      <section id="doors" class="doors"></section>
+      <section id="toggles" class="toggles"></section>
+      <section id="access" class="block"></section>
+      <section id="lastRing" class="last-ring"></section>
+    </div>
+    <div class="col col-log scroll">
+      <section id="log" class="block"></section>
+    </div>
+  </div>
+  <div id="overlay" class="overlay" hidden><div class="overlay-box"><img id="overlayImg" alt=""><button id="overlayClose" class="glass-btn overlay-close"></button></div></div>
+  <div id="notice" class="notice" hidden></div>
+</div>
+<script>window.VDM_CONFIG = /*CONFIG*/null;</script>
+<script>/*ICONS*/</script>
+<script>/*TILE*/</script>
+<script>/*SCROLL*/</script>
+</body>
+</html>

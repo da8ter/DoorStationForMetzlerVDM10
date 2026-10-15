@@ -1,0 +1,169 @@
+/* VDM10-Kachel – Gestaltung wie Musikplayer für Apple Music und SymDo-Kacheln.
+   Alle Farben aus den Theme-Variablen der Visualisierung (--card-color, --content-color, --accent-color). */
+:root {
+  --text: var(--content-color, #1d1d1f);
+  --muted: color-mix(in srgb, var(--content-color, #1d1d1f) 55%, transparent);
+  --accent: var(--accent-color, #00cdab);
+  --surface: color-mix(in srgb, var(--content-color, #1d1d1f) 7%, transparent);
+  --surface2: color-mix(in srgb, var(--content-color, #1d1d1f) 12%, transparent);
+  --line: color-mix(in srgb, var(--content-color, #1d1d1f) 14%, transparent);
+  --red: #ff4d4d; --green: #34c759; --orange: #ff9500;
+  --sbw: 6px;
+  --glass-bg: color-mix(in srgb, var(--card-color, #fff) 35%, transparent);
+  --glass-blur: blur(14.4px) saturate(180%);
+  --sb-pad: max(0px, calc((var(--marginside, 12px) - var(--sbw)) / 2));
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body { margin: 0 !important; padding: 0 !important; width: auto;
+  font: 14px/1.35 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--text); background: transparent; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0; }
+.fa-icon { width: 1em; height: 1em; flex: none; }
+
+/* Rahmen: Ränder aus den URL-Parametern der Visu, Scrollbalken mittig im seitlichen Randstreifen */
+.app { position: relative; height: 100%; display: flex; flex-direction: column; gap: 12px;
+  padding: max(var(--margintop, 12px), env(safe-area-inset-top, 0px)) var(--sb-pad) var(--marginbottom, 12px) var(--marginside, 12px); }
+.head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+  margin-right: calc(var(--sb-pad) + var(--sbw)); }
+.head-title { display: flex; flex-direction: column; min-width: 0; }
+.name { font-size: 18px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sub { font-size: 12px; color: var(--muted); }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px;
+  background: var(--surface); font-size: 12px; font-weight: 600; white-space: nowrap; }
+.chip::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+.chip.ok::before { background: var(--green); }
+.chip.bad::before { background: var(--red); }
+
+.body { flex: 1; min-height: 0; overflow-y: scroll; padding-right: var(--sb-pad); display: flex; flex-direction: column; gap: 14px; }
+.col { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+
+/* Scrollbalken-Hausrezept: 6 px, Griff in Akzentfarbe */
+.scroll::-webkit-scrollbar { width: 6px; }
+.scroll::-webkit-scrollbar-track { background: transparent; }
+.scroll::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--accent) 70%, transparent); border-radius: 999px; }
+@supports not selector(::-webkit-scrollbar) {
+  .scroll { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--accent) 70%, transparent) transparent; }
+}
+
+/* Klingel-Hinweis: Puls nur solange es klingelt (keine Dauer-Animation im Ruhezustand) */
+.ring-banner { display: grid; gap: 12px; padding: 14px; border-radius: 16px;
+  background: color-mix(in srgb, var(--orange) 18%, transparent); animation: pulse 1.6s ease-in-out infinite; }
+.ring-title { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 700; }
+.ring-title .fa-icon { width: 22px; height: 22px; color: var(--orange); }
+.ring-actions { display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px; }
+.ring-actions .hold small { display: none; }
+@keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--orange) 45%, transparent); }
+  50% { box-shadow: 0 0 0 8px color-mix(in srgb, var(--orange) 0%, transparent); } }
+
+/* Bild */
+.photo { position: relative; border-radius: 16px; overflow: hidden; aspect-ratio: 16 / 9; background: var(--surface); flex: none; }
+.photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.photo-empty { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; gap: 8px; color: var(--muted); }
+.photo-empty .fa-icon { width: 30px; height: 30px; }
+.photo-meta { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 12px 10px; color: #fff; font-size: 12px; font-weight: 600;
+  background: linear-gradient(transparent, rgba(0, 0, 0, .55)); }
+.photo-tools { position: absolute; top: 10px; right: 10px; display: flex; gap: 8px; }
+.glass-btn { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; color: #fff;
+  border: 1px solid rgba(255, 255, 255, .25); background: rgba(0, 0, 0, .28); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .18), 0 1px 2px rgba(0, 0, 0, .10); }
+.glass-btn .fa-icon { width: 17px; height: 17px; }
+
+/* Türen */
+.doors { display: grid; gap: 10px; }
+.door { display: grid; gap: 10px; padding: 12px; border-radius: 16px; background: var(--surface); }
+.door-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-weight: 700; }
+.door-head .chip { font-weight: 600; }
+.hold { position: relative; overflow: hidden; width: 100%; padding: 14px 12px; border-radius: 14px; background: var(--accent); color: #fff;
+  font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; touch-action: none; user-select: none; -webkit-user-select: none; }
+.hold .fa-icon { width: 18px; height: 18px; }
+.hold::before { content: ''; position: absolute; inset: 0; width: 0; background: rgba(255, 255, 255, .28); }
+.hold.holding::before { width: 100%; transition: width 1s linear; }
+.hold span, .hold svg { position: relative; }
+.hold small { position: relative; font-size: 11px; font-weight: 600; opacity: .85; }
+.hold.busy { opacity: .6; }
+.hold-no { display: none; }
+.btn { padding: 12px; border-radius: 12px; font-weight: 700; background: var(--surface2); display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn.danger { color: var(--red); }
+.btn .fa-icon { width: 16px; height: 16px; }
+.switch-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.switch { position: relative; width: 46px; height: 28px; border-radius: 999px; background: var(--surface2); flex: none; transition: background .2s; }
+.switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .3); transition: transform .2s; }
+.switch.on { background: var(--orange); }
+.switch.on::after { transform: translateX(18px); }
+
+/* Schnellschalter */
+.toggles { display: flex; flex-wrap: wrap; gap: 8px; }
+.tog { display: inline-flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 12px; background: var(--surface); color: var(--muted); font-weight: 600; }
+.tog .fa-icon { width: 16px; height: 16px; }
+.tog.on { color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, transparent); }
+
+/* Abschnitte */
+.block h3 { display: flex; align-items: center; gap: 8px; margin: 2px 2px 8px; font-size: 15px; font-weight: 700; }
+.block h3 .fa-icon { width: 15px; height: 15px; color: var(--accent); }
+.empty { color: var(--muted); padding: 8px 2px; }
+
+/* Letzte Zutritte */
+.people { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.people::-webkit-scrollbar { display: none; }
+.person { width: 70px; flex: none; display: grid; justify-items: center; gap: 4px; text-align: center; }
+.avatar { position: relative; width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; overflow: hidden;
+  background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--accent); font-weight: 700; font-size: 18px; border: 2px solid transparent; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.person.denied .avatar { border-color: var(--red); color: var(--red); background: color-mix(in srgb, var(--red) 14%, transparent); }
+.avatar .fa-icon { width: 22px; height: 22px; }
+.person b { font-size: 12px; font-weight: 600; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.person small { font-size: 11px; color: var(--muted); display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; max-width: 100%; overflow: hidden; }
+.person small .fa-icon { width: 10px; height: 10px; }
+
+/* Log */
+.row { display: flex; align-items: center; gap: 10px; padding: 8px 2px; border-bottom: 1px solid var(--line); }
+.row:last-child { border-bottom: 0; }
+.ico { width: 34px; height: 34px; flex: none; display: grid; place-items: center; border-radius: 50%; background: var(--surface); color: var(--muted); }
+.ico .fa-icon { width: 16px; height: 16px; }
+.ico.accent { color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, transparent); }
+.ico.orange { color: var(--orange); background: color-mix(in srgb, var(--orange) 16%, transparent); }
+.ico.red { color: var(--red); background: color-mix(in srgb, var(--red) 14%, transparent); }
+.ico.green { color: var(--green); background: color-mix(in srgb, var(--green) 14%, transparent); }
+.txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.txt b { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.txt small { color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.thumb { width: 64px; height: 40px; flex: none; border-radius: 8px; background: var(--surface) center / cover no-repeat; }
+.time { color: var(--muted); font-size: 12px; flex: none; }
+
+/* Kompakt (kleine Kachel): nur Status, Klingel-Hinweis, Türöffner und letztes Klingeln */
+.last-ring { display: none; color: var(--muted); font-size: 13px; }
+html.compact .photo, html.compact #access, html.compact .toggles, html.compact .col-log, html.compact .switch-row { display: none !important; }
+html.compact .last-ring { display: block; }
+html.compact .door { padding: 0; background: none; }
+html.compact .door-head { display: none; }
+html.compact .sub { display: none; }
+html.compact .ring-actions { grid-template-columns: 1fr; gap: 8px; }
+html.compact .ring-banner { padding: 10px; gap: 8px; }
+html.compact .ring-banner:not([hidden]) ~ .doors { display: none; }
+html.compact .name { font-size: 16px; }
+html.compact .chips .chip:not(:first-child) { display: none; }
+html.compact .hold { padding: 12px 10px; font-size: 15px; white-space: nowrap; }
+html.compact .hold small { display: none; }
+html.compact .doors.multi { grid-template-columns: 1fr 1fr; gap: 8px; }
+html.compact .doors.multi .hold-label { display: none; }
+html.compact .doors.multi .hold-no { display: inline; }
+
+/* Breit (maximiert, großes Dashboard): zwei Spalten, jede scrollt für sich */
+html.wide .body { display: grid; grid-template-columns: minmax(320px, 1fr) minmax(300px, 1fr); grid-template-rows: minmax(0, 1fr); column-gap: 20px;
+  overflow: hidden; padding-right: 0; }
+html.wide .col { min-height: 0; overflow-y: auto; padding-right: var(--sb-pad); }
+html.wide .photo { max-height: 42vh; aspect-ratio: auto; height: min(42vh, calc((50vw - 40px) * 9 / 16)); }
+
+/* Großes Bild */
+.overlay { position: absolute; inset: 0; z-index: 10; display: grid; place-items: center; padding: 16px;
+  background: rgba(0, 0, 0, .55); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.overlay-box { position: relative; max-width: 100%; max-height: 100%; }
+.overlay-box img { display: block; max-width: 100%; max-height: calc(100vh - 32px); border-radius: 12px; }
+.overlay-close { position: absolute; top: 10px; right: 10px; }
+
+.notice { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 11; max-width: 90%;
+  padding: 10px 14px; border-radius: 10px; background: rgba(40, 40, 40, .92); color: #fff; font-size: 13px; }
