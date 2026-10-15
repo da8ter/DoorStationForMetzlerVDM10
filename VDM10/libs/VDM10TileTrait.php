@@ -16,7 +16,7 @@ trait VDM10TileTrait
     /** Texte der Kachel (englisch; Übersetzung über locale.json). */
     private const TILE_TEXTS = [
         'Online', 'Offline', 'SIP', 'Stream', 'Live view', 'New picture', 'No picture yet', 'Someone is ringing',
-        'Reject', 'Open door', 'Hold to open', 'Opening…', 'Door %d', 'Permanently open', 'Ringtone', 'Motion detection',
+        'Reject', 'Open door', 'Hold to open', 'Opening…', 'Door %d', 'Permanently open', 'Ring tone outside', 'Motion detection',
         'Recent access', 'No access yet', 'Unknown', 'Events', 'No events yet', 'just now', '%d min ago', '%d h ago',
         'Yesterday', 'Fingerprint', 'Card', 'PIN', 'Face', 'Open', 'Closed', 'Alarm', 'Close',
         'Last ring', 'Never', 'Pictures', 'Current picture', 'Previous', 'Next', 'Modules',

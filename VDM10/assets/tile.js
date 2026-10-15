@@ -186,7 +186,7 @@
   function renderToggles() {
     const tog = (ident, on, icon, offIcon, label) => '<button class="tog' + (on ? ' on' : '') + '" data-toggle="' + ident + '" data-on="' + on + '">' +
       I(on ? icon : offIcon) + esc(T(label)) + '</button>';
-    let html = tog('RING_ENABLED', state.ring, 'speaker', 'speakerOff', 'Ringtone') +
+    let html = tog('RING_ENABLED', state.ring, 'speaker', 'speakerOff', 'Ring tone outside') +
       tog('MOTION_DETECTION', state.motionDet, 'motion', 'motion', 'Motion detection');
     $('toggles').innerHTML = html;
   }
