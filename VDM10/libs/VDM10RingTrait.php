@@ -13,10 +13,18 @@ trait VDM10RingTrait
     public function UpdateCallStatus(): string
     {
         $r = $this->isapi()->request('GET', VDM10Isapi::PATH_CALL_STATUS, '', 5);
-        if ($r['code'] === 401) {
-            $this->authFailed();
+        // Nur eine echte Ablehnung zählt: 401 ohne Verbindungsfehler, dreimal hintereinander. Ein Timeout
+        // nach der Digest-Aufforderung meldet curl ebenfalls als 401 (beobachtet, als die Türstation beim
+        // Klingeln beschäftigt war) – das darf die Klingel-Erkennung nicht pausieren.
+        if ($r['code'] === 401 && $r['error'] === '') {
+            $fails = (int) $this->GetBuffer('AuthFails') + 1;
+            $this->SetBuffer('AuthFails', (string) $fails);
+            if ($fails >= 3) {
+                $this->authFailed();
+            }
             return '';
         }
+        $this->SetBuffer('AuthFails', '');
         $status = $r['code'] === 200 ? (string) (json_decode($r['body'], true)['CallStatus']['status'] ?? '') : '';
         if ($status === '') {
             if (!$this->GetValue('STREAM_CONNECTED')) {
@@ -57,6 +65,7 @@ trait VDM10RingTrait
     /** Anmeldung abgelehnt: Abfragen und Stream stoppen (Kontosperre der Türstation vermeiden). */
     private function authFailed(): void
     {
+        $this->SetBuffer('AuthFails', '');
         if ($this->GetStatus() !== self::STATUS_AUTH_FAILED) {
             $this->LogMessage($this->Translate('The door station rejected the login; polling paused, next attempt in 5 minutes.'), KL_WARNING);
         }
