@@ -70,6 +70,17 @@ trait VDM10TileTrait
         ]);
     }
 
+    /**
+     * Test der Kachel: Klingel-Hinweis dauerhaft zeigen, ohne dass geklingelt wird. Nur die Anzeige;
+     * „Tür öffnen“ im Hinweis öffnet trotzdem wirklich. Endet mit false oder beim Neuladen des Moduls.
+     */
+    public function TileTestRing(bool $Active): void
+    {
+        $this->SetBuffer('TileTestRing', $Active ? '1' : '');
+        $this->SendDebug('Tile', 'test ring ' . ($Active ? 'on' : 'off'), 0);
+        $this->tileChanged();
+    }
+
     /** Aktionen, die nur die Kachel auslöst; false = Ident gehört nicht hierher. */
     private function tileAction(string $Ident, mixed $Value): bool
     {
@@ -102,7 +113,7 @@ trait VDM10TileTrait
             'stream'    => (bool) $value('STREAM_CONNECTED', false),
             'sip'       => (string) $value('SIP_STATUS', ''),
             'call'      => (int) $value('CALL_STATUS', 0),
-            'ringing'   => (bool) $value('DOORBELL', false),
+            'ringing'   => (bool) $value('DOORBELL', false) || $this->GetBuffer('TileTestRing') === '1',
             'lastRing'  => (int) $value('LAST_RING', 0),
             'doors'     => $doors,
             'holdAllowed' => $this->ReadPropertyBoolean('HoldOpenEnabled'),
