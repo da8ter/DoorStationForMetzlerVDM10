@@ -82,7 +82,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .hold::before { content: ''; position: absolute; inset: 0; width: 0; background: rgba(255, 255, 255, .28); }
 .hold.holding::before { width: 100%; transition: width 1s linear; }
 .hold span, .hold svg { position: relative; }
-.hold small { position: relative; font-size: 11px; font-weight: 600; opacity: .85; }
+.hold small { position: relative; font-size: 10px; font-weight: 600; opacity: .5; }
 .hold.busy { opacity: .6; }
 .hold-no { display: none; }
 .hold-label { white-space: nowrap; }
