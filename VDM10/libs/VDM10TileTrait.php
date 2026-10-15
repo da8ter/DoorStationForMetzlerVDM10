@@ -158,6 +158,7 @@ trait VDM10TileTrait
             $out[] = ['name' => (string) ($e['name'] ?? ''), 'ts' => $e['ts'], 'method' => $e['method'] ?? '',
                 'denied' => $denied, 'count' => 1,
                 'full' => !empty($e['img']) ? $this->imageUrl('ring', (string) $e['id'], 'full', (string) $e['id']) : '',
+                'thumb' => !empty($e['img']) ? $this->imageUrl('ring', (string) $e['id'], 'thumb', (string) $e['id']) : '',
                 'photo' => $photo !== '' ? $this->imageUrl('person', $emp, 'thumb', $photo) : ''];
         }
         return $out;

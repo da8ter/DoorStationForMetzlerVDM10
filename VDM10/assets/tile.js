@@ -200,7 +200,9 @@
       '<div class="people scroll-x">' + list.map(p => {
         const m = METHOD[p.method];
         const initials = (p.name || '').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
-        const face = p.photo ? '<img src="' + esc(p.photo) + '" alt="">' : (p.denied ? I('denied') : (initials ? esc(initials) : I('user')));
+        // Unbekannte: Zutrittsbild im Kreis (roter Rand bleibt), sonst Verbotszeichen
+        const face = p.photo ? '<img src="' + esc(p.photo) + '" alt="">'
+          : (p.denied ? (p.thumb ? '<img src="' + esc(p.thumb) + '" alt="">' : I('denied')) : (initials ? esc(initials) : I('user')));
         const n = p.count > 1 ? '<span class="badge" title="' + esc(p.count) + '">' + (p.count > 99 ? '99+' : esc(p.count)) + '</span>' : '';
         // Mit Zutrittsbild ist die Person ein Knopf: Tippen zeigt das Bild groß
         const tag = p.full ? 'button' : 'div';
