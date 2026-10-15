@@ -1,0 +1,79 @@
+{
+    "elements": [
+        {
+            "type": "Label",
+            "caption": "Metzler VDM10 door station via ISAPI (local, no cloud). Enter the IP address and the admin password of the door station."
+        },
+        {
+            "type": "RowLayout",
+            "items": [
+                { "type": "ValidationTextBox", "name": "Host", "caption": "IP address / host name", "validate": "^[A-Za-z0-9.\\-_:]+$" },
+                { "type": "NumberSpinner", "name": "Port", "caption": "HTTP port", "minimum": 1, "maximum": 65535 },
+                { "type": "CheckBox", "name": "UseHttps", "caption": "HTTPS" }
+            ]
+        },
+        {
+            "type": "RowLayout",
+            "items": [
+                { "type": "ValidationTextBox", "name": "Username", "caption": "User name" },
+                { "type": "PasswordTextBox", "name": "Password", "caption": "Password" }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Events",
+            "expanded": false,
+            "items": [
+                { "type": "CheckBox", "name": "StreamEnabled", "caption": "Receive events via ISAPI alert stream (client socket)" },
+                { "type": "NumberSpinner", "name": "PollInterval", "caption": "Poll call status every (s, 0 = off)", "minimum": 0, "maximum": 3600, "suffix": "s" },
+                { "type": "NumberSpinner", "name": "RingTimeout", "caption": "Reset doorbell after", "minimum": 5, "maximum": 600, "suffix": "s" },
+                { "type": "NumberSpinner", "name": "MotionReset", "caption": "Reset motion after", "minimum": 1, "maximum": 3600, "suffix": "s" }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Doors, snapshots and live view",
+            "expanded": false,
+            "items": [
+                { "type": "NumberSpinner", "name": "DoorCount", "caption": "Door openers", "minimum": 1, "maximum": 2 },
+                { "type": "CheckBox", "name": "SnapshotOnRing", "caption": "Take a snapshot when the doorbell rings" },
+                { "type": "NumberSpinner", "name": "SnapshotArchive", "caption": "Keep previous snapshots", "minimum": 0, "maximum": 10 },
+                { "type": "Select", "name": "SnapshotChannel", "caption": "Snapshot source", "options": [
+                    { "caption": "Main stream (1280x720)", "value": 101 },
+                    { "caption": "Sub stream", "value": 102 }
+                ] },
+                { "type": "CheckBox", "name": "StreamMedia", "caption": "Create RTSP live view media object" },
+                { "type": "Select", "name": "StreamChannel", "caption": "Live view source", "options": [
+                    { "caption": "Main stream", "value": 101 },
+                    { "caption": "Sub stream", "value": 102 }
+                ] },
+                { "type": "Label", "caption": "Two-way audio: register the door station (SIP) with Symcon's door intercom module (DoorIP) or a FRITZ!Box. This module covers events, door openers, snapshots and the video stream." }
+            ]
+        }
+    ],
+    "actions": [
+        { "type": "Button", "caption": "Test connection", "onClick": "VDM10_TestConnection($id);" },
+        {
+            "type": "RowLayout",
+            "items": [
+                { "type": "Button", "caption": "Open door 1", "onClick": "echo VDM10_UnlockDoor($id, 1) ? 'OK' : 'Error';" },
+                { "type": "Button", "caption": "Open door 2", "onClick": "echo VDM10_UnlockDoor($id, 2) ? 'OK' : 'Error';" },
+                { "type": "Button", "caption": "Take snapshot", "onClick": "echo VDM10_TakeSnapshot($id) ? 'OK' : 'Error';" },
+                { "type": "Button", "caption": "Call status", "onClick": "echo VDM10_UpdateCallStatus($id);" }
+            ]
+        },
+        {
+            "type": "RowLayout",
+            "items": [
+                { "type": "Button", "caption": "Reconnect event stream", "onClick": "VDM10_ReconnectStream($id); echo 'OK';" },
+                { "type": "Button", "caption": "Reboot door station", "confirm": "Reboot the door station now?", "onClick": "echo VDM10_Reboot($id) ? 'OK' : 'Error';" }
+            ]
+        }
+    ],
+    "status": [
+        { "code": 102, "icon": "active", "caption": "Connected" },
+        { "code": 104, "icon": "inactive", "caption": "No host configured" },
+        { "code": 201, "icon": "error", "caption": "Authentication failed (check user name / password)" },
+        { "code": 202, "icon": "error", "caption": "Door station not reachable" }
+    ]
+}
