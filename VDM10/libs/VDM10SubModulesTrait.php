@@ -62,7 +62,8 @@ trait VDM10SubModulesTrait
      */
     private function credentials(): array
     {
-        if ($this->ReadAttributeString('SubModules') === '' && $this->ReadPropertyString('Host') !== '' && $this->GetStatus() === IS_ACTIVE) {
+        if ($this->ReadAttributeString('SubModules') === '' && $this->ReadPropertyString('Host') !== '' && $this->GetStatus() === IS_ACTIVE
+            && time() - (int) $this->GetBuffer('SubModulesTried') >= 600) { // höchstens alle 10 min nachfragen
             $this->refreshSubModules();
         }
         $list = json_decode($this->ReadAttributeString('SubModules'), true);
@@ -72,10 +73,14 @@ trait VDM10SubModulesTrait
     /** Modulliste lesen, Statusvariablen und Display-Helligkeit aktualisieren (aus RefreshStatus). */
     private function refreshSubModules(): void
     {
+        $this->SetBuffer('SubModulesTried', (string) time());
         $r = $this->isapi()->request('GET', self::PATH_SUBMODULES, '', 5);
         $modules = $r['code'] === 200 ? VDM10SubModules::parseList($r['body']) : null;
+        if ($modules === null && $r['code'] >= 400 && $r['code'] !== 401) {
+            $modules = []; // Türstation ohne Modulbus (notSupport): „keine Module“ merken statt immer neu zu fragen
+        }
         if ($modules === null) {
-            return; // Türstation ohne Modulbus oder nicht erreichbar: letzten Stand behalten
+            return; // nicht erreichbar: letzten Stand behalten
         }
         if ((string) json_encode($modules) !== $this->ReadAttributeString('SubModules')) {
             $this->WriteAttributeString('SubModules', (string) json_encode($modules));

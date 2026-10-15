@@ -154,7 +154,8 @@ trait VDM10NotifyTrait
         }
         $manual = VDM10SubModules::xmlSet(VDM10SubModules::xmlSet($r['body'], 'Time', 'timeMode', 'manual'), 'Time', 'localTime', date('Y-m-d\TH:i:sP'));
         $this->writeChecked('PUT', self::PATH_TIME, $manual);
-        $this->writeChecked('PUT', self::PATH_TIME, $r['body']); // gesicherten Ist-Stand (z. B. NTP) zurück
+        // Zeitmodus (z. B. NTP) zurück – mit aktueller Zeit, damit keine Firmware die alte, abweichende übernimmt
+        $this->writeChecked('PUT', self::PATH_TIME, VDM10SubModules::xmlSet($r['body'], 'Time', 'localTime', date('Y-m-d\TH:i:sP')));
         $this->WriteAttributeInteger('ClockSynced', time());
         $after = $this->clockDrift();
         if ($after !== null) {

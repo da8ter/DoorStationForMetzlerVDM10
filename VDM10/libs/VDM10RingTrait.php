@@ -111,8 +111,5 @@ trait VDM10RingTrait
             $this->TakeSnapshot();
         }
         $this->logRing($source, $this->ringButton($key, $room));
-        if ($key === 0 && $room === 0) {
-            $this->callerButton($source);
-        }
     }
 }
