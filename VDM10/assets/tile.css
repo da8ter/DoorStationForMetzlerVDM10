@@ -75,10 +75,17 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .door-status { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0; }
 .door-head .switch-row { gap: 8px; }
 .door-head .switch-row { margin-left: auto; font-weight: 500; flex: none; }
-/* „Ablehnen“ beim Klingeln: so hoch wie der Schalter, damit sich die Türkarte nicht verschiebt */
-.btn-reject { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; border-radius: 999px; flex: none;
-  margin-left: auto; background: color-mix(in srgb, var(--red) 16%, transparent); color: var(--red); font-size: 14px; font-weight: 700; }
-.btn-reject .fa-icon { width: 15px; height: 15px; }
+/* Klingeln: Klingel-Knopf und roter „Ablehnen“-Knopf nebeneinander. Ein unsichtbarer normaler Türöffner
+   (sizer) bestimmt die Größe, beide Knöpfe liegen exakt darüber – die Größe kann sich nicht ändern. */
+.ring-row { position: relative; }
+.ring-row .sizer { visibility: hidden; }
+.ring-over { position: absolute; inset: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+.ring-over .hold { height: 100%; min-height: 0; overflow: hidden; }
+.btn-reject { display: grid; place-items: center; width: 56px; border-radius: 14px; background: var(--red); color: #fff; }
+.btn-reject .fa-icon { width: 24px; height: 24px; }
+html.compact .btn-reject { width: 44px; }
+html.compact .btn-reject .fa-icon { width: 20px; height: 20px; }
+html.compact .doors.multi .ring-over .hold-no { display: none; } /* zwei Türen, kleine Kachel: nur die Glocke */
 .door-head .switch-row span { white-space: nowrap; }
 .hold { position: relative; overflow: hidden; width: 100%; padding: 14px 12px; border-radius: 14px; background: var(--accent); color: #fff;
   font-size: 19px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; touch-action: none; user-select: none; -webkit-user-select: none; }

@@ -186,8 +186,8 @@ Die Instanz bringt eine eigene HTML-Kachel mit. Sie passt sich der Kachelgröße
 - **Breit** (z. B. maximiert): zwei Spalten, links Bild und Steuerung, rechts das Log.
 
 Beim Klingeln wird der Türöffner von Tür 1 selbst zum Hinweis: Glocke, „Es klingelt“, orange und
-pulsierend, in exakt derselben Größe; Gedrückthalten öffnet weiterhin die Tür. „Ablehnen“ steht dann
-an der Stelle des Schalters „Dauerhaft offen“, in der kleinen Kachel statt „Letztes Klingeln“. Zum Testen:
+pulsierend; Gedrückthalten öffnet weiterhin die Tür. Rechts daneben erscheint ein roter Knopf mit
+aufgelegtem Hörer zum Ablehnen. Beide zusammen sind exakt so groß wie der Türöffner. Zum Testen:
 `VDM10_TileTestRing($id, true)` (aus mit `false` oder beim Neuladen des Moduls).
 
 Der Türöffner reagiert erst, wenn er eine Sekunde gedrückt gehalten wird. So öffnet ein

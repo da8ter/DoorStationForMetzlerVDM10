@@ -79,11 +79,13 @@
 
   // Beim Klingeln wird der Türöffner von Tür 1 zum Klingel-Hinweis (gleiche Größe, weiter zum Öffnen halten)
   const isRinging = () => !!(state && (state.ringing || state.call === 1));
-  const rejectButton = () => '<button class="btn-reject" data-reject="1">' + I('reject') + '<span>' + esc(T('Reject')) + '</span></button>';
-  function holdButton(door) {
-    const opening = (busy[door] || 0) > Date.now();
-    const ringing = !opening && door === 1 && isRinging();
-    return '<button class="hold' + (opening ? ' busy' : '') + (ringing ? ' ringing' : '') + '" data-door="' + door + '">' + I(ringing ? 'ring' : 'unlock') +
+  const rejectButton = () => '<button class="btn-reject" data-reject="1" title="' + esc(T('Reject')) + '" aria-label="' + esc(T('Reject')) + '">' + I('reject') + '</button>';
+  function holdButton(door, sizer) {
+    const opening = !sizer && (busy[door] || 0) > Date.now();
+    const ringing = !sizer && !opening && door === 1 && isRinging();
+    // sizer: unsichtbarer normaler Türöffner, der beim Klingeln die exakte Größe vorgibt
+    return '<button class="hold' + (sizer ? ' sizer' : '') + (opening ? ' busy' : '') + (ringing ? ' ringing' : '') + '"' +
+      (sizer ? ' tabindex="-1" aria-hidden="true"' : ' data-door="' + door + '"') + '>' + I(ringing ? 'ring' : 'unlock') +
       '<span class="hold-label">' + esc(T(opening ? 'Opening…' : (ringing ? 'Someone is ringing' : 'Open door'))) + '</span><span class="hold-no">' + esc(T('Door %d', door)) + '</span>' +
       '<small>' + esc(T('Hold to open')) + '</small></button>'; // bleibt beim Öffnen (unsichtbar), damit die Höhe gleich bleibt
   }
@@ -171,13 +173,15 @@
       const held = !allowed && d.hold ? '<span class="chip warn">' + esc(T('Permanently open')) + '</span>' : '';
       // Kopfzeile: links Tür-Name und Status-Chips, rechts „Dauerhaft offen“ mit Schalter
       const left = (multi ? '<span>' + esc(T('Door %d', d.no)) + '</span>' : '') + contact + held;
-      // Beim Klingeln steht „Ablehnen“ an der Stelle des Schalters (Türöffner behält seine Größe)
-      const right = d.no === 1 && isRinging() ? rejectButton()
-        : (allowed ? '<div class="switch-row"><span>' + esc(T('Permanently open')) + '</span><button class="switch' + (d.hold ? ' on' : '') +
-        '" data-hold="' + d.no + '" aria-pressed="' + d.hold + '"></button></div>' : '');
+      const right = allowed ? '<div class="switch-row"><span>' + esc(T('Permanently open')) + '</span><button class="switch' + (d.hold ? ' on' : '') +
+        '" data-hold="' + d.no + '" aria-pressed="' + d.hold + '"></button></div>' : '';
+      // Beim Klingeln: roter „Ablehnen“-Knopf rechts neben dem Klingel-Knopf, gemeinsam so breit wie der Türöffner
+      const button = d.no === 1 && isRinging()
+        ? '<div class="ring-row">' + holdButton(d.no, true) + '<div class="ring-over">' + holdButton(d.no) + rejectButton() + '</div></div>'
+        : holdButton(d.no);
       return '<div class="door">' +
         (left || right ? '<div class="door-head"><div class="door-status">' + left + '</div>' + right + '</div>' : '') +
-        holdButton(d.no) + '</div>';
+        button + '</div>';
     }).join('');
   }
 
@@ -236,9 +240,7 @@
     renderAccess();
     renderLog();
     renderGallery(false);
-    // Kleine Kachel (ohne Kopfzeile der Tür): „Ablehnen“ während des Klingelns statt „Letztes Klingeln“
-    if (isRinging()) $('lastRing').innerHTML = rejectButton();
-    else $('lastRing').textContent = T('Last ring') + ': ' + ago(state.lastRing);
+    $('lastRing').textContent = T('Last ring') + ': ' + ago(state.lastRing);
   }
 
   function notice(text) {

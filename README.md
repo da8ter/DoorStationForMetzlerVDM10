@@ -26,7 +26,7 @@ DS-KD8003(B); geprüft mit Firmware V3.7.1 (build 251112).
 - **Einstellungen der Türstation** im Formular: Öffnungsdauer je Tür, Ausgang 2, Eingänge 1–4,
   Tastenbeleuchtung mit eigenen Zeiten, Fingerabdruck-Sicherheitsstufe
 - **Eigene Kachel** als Steuerzentrale: Snapshot mit Livebild-Knopf, Türöffner zum Gedrückthalten
-  (wird beim Klingeln zum orangen Hinweis „Es klingelt“, daneben „Ablehnen“), Schnellschalter, die letzten fünf
+  (wird beim Klingeln zum orangen Hinweis „Es klingelt“, daneben ein roter Ablehnen-Knopf), Schnellschalter, die letzten fünf
   Zutritte mit Personenfoto, ein Ereignis-Log der letzten 50 Ereignisse und eine Bildergalerie
   der letzten Klingelbilder.
   Bilder kommen über einen mit Token abgesicherten WebHook.
