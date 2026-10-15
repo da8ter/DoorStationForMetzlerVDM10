@@ -25,6 +25,10 @@ DS-KD8003(B); geprüft mit Firmware V3.7.1 (build 251112).
   und Firmware
 - **Einstellungen der Türstation** im Formular: Öffnungsdauer je Tür, Ausgang 2, Eingänge 1–4,
   Fingerabdruck-Sicherheitsstufe
+- **Eigene Kachel** als Steuerzentrale: Snapshot mit Livebild-Knopf, Klingel-Hinweis mit
+  „Ablehnen“ und „Tür öffnen“, Türöffner zum Gedrückthalten, Schnellschalter, die letzten fünf
+  Zutritte mit Personenfoto und ein Ereignis-Log der letzten 50 Ereignisse mit Klingelbildern.
+  Bilder kommen über einen mit Token abgesicherten WebHook.
 - Neustart der Türstation, generischer ISAPI-Durchgriff `VDM10_Request()` für Skripte
 
 Gegensprechen (Audio) übernimmt dieses Modul nicht. Dafür die Türstation per

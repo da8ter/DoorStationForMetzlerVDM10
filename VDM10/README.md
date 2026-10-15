@@ -12,6 +12,8 @@ Gerätemodul für die Video-Türstation **Metzler VDM10 (2.0)** über die lokale
 5. [Statusvariablen und Medien](#5-statusvariablen-und-medien)
 6. [Konfigurationsbereiche im Aktionsteil](#6-konfigurationsbereiche-im-aktionsteil)
 7. [PHP-Befehlsreferenz](#7-php-befehlsreferenz)
+8. [Metzler-Sicherheitsmodul](#8-metzler-sicherheitsmodul)
+9. [Kachel in der Visualisierung](#9-kachel-in-der-visualisierung)
 
 ## 1. Funktionsumfang
 
@@ -22,6 +24,7 @@ Gerätemodul für die Video-Türstation **Metzler VDM10 (2.0)** über die lokale
 - Bewegungserkennung, Empfindlichkeit, Lautstärken, Klingelton, Tastenbeleuchtung schaltbar
 - Personen, Fingerabdrücke, Karten, PIN, Gültigkeit und Zugangszeitpläne verwalten
 - Öffnungsdauer, Ausgang 2, Eingänge 1–4 und Fingerabdruck-Sicherheitsstufe einstellen
+- Eigene Kachel als Steuerzentrale mit Ereignis-Log, letzten Zutritten und Personenfotos
 
 Gegensprechen (Audio) übernimmt das Symcon-Modul „Türsprechanlage“ (SIP) oder eine FRITZ!Box.
 
@@ -131,3 +134,33 @@ sich beim ersten Start fest an deren Seriennummer. Türöffnen, „dauerhaft off
 funktionieren unverändert, die Türstation leitet die Befehle weiter (DIP-Schalter ID 1 = Relais 1).
 Am Sicherheitsmodul lassen sich Türkontakt und Exit-Taster anschließen. Die Zuordnung der Ereignisse
 ist geprüft (`tests/SecurityModuleEventsTest.php`), ein Test mit angeschlossenem Modul steht aus.
+
+## 9. Kachel in der Visualisierung
+
+Die Instanz bringt eine eigene HTML-Kachel mit. Sie passt sich der Kachelgröße an:
+
+- **Klein:** Status, Türöffner und letztes Klingeln. Während es klingelt, stehen „Ablehnen“ und
+  „Tür öffnen“ im Vordergrund.
+- **Normal:** zusätzlich der letzte Snapshot mit den Knöpfen „Livebild“ (öffnet das Medienobjekt
+  `LIVE`) und „Neues Bild“, je Tür ein Türöffner und der Schalter „Dauerhaft offen“, Schnellschalter
+  für Klingelton und Bewegungserkennung, die letzten Zutritte und das Ereignis-Log.
+- **Breit** (z. B. maximiert): zwei Spalten, links Bild und Steuerung, rechts das Log.
+
+Der Türöffner reagiert erst, wenn er eine Sekunde gedrückt gehalten wird. So öffnet ein
+versehentliches Antippen keine Tür.
+
+**Letzte Zutritte** zeigt die fünf zuletzt eingetretenen Personen mit Foto, Art des Zutritts und
+Zeit. Abgelehnte Versuche erscheinen als „Unbekannt“ mit rotem Rand. Das Foto wählt man im
+Personen-Dialog unter „Foto“ aus den Bild-Medienobjekten von Symcon. Die Türstation selbst kann keine
+Fotos speichern.
+
+Das **Ereignis-Log** hält die letzten 50 Ereignisse und übersteht Neustarts: Klingeln, Türöffner,
+dauerhaft offen, Zutritte, Bewegung, Sabotage, Türkontakt, Verbindung und SIP-Anmeldung. Die letzten
+zehn Klingel-Einträge haben ein Vorschaubild. Ein Tipp darauf zeigt das Bild groß. Die Bilder liegen
+unter `media/vdm10_<InstanzID>/` und werden beim Löschen der Instanz entfernt.
+
+Bilder lädt die Kachel über den WebHook `/hook/vdm10/<InstanzID>`. Jede Adresse trägt ein zufälliges
+Token der Instanz; ohne gültiges Token antwortet der Hook mit 403. Ausgeliefert werden nur der
+aktuelle Snapshot, Klingelbilder aus dem Log und zugeordnete Personenfotos. Das Token kennt jeder
+Client, der die Kachel anzeigt. Es schützt vor Abrufen ohne Visualisierung, zum Beispiel aus dem
+LAN. Prüfung ohne Symcon: `php tests/ImageHookTest.php`.
