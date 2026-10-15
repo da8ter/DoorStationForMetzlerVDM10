@@ -267,7 +267,10 @@ class VDM10 extends IPSModuleStrict
 
     public function UnlockDoor(int $Door): bool
     {
-        $door = max(1, min(2, $Door));
+        if ($Door < 1 || $Door > max(1, min(2, $this->ReadPropertyInteger('DoorCount')))) {
+            throw new InvalidArgumentException(sprintf($this->Translate('Door opener %d is not set up'), $Door));
+        }
+        $door = $Door;
         $ok = $this->isapi()->door($door, 'open');
         if ($ok) {
             $this->SetValue('DOOR' . $door, true);
@@ -354,7 +357,9 @@ class VDM10 extends IPSModuleStrict
     {
         $this->SetTimerInterval('RingReset', 0);
         $this->SetValue('DOORBELL', false);
-        if ($this->GetValue('CALL_STATUS') === self::CALL_RING) {
+        // Ruft die Türstation noch (bis ~60 s), bleibt der Rufstatus „Klingelt“ – sonst meldet die
+        // nächste Abfrage einen Wechsel frei→klingelt und damit ein zweites Klingeln.
+        if ($this->GetValue('CALL_STATUS') === self::CALL_RING && $this->GetBuffer('DeviceRing') !== '1') {
             $this->SetValue('CALL_STATUS', self::CALL_IDLE);
         }
     }

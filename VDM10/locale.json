@@ -385,7 +385,8 @@
             "Notice shown on the touch display.": "Hinweis wird auf dem Touch-Display angezeigt.",
             "Notice on the touch display: shown when the display wakes up or is idle (Metzler recommends at most 45 characters). Empty = hidden. Also available as variable for automations.": "Hinweis auf dem Touch-Display: erscheint beim Aufwachen und im Ruhezustand des Displays (Metzler empfiehlt höchstens 45 Zeichen). Leer = ausgeblendet. Auch als Variable für Automationen.",
             "Notice text": "Hinweistext",
-            "Show on the touch display": "Auf dem Touch-Display anzeigen"
+            "Show on the touch display": "Auf dem Touch-Display anzeigen",
+            "Door opener %d is not set up": "Türöffner %d ist nicht eingerichtet"
         }
     }
 }

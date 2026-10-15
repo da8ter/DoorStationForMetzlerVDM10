@@ -64,7 +64,7 @@ trait VDM10PersonsTrait
     /** Gültigkeit als Unix-Zeitstempel; 0/0 = unbegrenzt. */
     public function SetPersonValidity(string $EmployeeNo, int $Begin, int $End): bool
     {
-        if ($End !== 0 && $End <= $Begin) {
+        if ($End !== 0 && $End < $Begin) { // gleicher Tag ist gültig (Ende = 23:59:59)
             throw new InvalidArgumentException($this->Translate('End must be after begin'));
         }
         return $this->modifyPerson($EmployeeNo, ['Valid' => $this->validity($Begin, $End)]);
@@ -204,7 +204,7 @@ trait VDM10PersonsTrait
     {
         $unlimited = $begin === 0 && $end === 0;
         $b = $unlimited ? time() : ($begin ?: time());
-        $e = $unlimited ? strtotime('+10 years', $b) : $end;
+        $e = $end === 0 ? strtotime('+10 years', $b) : $end; // Ende 0 = unbefristet (nicht 1970)
         return ['enable' => !$unlimited, 'beginTime' => date('Y-m-d\T00:00:00', $b),
             'endTime' => date('Y-m-d\T23:59:59', $e), 'timeType' => 'local'];
     }

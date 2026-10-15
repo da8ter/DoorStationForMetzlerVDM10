@@ -73,6 +73,9 @@ trait VDM10PersonsUITrait
     {
         try {
             [$from, $until] = $Limited ? [$this->dateValue($Begin), $this->dateValue($End)] : [0, 0];
+            if ($Limited && $until < $from) { // vor dem Anlegen prüfen, sonst bliebe eine Person ohne Einschränkung
+                throw new InvalidArgumentException($this->Translate('End must be after begin'));
+            }
             if ($EmployeeNo === '') {
                 $no = $this->AddPerson($Name, $Pin);
                 if ($Limited) {
