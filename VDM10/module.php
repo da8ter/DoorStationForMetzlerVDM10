@@ -71,6 +71,7 @@ class VDM10 extends IPSModuleStrict
         $this->registerSubModuleProperties();
         $this->RegisterPropertyBoolean('SnapshotOnRing', true);
         $this->RegisterPropertyBoolean('SnapshotOnAccess', true);
+        $this->RegisterPropertyBoolean('SnapshotOnMotion', true);
         $this->RegisterPropertyInteger('SnapshotArchive', 3);
         $this->RegisterPropertyInteger('SnapshotChannel', 101);
         $this->RegisterPropertyBoolean('StreamMedia', true);

@@ -97,7 +97,7 @@
   function gallery() {
     const rings = (state.log || []).filter(e => e.thumb).map(e => ({
       thumb: e.thumb, full: e.full, ts: e.ts, text: e.text + (e.name ? ' · ' + e.name : ''),
-      icon: e.kind === 'ring' ? 'bell' : (e.kind === 'access_denied' ? 'denied' : (METHOD[e.method] ? METHOD[e.method][0] : 'access')),
+      icon: e.kind === 'ring' ? 'bell' : (e.kind === 'motion' ? 'motion' : (e.kind === 'access_denied' ? 'denied' : (METHOD[e.method] ? METHOD[e.method][0] : 'access'))),
     }));
     const snap = state.snapshot;
     const same = snap && snap.url ? rings.find(r => Math.abs(r.ts - snap.ts) <= 15) : null;

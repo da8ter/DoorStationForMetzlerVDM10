@@ -12,7 +12,7 @@ declare(strict_types=1);
 trait VDM10LogTrait
 {
     private const LOG_SIZE = 50;
-    private const LOG_IMAGES = 10; // je Gruppe: Klingeln und Zutritte
+    private const LOG_IMAGES = 10; // je Gruppe: Klingeln, Zutritte, Bewegung
 
     /** Variablen, deren Wechsel ins Log gehören: Ident => [Art bei true, Art bei false] (null = nicht loggen). */
     private const LOG_ON_CHANGE = [
@@ -87,12 +87,12 @@ trait VDM10LogTrait
             return;
         }
         $log = $this->readLog();
-        $kept = ['ring' => 0, 'access' => 0];
+        $kept = ['ring' => 0, 'access' => 0, 'motion' => 0];
         foreach ($log as &$entry) {
             if ((int) $entry['id'] === $id) {
                 $entry['img'] = true;
             }
-            $group = $entry['kind'] === 'ring' ? 'ring' : 'access';
+            $group = in_array($entry['kind'], ['ring', 'motion'], true) ? $entry['kind'] : 'access';
             if (!empty($entry['img']) && ++$kept[$group] > self::LOG_IMAGES) {
                 $this->deleteLogImage((int) $entry['id']);
                 $entry['img'] = false;
@@ -146,7 +146,11 @@ trait VDM10LogTrait
         $kind = self::LOG_ON_CHANGE[$ident][$data[0] ? 0 : 1];
         if ($kind !== null) {
             $door = preg_match('/^DOOR(\d)_/', $ident, $m) ? (int) $m[1] : 0;
-            $this->logEvent($kind, $door > 0 ? ['door' => $door] : []);
+            $id = $this->logEvent($kind, $door > 0 ? ['door' => $door] : []);
+            if ($kind === 'motion' && $this->ReadPropertyBoolean('SnapshotOnMotion')) {
+                // Bild direkt von der Kamera, ohne den Kachel-Snapshot zu ersetzen
+                $this->attachLogImage($id, $this->isapi()->picture($this->ReadPropertyInteger('SnapshotChannel')));
+            }
         }
     }
 

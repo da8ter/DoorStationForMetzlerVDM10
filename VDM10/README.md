@@ -204,7 +204,8 @@ Bei jedem **Zutrittsversuch** (Fingerabdruck, Karte, PIN, erfolgreich oder abgel
 Modul ein Bild direkt von der Kamera auf, ohne den Snapshot der Kachel zu ersetzen. Ein Tipp auf den
 Eintrag im Log oder auf die Person unter „Letzte Zutritte“ zeigt es groß. Abschaltbar mit der Option
 „Bei jedem Zutrittsversuch ein Bild aufnehmen“; aufbewahrt werden die letzten zehn Zutrittsbilder
-zusätzlich zu den zehn Klingelbildern.
+zusätzlich zu den zehn Klingelbildern. Ebenso nimmt das Modul bei **Bewegung** ein Bild auf (eigene
+Grenze von zehn Bildern, abschaltbar mit „Bei Bewegung ein Bild aufnehmen“).
 
 Das **Ereignis-Log** hält die letzten 50 Ereignisse und übersteht Neustarts: Klingeln, Türöffner,
 dauerhaft offen, Zutritte, Bewegung, Sabotage, Türkontakt, Verbindung und SIP-Anmeldung. Die letzten
