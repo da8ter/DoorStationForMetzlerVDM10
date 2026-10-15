@@ -50,9 +50,6 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   .scroll { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--accent) 70%, transparent) transparent; }
 }
 
-/* Puls des Türöffners beim Klingeln (keine Dauer-Animation im Ruhezustand) */
-@keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--orange) 45%, transparent); }
-  50% { box-shadow: 0 0 0 8px color-mix(in srgb, var(--orange) 0%, transparent); } }
 
 /* Bild */
 .photo { position: relative; border-radius: 16px; overflow: hidden; aspect-ratio: 16 / 9; background: var(--surface); flex: none; }
@@ -96,7 +93,16 @@ html.compact .doors.multi .ring-over .hold-no { display: none; } /* zwei Türen,
 .hold small { position: relative; font-size: 10px; font-weight: 600; opacity: .5; }
 .hold.busy { opacity: .6; }
 /* Klingeln: der Türöffner wird zum Hinweis – gleiche Größe, Orange, Puls nur solange es klingelt */
-.hold.ringing { background: var(--orange); animation: pulse 1.6s ease-in-out infinite; }
+.hold.ringing { background: var(--orange); animation: ring-pulse 1.2s ease-in-out infinite; }
+.hold.ringing .fa-icon { transform-origin: 50% 8%; animation: bell-swing 1.2s ease-in-out infinite; }
+/* Deutlicher Puls (Helligkeit + Schein) ohne Größenänderung; die Glocke schwingt mit */
+@keyframes ring-pulse {
+  0%, 100% { filter: brightness(1); box-shadow: 0 0 0 0 color-mix(in srgb, var(--orange) 75%, transparent); }
+  50% { filter: brightness(1.22); box-shadow: 0 0 0 10px color-mix(in srgb, var(--orange) 0%, transparent); }
+}
+@keyframes bell-swing { 0%, 50%, 100% { transform: rotate(0); } 10% { transform: rotate(16deg); } 20% { transform: rotate(-14deg); }
+  30% { transform: rotate(10deg); } 40% { transform: rotate(-6deg); } }
+@media (prefers-reduced-motion: reduce) { .hold.ringing, .hold.ringing .fa-icon { animation: none; } }
 
 .hold.busy small { visibility: hidden; } /* Platz bleibt: Knopfhöhe ändert sich beim Öffnen nicht */
 .hold-no { display: none; }
