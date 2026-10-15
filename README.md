@@ -24,7 +24,7 @@ DS-KD8003(B); geprüft mit Firmware V3.7.1 (build 251112).
   Klingelton an/aus, Klingelton- und Sprechlautstärke, Tastenbeleuchtung; Anzeige von SIP-Anmeldung
   und Firmware
 - **Einstellungen der Türstation** im Formular: Öffnungsdauer je Tür, Ausgang 2, Eingänge 1–4,
-  Fingerabdruck-Sicherheitsstufe
+  Tastenbeleuchtung mit eigenen Zeiten, Fingerabdruck-Sicherheitsstufe
 - **Eigene Kachel** als Steuerzentrale: Snapshot mit Livebild-Knopf, Klingel-Hinweis mit
   „Ablehnen“ und „Tür öffnen“, Türöffner zum Gedrückthalten, Schnellschalter, die letzten fünf
   Zutritte mit Personenfoto, ein Ereignis-Log der letzten 50 Ereignisse und eine Bildergalerie

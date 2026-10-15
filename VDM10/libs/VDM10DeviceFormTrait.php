@@ -15,7 +15,8 @@ trait VDM10DeviceFormTrait
     private const PATH_INPUT = '/ISAPI/System/IO/inputs/';
     private const PATH_READER = '/ISAPI/AccessControl/CardReaderCfg/1?format=json';
 
-    public function UIDeviceSave(float $Open1, float $Open2, string $Output2, string $Input1, string $Input2, string $Input3, string $Input4, int $FpLevel, bool $SmTamper): string
+    public function UIDeviceSave(float $Open1, float $Open2, string $Output2, string $Input1, string $Input2, string $Input3, string $Input4, int $FpLevel, bool $SmTamper,
+        string $LightMode = '', string $LightBegin = '', string $LightEnd = ''): string
     {
         try {
             $now = $this->deviceSettings();
@@ -48,6 +49,9 @@ trait VDM10DeviceFormTrait
                 $reboot = $this->securityModuleTamperAlarm($SmTamper) || $reboot;
                 $changed[] = $this->Translate('Security module tamper alarm');
             }
+            if ($LightMode !== '' && $this->saveBacklight($now['light'], $LightMode, $LightBegin, $LightEnd)) {
+                $changed[] = $this->Translate('Button lighting');
+            }
             if ($changed === []) {
                 return $this->Translate('No changes');
             }
@@ -56,6 +60,54 @@ trait VDM10DeviceFormTrait
         } catch (Throwable $e) {
             return $this->Translate('Error') . ': ' . $e->getMessage();
         }
+    }
+
+    /** Tastenbeleuchtung (Modus, eigene Zeiten) schreiben; true = geändert. */
+    private function saveBacklight(array $now, string $mode, string $begin, string $end): bool
+    {
+        if (!in_array($mode, self::BACKLIGHT_MODES, true)) {
+            throw new InvalidArgumentException('Invalid mode ' . $mode);
+        }
+        $from = $this->timeValue($begin, $now['begin']);
+        $until = $this->timeValue($end, $now['end']);
+        if ($mode === $now['mode'] && ($mode !== 'custom' || ($from === $now['begin'] && $until === $now['end']))) {
+            return false;
+        }
+        if ($mode === 'custom' && $from === $until) {
+            throw new InvalidArgumentException($this->Translate('Button lighting: start and end must differ'));
+        }
+        $cfg = $this->json($this->isapi()->request('GET', self::PATH_BACKLIGHT));
+        $cfg['backlightMode'] = $mode;
+        if ($mode === 'custom') {
+            $cfg['customBacklightTime'] = ['beginTime' => $from, 'endTime' => $until];
+        }
+        $this->writeChecked('PUT', self::PATH_BACKLIGHT, (string) json_encode($cfg));
+        $this->SetValue('BACKLIGHT', $mode);
+        return true;
+    }
+
+    /** SelectTime-JSON → „HH:MM:SS“; leer/ungültig = bisheriger Wert. */
+    private function timeValue(string $json, string $fallback): string
+    {
+        $t = json_decode($json, true);
+        if (!is_array($t) || !isset($t['hour'], $t['minute'])) {
+            return $fallback;
+        }
+        return sprintf('%02d:%02d:%02d', max(0, min(23, (int) $t['hour'])), max(0, min(59, (int) $t['minute'])), max(0, min(59, (int) ($t['second'] ?? 0))));
+    }
+
+    /** „HH:MM:SS“ → SelectTime-JSON. */
+    private function timeJson(string $time): string
+    {
+        [$h, $m, $s] = array_map('intval', explode(':', $time . ':0:0'));
+        return (string) json_encode(['hour' => $h, 'minute' => $m, 'second' => $s]);
+    }
+
+    /** Auswahl des Modus: Zeitfelder nur bei „Eigene Zeiten“ aktiv. */
+    public function UIDeviceLightMode(string $Mode): void
+    {
+        $this->UpdateFormField('DevLightBegin', 'enabled', $Mode === 'custom');
+        $this->UpdateFormField('DevLightEnd', 'enabled', $Mode === 'custom');
     }
 
     /** Werte und Auswahlmöglichkeiten in den Formularbereich eintragen. */
@@ -75,7 +127,8 @@ trait VDM10DeviceFormTrait
                 continue;
             }
             $values = ['DevOpen1' => $now['open'][1] / 1000, 'DevOpen2' => $now['open'][2] / 1000, 'DevOutput2' => $now['output2'],
-                'DevFpLevel' => $now['fpLevel'], 'DevSmTamper' => $now['smTamper']];
+                'DevFpLevel' => $now['fpLevel'], 'DevSmTamper' => $now['smTamper'], 'DevLightMode' => $now['light']['mode'],
+                'DevLightBegin' => $this->timeJson($now['light']['begin']), 'DevLightEnd' => $this->timeJson($now['light']['end'])];
             foreach ([1, 2, 3, 4] as $no) {
                 $values['DevInput' . $no] = $now['inputs'][$no];
             }
@@ -97,6 +150,12 @@ trait VDM10DeviceFormTrait
             if ($name === 'DevSmTamper') {
                 $item['visible'] = $this->ReadPropertyBoolean('SecurityModule');
             }
+            if ($name === 'DevLightMode') {
+                $item['options'] = array_map(fn (string $m): array => ['caption' => $this->Translate('backlight_' . $m), 'value' => $m], self::BACKLIGHT_MODES);
+            }
+            if ($name === 'DevLightBegin' || $name === 'DevLightEnd') {
+                $item['enabled'] = ($values['DevLightMode'] ?? '') === 'custom';
+            }
             if ($name === 'DevFpLevel') {
                 $item['visible'] = $this->credentials()['finger']; // ohne Fingerleser keine Sicherheitsstufe
             }
@@ -108,7 +167,7 @@ trait VDM10DeviceFormTrait
         return $items;
     }
 
-    /** @return array{open: array<int,int>, output2: string, inputs: array<int,string>, inputOptions: array<int,array<int,string>>, fpLevel: int, smTamper: bool} */
+    /** @return array{open: array<int,int>, output2: string, inputs: array<int,string>, inputOptions: array<int,array<int,string>>, fpLevel: int, smTamper: bool, light: array{mode:string,begin:string,end:string}} */
     private function deviceSettings(): array
     {
         $api = $this->isapi();
@@ -127,6 +186,7 @@ trait VDM10DeviceFormTrait
             $inputOptions[$no] = preg_match('#<IOUseType opt="([^"]+)"#', $caps, $m) ? explode(',', $m[1]) : [$inputs[$no]];
         }
         $reader = $this->json($api->request('GET', self::PATH_READER, '', 5));
+        $light = $this->json($api->request('GET', self::PATH_BACKLIGHT, '', 5));
         return [
             'open'         => $open,
             'output2'      => $tag($api->request('GET', self::PATH_OUTPUT . '2', '', 5)['body'], 'IOUseType'),
@@ -134,6 +194,9 @@ trait VDM10DeviceFormTrait
             'inputOptions' => $inputOptions,
             'fpLevel'      => (int) ($reader['CardReaderCfg']['fingerPrintCheckLevel'] ?? 0),
             'smTamper'     => $this->securityModuleTamperAlarm(),
+            'light'        => ['mode' => (string) ($light['backlightMode'] ?? 'auto'),
+                'begin' => (string) ($light['customBacklightTime']['beginTime'] ?? '18:00:00'),
+                'end'   => (string) ($light['customBacklightTime']['endTime'] ?? '06:00:00')],
         ];
     }
 }

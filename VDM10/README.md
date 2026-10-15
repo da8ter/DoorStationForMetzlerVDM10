@@ -94,6 +94,7 @@ Medien: `SNAPSHOT`, `SNAPSHOT_1` … `SNAPSHOT_n` (Archiv), `LIVE` (RTSP).
   Anlernen und Löschen.
 - **Zugangszeitpläne:** Zeitfenster je Tagesgruppe; gelten für alle Türen der Person.
 - **Einstellungen der Türstation:** Öffnungsdauer je Tür, Ausgang 2, Eingänge 1–4,
+  Tastenbeleuchtung mit eigenen Zeiten (An ab / Aus um, nur im Modus „Eigene Zeiten“),
   Fingerabdruck-Sicherheitsstufe, Sabotagealarm des Sicherheitsmoduls (nur wenn installiert). „In die Türstation schreiben“ überträgt nur geänderte Werte; manche
   Änderungen (z. B. Ausgang 2) wirken erst nach einem Neustart der Türstation.
 

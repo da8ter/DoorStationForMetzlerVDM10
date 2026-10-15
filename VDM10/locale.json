@@ -340,7 +340,10 @@
             "Enrolling: click the button, then within 10 seconds place the finger on the reader of the door station (lift and place it again after each beep).": "Anlernen: Button klicken, dann innerhalb von 10 Sekunden den Finger auf den Leser der Türstation legen (nach jedem Piepen kurz abheben und wieder auflegen).",
             "Enrolling: click the button, then within 10 seconds hold the card in front of the reader of the door station.": "Anlernen: Button klicken, dann innerhalb von 10 Sekunden die Karte vor den Leser der Türstation halten.",
             "Fingerprints can be enrolled after the person has been created.": "Fingerabdrücke lassen sich anlernen, sobald die Person angelegt ist.",
-            "Cards can be enrolled after the person has been created.": "Karten lassen sich anlernen, sobald die Person angelegt ist."
+            "Cards can be enrolled after the person has been created.": "Karten lassen sich anlernen, sobald die Person angelegt ist.",
+            "On from": "An ab",
+            "Off at": "Aus um",
+            "Button lighting: start and end must differ": "Tastenbeleuchtung: Beginn und Ende müssen verschieden sein"
         }
     }
 }

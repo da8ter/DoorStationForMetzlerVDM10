@@ -543,6 +543,29 @@
                     ]
                 },
                 {
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "type": "Select",
+                            "name": "DevLightMode",
+                            "caption": "Button lighting",
+                            "width": "200px",
+                            "options": [],
+                            "onChange": "VDM10_UIDeviceLightMode($id, $DevLightMode);"
+                        },
+                        {
+                            "type": "SelectTime",
+                            "name": "DevLightBegin",
+                            "caption": "On from"
+                        },
+                        {
+                            "type": "SelectTime",
+                            "name": "DevLightEnd",
+                            "caption": "Off at"
+                        }
+                    ]
+                },
+                {
                     "type": "Select",
                     "name": "DevFpLevel",
                     "caption": "Fingerprint security level",
@@ -579,7 +602,7 @@
                     "type": "Button",
                     "caption": "Save to the door station",
                     "confirm": "Write the changed settings to the door station now?",
-                    "onClick": "echo VDM10_UIDeviceSave($id, $DevOpen1, $DevOpen2, $DevOutput2, $DevInput1, $DevInput2, $DevInput3, $DevInput4, (int) $DevFpLevel, $DevSmTamper);"
+                    "onClick": "echo VDM10_UIDeviceSave($id, $DevOpen1, $DevOpen2, $DevOutput2, $DevInput1, $DevInput2, $DevInput3, $DevInput4, (int) $DevFpLevel, $DevSmTamper, $DevLightMode, $DevLightBegin, $DevLightEnd);"
                 }
             ]
         },
