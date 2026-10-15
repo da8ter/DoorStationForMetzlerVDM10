@@ -189,7 +189,9 @@ Kartenleser.
 - **Welche Taste geklingelt hat:** Ab zwei Tasten zeigt die Variable „Klingeltaste“ die zuletzt
   gedrückte Taste, und das Log nennt sie beim Klingeln. Das funktioniert nur, wenn die Türstation die
   Taste im Ereignis mitschickt (Felder `buttonNo`, `keyNo`, `callButtonNo`, `callNumber`,
-  `roomNumber`). Die VDM10 mit Firmware V3.7.1 schickt beim Taster des Hauptmoduls keine Nummer mit.
+  `roomNumber`) oder in `callerInfo` einträgt. Die VDM10 mit Firmware V3.7.1 tut beim Taster des
+  Hauptmoduls beides nicht: Das Ereignis enthält keine Nummer, und `callerInfo` meldet beim Klingeln
+  nur `status: ring` mit `devNo: 0` (gemessen am 15.10.2026).
 
 Geprüft ist der Finger- und Kartenleser DS-KD-MFB. Display-, Taster- und Info-Module sind nach der
 Weboberfläche der Türstation umgesetzt und ohne Hardware getestet (`php tests/SubModulesTest.php`).

@@ -61,7 +61,8 @@ class VDM10 extends IPSModuleStrict
     private const CTRL_REJECT = 2;
     private const CTRL_HANGUP = 3;
     private const DOOR_PULSE_MS = 3000;
-    private const RING_DEDUPE_SECONDS = 3;
+    // Ein Besuch: Taster (1/3) kommt oft doppelt im Abstand von ~8 s, der Rufstatus „ring“ 4–8 s danach.
+    private const RING_DEDUPE_SECONDS = 15;
 
     public function Create(): void
     {
