@@ -16,6 +16,7 @@ trait VDM10SubModulesTrait
     private const PATH_KEYS = '/ISAPI/VideoIntercom/keyCfg';
     private const PATH_VIRTUAL_KEYS = '/ISAPI/VideoIntercom/keyCfg?type=virtualKey';
     private const PATH_KEY = '/ISAPI/VideoIntercom/keyCfg/%d';
+    private const PATH_CALLER_INFO = '/ISAPI/VideoIntercom/callerInfo?format=json';
     private const POSITION_SUBMODULE = 300;
     private const POSITION_DISPLAY = 340;
     private const SUBMODULE_IDENTS = '/^(SUBMODULE_\d+|DISPLAY\d+_BRIGHTNESS|RING_BUTTON)$/';
@@ -217,6 +218,27 @@ trait VDM10SubModulesTrait
             }
         }
         return '';
+    }
+
+    /**
+     * Beim Klingeln callerInfo der Türstation lesen (wie Hikvision-Addons und node-red-contrib-
+     * hikvision-ultimate): devNo bzw. buttonNo/keyNo/callButtonNo benennen dort die gedrückte
+     * Taste. Ob die VDM10 sie füllt, ist offen; die Antwort steht deshalb immer im Debug.
+     */
+    private function callerButton(string $when): void
+    {
+        $r = $this->isapi()->request('GET', self::PATH_CALLER_INFO, '', 3);
+        $this->SendDebug('CallerInfo', $when . ': ' . preg_replace('/\s+/', ' ', $r['body']), 0);
+        $info = json_decode($r['body'], true)['CallerInfo'] ?? null;
+        if (!is_array($info)) {
+            return;
+        }
+        $found = VDM10Events::buttonInfo($info);
+        $dev = (int) ($info['devNo'] ?? 0);
+        $label = $this->ringButton($found['key'] ?: $dev, $found['room'] ?: $dev);
+        if ($label !== '') {
+            $this->annotateLastRing($label);
+        }
     }
 
     /** Für die Kachel: Anzahl Module und davon offline. */

@@ -308,6 +308,9 @@ class VDM10 extends IPSModuleStrict
         if ($new === self::CALL_RING && $old !== self::CALL_RING) {
             $this->ring('poll');
         }
+        if ($new === self::CALL_RING && $this->GetBuffer('DeviceRing') !== '1') {
+            $this->callerButton('call'); // Ruf aufgebaut: jetzt steht der Anrufer fest
+        }
         $this->SetValue('CALL_STATUS', $new);
         // Die Klingel erlischt vorzeitig nur, wenn die Türstation selbst einen Ruf gemeldet hat
         // und dieser beendet ist. Der Tastendruck (Alarmeingang) kommt im Stream einige Sekunden
@@ -476,5 +479,8 @@ class VDM10 extends IPSModuleStrict
             $this->TakeSnapshot();
         }
         $this->logRing($source, $this->ringButton($key, $room));
+        if ($key === 0 && $room === 0) {
+            $this->callerButton($source);
+        }
     }
 }

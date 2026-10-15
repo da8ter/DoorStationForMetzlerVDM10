@@ -91,6 +91,18 @@ trait VDM10LogTrait
         }
     }
 
+    /** Taste nachträglich am letzten Klingel-Eintrag vermerken (callerInfo kommt nach dem Tastendruck). */
+    private function annotateLastRing(string $name): void
+    {
+        $log = $this->readLog();
+        if ($log === [] || $log[0]['kind'] !== 'ring' || time() - (int) $log[0]['ts'] > 60 || ($log[0]['name'] ?? '') !== '') {
+            return;
+        }
+        $log[0]['name'] = $name;
+        $this->WriteAttributeString('EventLog', (string) json_encode($log, JSON_UNESCAPED_UNICODE));
+        $this->tileChanged();
+    }
+
     /** Zutritt mit Person und Methode ins Log. */
     private function logAccess(array $e, string $name, string $employeeNo): void
     {
