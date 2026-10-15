@@ -14,6 +14,7 @@ Gerätemodul für die Video-Türstation **Metzler VDM10 (2.0)** über die lokale
 7. [PHP-Befehlsreferenz](#7-php-befehlsreferenz)
 8. [Metzler-Sicherheitsmodul](#8-metzler-sicherheitsmodul)
 9. [Kachel in der Visualisierung](#9-kachel-in-der-visualisierung)
+10. [Erweiterungsmodule und Klingeltasten](#10-erweiterungsmodule-und-klingeltasten)
 
 ## 1. Funktionsumfang
 
@@ -25,6 +26,7 @@ Gerätemodul für die Video-Türstation **Metzler VDM10 (2.0)** über die lokale
 - Personen, Fingerabdrücke, Karten, PIN, Gültigkeit und Zugangszeitpläne verwalten
 - Öffnungsdauer, Ausgang 2, Eingänge 1–4 und Fingerabdruck-Sicherheitsstufe einstellen
 - Eigene Kachel als Steuerzentrale mit Ereignis-Log, letzten Zutritten und Personenfotos
+- Erweiterungsmodule (Touch-Display, Namensschild-, Taster-, Tastenfeld-, Info-Module, Finger- und Kartenleser): Status, Display-Einstellungen, Klingeltasten
 
 Gegensprechen (Audio) übernimmt das Symcon-Modul „Türsprechanlage“ (SIP) oder eine FRITZ!Box.
 
@@ -168,3 +170,27 @@ Token der Instanz; ohne gültiges Token antwortet der Hook mit 403. Ausgeliefert
 aktuelle Snapshot, Klingelbilder aus dem Log und zugeordnete Personenfotos. Das Token kennt jeder
 Client, der die Kachel anzeigt. Es schützt vor Abrufen ohne Visualisierung, zum Beispiel aus dem
 LAN. Prüfung ohne Symcon: `php tests/ImageHookTest.php`.
+
+## 10. Erweiterungsmodule und Klingeltasten
+
+Das Modul liest die Erweiterungsmodule am RS-485-Bus der Türstation, zum Beispiel das Touch-Display
+VDM10-TDM, Namensschild- und Taster-Module, das Tastenfeld, das Info-Modul und den Finger- und
+Kartenleser.
+
+- **Status:** Je Modul gibt es eine Variable „Online/Offline“. Fällt ein Modul aus, steht das im
+  Ereignis-Log, und die Kachel zeigt den Chip „Module“ rot. Der Status wird jede Minute gelesen.
+- **Display-Module:** Im Aktionsbereich unter „Erweiterungsmodule und Klingeltasten“ öffnet das
+  Bearbeiten-Symbol die Einstellungen: Helligkeit, Tastenton, Design, Startbildschirm, direktes
+  Klingeln und die Taste „Zentrale anrufen“. Es erscheinen nur Felder, die das Modul meldet. Die
+  Helligkeit gibt es zusätzlich als Schieberegler-Variable, etwa um das Display nachts zu dimmen.
+- **Klingeltasten:** Die Liste zeigt jede Taste mit der Zimmernummer, die sie ruft. Zimmernummer und
+  Beschriftung lassen sich ändern. Beschriftungen speichert die Türstation nur für Tasten eines
+  Touch-Displays.
+- **Welche Taste geklingelt hat:** Ab zwei Tasten zeigt die Variable „Klingeltaste“ die zuletzt
+  gedrückte Taste, und das Log nennt sie beim Klingeln. Das funktioniert nur, wenn die Türstation die
+  Taste im Ereignis mitschickt (Felder `buttonNo`, `keyNo`, `callButtonNo`, `callNumber`,
+  `roomNumber`). Die VDM10 mit Firmware V3.7.1 schickt beim Taster des Hauptmoduls keine Nummer mit.
+
+Geprüft ist der Finger- und Kartenleser DS-KD-MFB. Display-, Taster- und Info-Module sind nach der
+Weboberfläche der Türstation umgesetzt und ohne Hardware getestet (`php tests/SubModulesTest.php`).
+Die Option „Variablen für Erweiterungsmodule“ in der Konfiguration schaltet die Variablen ab.

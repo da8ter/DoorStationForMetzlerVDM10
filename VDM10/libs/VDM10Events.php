@@ -15,6 +15,12 @@ final class VDM10Events
 {
     public const HEARTBEAT_SECONDS = 10;
 
+    /** Ereignisfelder, die eine Klingeltaste (key) oder die gerufene Zimmernummer (room) benennen. */
+    private const KEY_FIELDS = [
+        'buttonNo' => 'key', 'keyNo' => 'key', 'callButtonNo' => 'key', 'keyID' => 'key',
+        'callNumber' => 'room', 'roomNumber' => 'room', 'roomNo' => 'room', 'callRoomNum' => 'room',
+    ];
+
     /** Ereignis-Klassen, die das Modul unterscheidet. */
     public const KIND_RING = 'ring';
     public const KIND_UNLOCK = 'unlock';
@@ -120,7 +126,7 @@ final class VDM10Events
     /**
      * Normalisiert ein EventNotificationAlert (JSON oder XML).
      *
-     * @return array{kind:string,label:string,major:int,minor:int,current:bool,name:string,door:int,time:string,raw:string}|null
+     * @return array{kind:string,label:string,major:int,minor:int,current:bool,name:string,door:int,time:string,raw:string,key:int,room:int}|null
      */
     public static function parseNotification(string $body): ?array
     {
@@ -138,27 +144,63 @@ final class VDM10Events
                 (string) ($json['eventType'] ?? ''), (string) ($json['eventState'] ?? ''),
                 (int) ($acs['majorEventType'] ?? 0), (int) ($acs['subEventType'] ?? 0),
                 !isset($acs['currentEvent']) || (bool) $acs['currentEvent'],
-                (string) ($acs['name'] ?? ''), (int) ($acs['doorNo'] ?? 0), (string) ($json['dateTime'] ?? '')
+                (string) ($acs['name'] ?? ''), (int) ($acs['doorNo'] ?? 0), (string) ($json['dateTime'] ?? ''),
+                self::buttonInfo($json)
             );
         }
         if (str_starts_with($body, '<')) {
             $get = static fn (string $tag): string => preg_match('/<' . $tag . '>([^<]*)</', $body, $m) ? $m[1] : '';
+            $button = ['key' => 0, 'room' => 0];
+            foreach (self::KEY_FIELDS as $field => $what) {
+                if ($button[$what] === 0 && (int) $get($field) > 0) {
+                    $button[$what] = (int) $get($field);
+                }
+            }
             return self::normalize($get('eventType'), $get('eventState'), (int) $get('majorEventType'),
-                (int) $get('subEventType'), $get('currentEvent') !== 'false', $get('name'), (int) $get('doorNo'), $get('dateTime'));
+                (int) $get('subEventType'), $get('currentEvent') !== 'false', $get('name'), (int) $get('doorNo'), $get('dateTime'), $button);
         }
         return null;
     }
 
-    /** @return array{kind:string,label:string,major:int,minor:int,current:bool,name:string,door:int,time:string,raw:string} */
+    /** @return array{kind:string,label:string,major:int,minor:int,current:bool,name:string,door:int,time:string,raw:string,key:int,room:int} */
     public static function normalize(string $type, string $state, int $major, int $minor, bool $current,
-        string $name, int $door, string $time): array
+        string $name, int $door, string $time, array $button = []): array
     {
         [$kind, $label] = self::classify($type, $state, $major, $minor);
         return [
             'kind' => $kind, 'label' => $label, 'major' => $major, 'minor' => $minor, 'current' => $current,
             'name' => $name, 'door' => $door, 'time' => $time,
             'raw' => $type === 'AccessControllerEvent' ? $major . '/' . $minor : $type . '/' . $state,
+            'key' => (int) ($button['key'] ?? 0), 'room' => (int) ($button['room'] ?? 0),
         ];
+    }
+
+    /**
+     * Welche Klingeltaste gedrückt wurde, sofern die Türstation es mitschickt. Die VDM10 mit
+     * Firmware V3.7.1 sendet beim Hauptmodul-Taster (1/3) nur deviceName/serialNo; mit
+     * Tasten- oder Touch-Modulen sind diese Felder aus anderen Hikvision-Integrationen bekannt.
+     *
+     * @return array{key:int,room:int}
+     */
+    public static function buttonInfo(array $json): array
+    {
+        $found = ['key' => 0, 'room' => 0];
+        $scan = static function (array $node, int $depth) use (&$scan, &$found): void {
+            foreach (self::KEY_FIELDS as $field => $what) {
+                if ($found[$what] === 0 && isset($node[$field]) && is_numeric($node[$field]) && (int) $node[$field] > 0) {
+                    $found[$what] = (int) $node[$field];
+                }
+            }
+            if ($depth < 2) {
+                foreach ($node as $child) {
+                    if (is_array($child)) {
+                        $scan($child, $depth + 1);
+                    }
+                }
+            }
+        };
+        $scan($json, 0);
+        return $found;
     }
 
     /** @return array{0:string,1:string} */
@@ -204,6 +246,6 @@ final class VDM10Events
     public static function fromAcsEvent(array $info): array
     {
         return self::normalize('AccessControllerEvent', 'active', (int) ($info['major'] ?? 0), (int) ($info['minor'] ?? 0),
-            true, (string) ($info['name'] ?? ''), (int) ($info['doorNo'] ?? 0), (string) ($info['time'] ?? ''));
+            true, (string) ($info['name'] ?? ''), (int) ($info['doorNo'] ?? 0), (string) ($info['time'] ?? ''), self::buttonInfo($info));
     }
 }

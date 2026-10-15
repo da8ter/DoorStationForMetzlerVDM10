@@ -16,6 +16,9 @@ require_once __DIR__ . '/libs/VDM10SecurityModuleTrait.php';
 require_once __DIR__ . '/libs/VDM10LogTrait.php';
 require_once __DIR__ . '/libs/VDM10ImageHookTrait.php';
 require_once __DIR__ . '/libs/VDM10TileTrait.php';
+require_once __DIR__ . '/libs/VDM10SubModules.php';
+require_once __DIR__ . '/libs/VDM10SubModulesTrait.php';
+require_once __DIR__ . '/libs/VDM10SubModulesUITrait.php';
 
 /**
  * Metzler VDM10 Video-Türstation (Hikvision DS-KD8003-Basis) über ISAPI.
@@ -38,6 +41,8 @@ class VDM10 extends IPSModuleStrict
     use VDM10LogTrait;
     use VDM10ImageHookTrait;
     use VDM10TileTrait;
+    use VDM10SubModulesTrait;
+    use VDM10SubModulesUITrait;
 
     private const CLIENT_SOCKET_GUID = '{3CFF0FD9-E306-41DB-9B5A-9D06D38576C3}';
     private const SOCKET_RX = '{018EF6B5-AB94-40C6-AA53-46943E824ACF}';
@@ -72,6 +77,7 @@ class VDM10 extends IPSModuleStrict
         $this->RegisterPropertyInteger('MotionReset', 10);
         $this->RegisterPropertyInteger('DoorCount', 1);
         $this->registerSecurityModuleProperties();
+        $this->registerSubModuleProperties();
         $this->RegisterPropertyBoolean('SnapshotOnRing', true);
         $this->RegisterPropertyInteger('SnapshotArchive', 3);
         $this->RegisterPropertyInteger('SnapshotChannel', 101);
@@ -172,6 +178,7 @@ class VDM10 extends IPSModuleStrict
         $this->SetSummary($host);
         if ($host === '') {
             $this->maintainControlVariables(false);
+            $this->maintainSubModules(false);
             $this->SetTimerInterval('Poll', 0);
             $this->SetTimerInterval('Watchdog', 0);
             $this->SetStatus(self::STATUS_NO_HOST);
@@ -187,6 +194,7 @@ class VDM10 extends IPSModuleStrict
         }
         $this->refreshDeviceInfo();
         $this->maintainControlVariables($this->GetStatus() === IS_ACTIVE);
+        $this->maintainSubModules($this->GetStatus() === IS_ACTIVE);
         $this->SetTimerInterval('Poll', max(0, $this->ReadPropertyInteger('PollInterval')) * 1000);
         $this->SetTimerInterval('Watchdog', 30000);
         if ($this->ReadPropertyBoolean('StreamEnabled') && $this->HasActiveParent()) {
@@ -200,7 +208,7 @@ class VDM10 extends IPSModuleStrict
     public function GetConfigurationForm(): string
     {
         $form = json_decode((string) file_get_contents(__DIR__ . '/form.json'), true);
-        return (string) json_encode($this->fillDeviceForm($this->fillPersonsForm($form)));
+        return (string) json_encode($this->fillSubModulesForm($this->fillDeviceForm($this->fillPersonsForm($form))));
     }
 
     /** Beim Anlegen einen eigenen Client Socket anfordern (Module Strict: Ersatz für RequireParent). */
@@ -253,7 +261,7 @@ class VDM10 extends IPSModuleStrict
                 $this->SetValue('CALL_CONTROL', self::CTRL_NONE);
                 break;
             default:
-                if (!$this->controlAction($Ident, $Value) && !$this->tileAction($Ident, $Value)) {
+                if (!$this->controlAction($Ident, $Value) && !$this->tileAction($Ident, $Value) && !$this->subModuleAction($Ident, $Value)) {
                     throw new Exception('Invalid ident ' . $Ident);
                 }
         }
@@ -311,26 +319,6 @@ class VDM10 extends IPSModuleStrict
             $this->ResetRing();
         }
         return $status;
-    }
-
-    public function AnswerCall(): bool
-    {
-        return $this->isapi()->callSignal('answer');
-    }
-
-    public function RejectCall(): bool
-    {
-        return $this->isapi()->callSignal('reject');
-    }
-
-    public function HangUp(): bool
-    {
-        return $this->isapi()->callSignal('hangUp');
-    }
-
-    public function Reboot(): bool
-    {
-        return $this->isapi()->reboot();
     }
 
     /** Generischer ISAPI-Durchgriff für Skripte; liefert den Antwortrumpf. */
@@ -429,7 +417,7 @@ class VDM10 extends IPSModuleStrict
         }
         switch ($e['kind']) {
             case VDM10Events::KIND_RING:
-                $this->ring($source);
+                $this->ring($source, $e['key'], $e['room']);
                 break;
             case VDM10Events::KIND_UNLOCK:
                 $door = $e['door'] >= 1 && $e['door'] <= $this->ReadPropertyInteger('DoorCount') ? $e['door'] : 1;
@@ -471,7 +459,7 @@ class VDM10 extends IPSModuleStrict
         }
     }
 
-    private function ring(string $source): void
+    private function ring(string $source, int $key = 0, int $room = 0): void
     {
         $now = time();
         if ($this->GetValue('DOORBELL') && $now - $this->GetValue('LAST_RING') <= self::RING_DEDUPE_SECONDS) {
@@ -487,7 +475,6 @@ class VDM10 extends IPSModuleStrict
         if ($this->ReadPropertyBoolean('SnapshotOnRing')) {
             $this->TakeSnapshot();
         }
-        $this->logRing($source);
+        $this->logRing($source, $this->ringButton($key, $room));
     }
-
 }

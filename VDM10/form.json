@@ -160,6 +160,21 @@
                     "caption": "Two-way audio: register the door station (SIP) with Symcon's door intercom module (DoorIP) or a FRITZ!Box. This module covers events, door openers, snapshots and the video stream."
                 }
             ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Extension modules",
+            "items": [
+                {
+                    "type": "CheckBox",
+                    "name": "SubModuleVariables",
+                    "caption": "Variables for extension modules (status, display brightness, last bell button)"
+                },
+                {
+                    "type": "Label",
+                    "caption": "Note: Switching this off deletes these variables including their archived data."
+                }
+            ]
         }
     ],
     "actions": [
@@ -565,6 +580,170 @@
                     "caption": "Save to the door station",
                     "confirm": "Write the changed settings to the door station now?",
                     "onClick": "echo VDM10_UIDeviceSave($id, $DevOpen1, $DevOpen2, $DevOutput2, $DevInput1, $DevInput2, $DevInput3, $DevInput4, (int) $DevFpLevel, $DevSmTamper);"
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "name": "ModulesPanel",
+            "caption": "Extension modules and bell buttons",
+            "expanded": false,
+            "items": [
+                {
+                    "type": "Label",
+                    "caption": "Modules on the RS-485 bus of the door station (e.g. VDM10-TDM touch display, name plate, button, keypad and info modules, fingerprint and card reader). Display modules can be set up with the edit button."
+                },
+                {
+                    "type": "List",
+                    "name": "SubModules",
+                    "caption": "Extension modules on the bus of the door station",
+                    "rowCount": 4,
+                    "add": false,
+                    "delete": false,
+                    "columns": [
+                        {
+                            "caption": "No.",
+                            "name": "no",
+                            "width": "60px",
+                            "add": 0
+                        },
+                        {
+                            "caption": "Module",
+                            "name": "name",
+                            "width": "auto",
+                            "add": ""
+                        },
+                        {
+                            "caption": "Model",
+                            "name": "model",
+                            "width": "130px",
+                            "add": ""
+                        },
+                        {
+                            "caption": "Status",
+                            "name": "status",
+                            "width": "100px",
+                            "add": ""
+                        },
+                        {
+                            "caption": "Firmware",
+                            "name": "version",
+                            "width": "180px",
+                            "add": ""
+                        },
+                        {
+                            "name": "ModId",
+                            "visible": false,
+                            "add": 0
+                        },
+                        {
+                            "name": "ModBrightness",
+                            "visible": false,
+                            "add": 0
+                        },
+                        {
+                            "name": "ModTone",
+                            "visible": false,
+                            "add": false
+                        },
+                        {
+                            "name": "ModTheme",
+                            "visible": false,
+                            "add": ""
+                        },
+                        {
+                            "name": "ModStart",
+                            "visible": false,
+                            "add": ""
+                        },
+                        {
+                            "name": "ModCallCenter",
+                            "visible": false,
+                            "add": false
+                        },
+                        {
+                            "name": "ModCallCenterName",
+                            "visible": false,
+                            "add": ""
+                        },
+                        {
+                            "name": "ModRingDirectly",
+                            "visible": false,
+                            "add": false
+                        }
+                    ],
+                    "form": "return json_decode(VDM10_UISubModuleForm($id, (int) ($SubModules['ModId'] ?? 0)), true);",
+                    "onEdit": "echo VDM10_UISubModuleSave($id, (int) $SubModules['ModId'], (int) $SubModules['ModBrightness'], (bool) $SubModules['ModTone'], (string) $SubModules['ModTheme'], (string) $SubModules['ModStart'], (bool) $SubModules['ModCallCenter'], (string) $SubModules['ModCallCenterName'], (bool) $SubModules['ModRingDirectly']);"
+                },
+                {
+                    "type": "Label",
+                    "caption": "Each bell button calls the indoor station with the given room number. Virtual buttons of a touch display appear here as well."
+                },
+                {
+                    "type": "List",
+                    "name": "Keys",
+                    "caption": "Bell buttons",
+                    "rowCount": 5,
+                    "add": false,
+                    "delete": false,
+                    "columns": [
+                        {
+                            "caption": "No.",
+                            "name": "no",
+                            "width": "60px",
+                            "add": 0
+                        },
+                        {
+                            "caption": "Location",
+                            "name": "where",
+                            "width": "160px",
+                            "add": ""
+                        },
+                        {
+                            "caption": "Calls room",
+                            "name": "room",
+                            "width": "110px",
+                            "add": ""
+                        },
+                        {
+                            "caption": "Label",
+                            "name": "label",
+                            "width": "auto",
+                            "add": ""
+                        },
+                        {
+                            "name": "KeyId",
+                            "visible": false,
+                            "add": 0
+                        },
+                        {
+                            "name": "KeyRoom",
+                            "visible": false,
+                            "add": 1
+                        },
+                        {
+                            "name": "KeyLabel",
+                            "visible": false,
+                            "add": ""
+                        }
+                    ],
+                    "form": [
+                        {
+                            "type": "NumberSpinner",
+                            "name": "KeyRoom",
+                            "caption": "Calls room number",
+                            "minimum": 1,
+                            "maximum": 9999
+                        },
+                        {
+                            "type": "ValidationTextBox",
+                            "name": "KeyLabel",
+                            "caption": "Label (shown on touch displays, max. 30 characters)",
+                            "width": "320px",
+                            "validate": "^.{0,30}$"
+                        }
+                    ],
+                    "onEdit": "echo VDM10_UIKeySave($id, (int) $Keys['KeyId'], (int) $Keys['KeyRoom'], (string) $Keys['KeyLabel']);"
                 }
             ]
         },

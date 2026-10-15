@@ -34,6 +34,7 @@ trait VDM10LogTrait
         'door_open' => 'Door opened', 'door_closed' => 'Door closed', 'door_alarm' => 'Door alarm',
         'online' => 'Door station online', 'offline' => 'Door station offline', 'sip_on' => 'SIP registered',
         'sip_off' => 'SIP registration lost', 'sm_online' => 'Security module online', 'sm_offline' => 'Security module offline',
+        'module_online' => 'Extension module online', 'module_offline' => 'Extension module offline',
     ];
 
     /** @return array<int, array<string,mixed>> Log, neuester Eintrag zuerst */
@@ -66,12 +67,12 @@ trait VDM10LogTrait
     }
 
     /** Klingeln mit dem aktuellen Snapshot ins Log. */
-    private function logRing(string $source): void
+    private function logRing(string $source, string $button = ''): void
     {
         $img = false;
         $media = (int) @$this->GetIDForIdent(self::MEDIA_SNAPSHOT);
         $jpeg = $media > 0 ? (string) base64_decode(IPS_GetMediaContent($media), true) : '';
-        $id = $this->logEvent('ring', ['source' => $source]);
+        $id = $this->logEvent('ring', ['source' => $source] + ($button !== '' ? ['name' => $button] : []));
         if ($jpeg !== '' && str_starts_with($jpeg, "\xFF\xD8") && $this->ensureLogDir()) {
             $img = file_put_contents($this->logImagePath($id), $jpeg) !== false;
         }
@@ -108,6 +109,10 @@ trait VDM10LogTrait
         $ident = IPS_GetObject($variableId)['ObjectIdent'];
         if ($ident === 'SIP_STATUS') {
             $this->logEvent($data[0] === 'connect' ? 'sip_on' : 'sip_off');
+            return;
+        }
+        if (str_starts_with($ident, 'SUBMODULE_')) {
+            $this->logEvent($data[0] ? 'module_online' : 'module_offline', ['name' => IPS_GetName($variableId)]);
             return;
         }
         if (!isset(self::LOG_ON_CHANGE[$ident])) {

@@ -30,6 +30,8 @@ DS-KD8003(B); geprüft mit Firmware V3.7.1 (build 251112).
   Zutritte mit Personenfoto, ein Ereignis-Log der letzten 50 Ereignisse und eine Bildergalerie
   der letzten Klingelbilder.
   Bilder kommen über einen mit Token abgesicherten WebHook.
+- **Erweiterungsmodule:** Status je Modul, Einstellungen der Display-Module (Helligkeit, Tastenton,
+  Design, Startbildschirm), Klingeltasten mit Zimmernummer und Beschriftung, zuletzt gedrückte Taste
 - Neustart der Türstation, generischer ISAPI-Durchgriff `VDM10_Request()` für Skripte
 
 Gegensprechen (Audio) übernimmt dieses Modul nicht. Dafür die Türstation per

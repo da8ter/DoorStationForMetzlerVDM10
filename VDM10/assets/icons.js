@@ -10,7 +10,7 @@
     denied: 'ban', motion: 'person-walking', tamper: 'triangle-exclamation', alarm: 'siren-on', online: 'wifi',
     offline: 'wifi-slash', sipOn: 'phone', sipOff: 'phone-slash', smOn: 'shield-check', smOff: 'shield-xmark',
     camera: 'camera', video: 'video', close: 'xmark', speaker: 'volume', speakerOff: 'volume-slash', user: 'user',
-    reject: 'phone-hangup', events: 'list-timeline', gallery: 'images', prev: 'chevron-left', next: 'chevron-right',
+    reject: 'phone-hangup', events: 'list-timeline', gallery: 'images', module: 'puzzle-piece', prev: 'chevron-left', next: 'chevron-right',
   };
 
   // [Breite, Höhe, Ligaturen, Unicode, Pfad] oder null

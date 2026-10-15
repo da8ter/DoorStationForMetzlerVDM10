@@ -19,7 +19,7 @@ trait VDM10TileTrait
         'Reject', 'Open door', 'Hold to open', 'Opening…', 'Door %d', 'Permanently open', 'Ringtone', 'Motion detection',
         'Recent access', 'No access yet', 'Unknown', 'Events', 'No events yet', 'just now', '%d min ago', '%d h ago',
         'Yesterday', 'Fingerprint', 'Card', 'PIN', 'Face', 'Open', 'Closed', 'Alarm', 'Security module', 'Close',
-        'Last ring', 'Never', 'Pictures', 'Current picture', 'Previous', 'Next',
+        'Last ring', 'Never', 'Pictures', 'Current picture', 'Previous', 'Next', 'Modules',
     ];
 
     /** In ApplyChanges(): Wechsel der eigenen Variablen beobachten (Log und Kachel). */
@@ -113,6 +113,7 @@ trait VDM10TileTrait
             'snapshot'  => $snapshot === '' ? null : ['url' => $this->imageUrl('snapshot', '0', 'full', $snapshot),
                 'thumb' => $this->imageUrl('snapshot', '0', 'thumb', $snapshot), 'ts' => (int) (IPS_GetMedia($media)['MediaUpdated'] ?? 0)],
             'live'      => $live,
+            'modules'   => $this->tileModules(),
             'access'    => $this->tileAccess($log),
             'log'       => array_map(fn (array $e): array => [
                 'id' => $e['id'], 'ts' => $e['ts'], 'kind' => $e['kind'], 'text' => $e['text'], 'name' => $e['name'] ?? '',

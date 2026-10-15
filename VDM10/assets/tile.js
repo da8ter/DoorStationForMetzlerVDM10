@@ -63,6 +63,7 @@
     access: ['access', 'green'], access_denied: ['denied', 'red'], motion: ['motion', ''], tamper: ['tamper', 'red'],
     door_open: ['doorOpen', ''], door_closed: ['door', ''], door_alarm: ['alarm', 'red'], online: ['online', 'green'],
     offline: ['offline', 'red'], sip_on: ['sipOn', 'green'], sip_off: ['sipOff', 'red'], sm_online: ['smOn', 'green'], sm_offline: ['smOff', 'red'],
+    module_online: ['module', 'green'], module_offline: ['module', 'red'],
   };
 
   function renderHead() {
@@ -72,7 +73,8 @@
     $('chips').innerHTML =
       '<span class="chip ' + (state.online ? 'ok' : 'bad') + '">' + esc(T(state.online ? 'Online' : 'Offline')) + '</span>' +
       '<span class="chip ' + sip + '">' + esc(T('SIP')) + '</span>' +
-      '<span class="chip ' + (state.stream ? 'ok' : 'bad') + '">' + esc(T('Stream')) + '</span>';
+      '<span class="chip ' + (state.stream ? 'ok' : 'bad') + '">' + esc(T('Stream')) + '</span>' +
+      (state.modules && state.modules.total > 0 ? '<span class="chip ' + (state.modules.offline > 0 ? 'bad' : 'ok') + '">' + esc(T('Modules')) + '</span>' : '');
   }
 
   function holdButton(door) {

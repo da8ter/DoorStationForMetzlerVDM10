@@ -83,7 +83,27 @@ trait VDM10ControlsTrait
         }
     }
 
-    /** Liest Türzustand, SIP, Bewegungserkennung, Audio und Beleuchtung und aktualisiert die Variablen. */
+    public function AnswerCall(): bool
+    {
+        return $this->isapi()->callSignal('answer');
+    }
+
+    public function RejectCall(): bool
+    {
+        return $this->isapi()->callSignal('reject');
+    }
+
+    public function HangUp(): bool
+    {
+        return $this->isapi()->callSignal('hangUp');
+    }
+
+    public function Reboot(): bool
+    {
+        return $this->isapi()->reboot();
+    }
+
+    /** Liest Türzustand, SIP, Bewegungserkennung, Audio, Beleuchtung und Erweiterungsmodule. */
     public function RefreshStatus(): void
     {
         $api = $this->isapi();
@@ -116,6 +136,7 @@ trait VDM10ControlsTrait
             }
             $info = json_decode($this->ReadAttributeString('DeviceInfo'), true);
             $this->SetValue('FIRMWARE', trim(($info['firmwareVersion'] ?? '') . ' ' . ($info['firmwareReleasedDate'] ?? '')));
+            $this->refreshSubModules();
         } catch (Throwable $e) {
             $this->SendDebug('Status', $e->getMessage(), 0);
         }
