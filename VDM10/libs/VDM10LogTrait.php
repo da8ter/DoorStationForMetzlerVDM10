@@ -12,7 +12,7 @@ declare(strict_types=1);
 trait VDM10LogTrait
 {
     private const LOG_SIZE = 50;
-    private const LOG_IMAGES = 10; // je Gruppe: Klingeln, Zutritte, Bewegung
+    private const LOG_IMAGES = 10; // je Gruppe: Klingeln, Zutritte, Bewegung, „Neues Bild“
 
     /** Variablen, deren Wechsel ins Log gehören: Ident => [Art bei true, Art bei false] (null = nicht loggen). */
     private const LOG_ON_CHANGE = [
@@ -37,7 +37,7 @@ trait VDM10LogTrait
         'online' => 'Door station online', 'offline' => 'Door station offline', 'sip_on' => 'SIP registered',
         'sip_off' => 'SIP registration lost', 'sm_online' => 'Security module online', 'sm_offline' => 'Security module offline',
         'module_online' => 'Extension module online', 'module_offline' => 'Extension module offline',
-        'clock_set' => 'Clock of the door station set', 'dnd_on' => 'Do not disturb on', 'dnd_off' => 'Do not disturb off',
+        'clock_set' => 'Clock of the door station set', 'snapshot' => 'Picture taken', 'dnd_on' => 'Do not disturb on', 'dnd_off' => 'Do not disturb off',
     ];
 
     /** @return array<int, array<string,mixed>> Log, neuester Eintrag zuerst */
@@ -79,7 +79,15 @@ trait VDM10LogTrait
         $this->attachLogImage($id, $jpeg);
     }
 
-    /** Bild an einen Log-Eintrag hängen; je Gruppe (Klingeln, Zutritte) bleiben die letzten 10. */
+    /** „Neues Bild“ aus der Kachel mit dem gerade aufgenommenen Snapshot ins Log. */
+    private function logSnapshot(): void
+    {
+        $media = (int) @$this->GetIDForIdent(self::MEDIA_SNAPSHOT);
+        $jpeg = $media > 0 ? (string) base64_decode(IPS_GetMediaContent($media), true) : '';
+        $this->attachLogImage($this->logEvent('snapshot'), $jpeg);
+    }
+
+    /** Bild an einen Log-Eintrag hängen; je Gruppe (Klingeln, Zutritte, Bewegung, Bild) bleiben die letzten 10. */
     private function attachLogImage(int $id, string $jpeg): void
     {
         if ($jpeg === '' || !str_starts_with($jpeg, "\xFF\xD8") || !$this->ensureLogDir()
@@ -87,12 +95,12 @@ trait VDM10LogTrait
             return;
         }
         $log = $this->readLog();
-        $kept = ['ring' => 0, 'access' => 0, 'motion' => 0];
+        $kept = ['ring' => 0, 'access' => 0, 'motion' => 0, 'snapshot' => 0];
         foreach ($log as &$entry) {
             if ((int) $entry['id'] === $id) {
                 $entry['img'] = true;
             }
-            $group = in_array($entry['kind'], ['ring', 'motion'], true) ? $entry['kind'] : 'access';
+            $group = in_array($entry['kind'], ['ring', 'motion', 'snapshot'], true) ? $entry['kind'] : 'access';
             if (!empty($entry['img']) && ++$kept[$group] > self::LOG_IMAGES) {
                 $this->deleteLogImage((int) $entry['id']);
                 $entry['img'] = false;

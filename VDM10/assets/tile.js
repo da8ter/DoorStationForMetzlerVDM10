@@ -63,7 +63,7 @@
     access: ['access', 'green'], access_denied: ['denied', 'red'], motion: ['motion', ''], tamper: ['tamper', 'red'],
     door_open: ['doorOpen', ''], door_closed: ['door', ''], door_alarm: ['alarm', 'red'], online: ['online', 'green'],
     offline: ['offline', 'red'], sip_on: ['sipOn', 'green'], sip_off: ['sipOff', 'red'], sm_online: ['smOn', 'green'], sm_offline: ['smOff', 'red'],
-    module_online: ['module', 'green'], module_offline: ['module', 'red'], clock_set: ['clock', ''], dnd_on: ['dnd', 'orange'], dnd_off: ['bell', ''],
+    module_online: ['module', 'green'], module_offline: ['module', 'red'], clock_set: ['clock', ''], snapshot: ['camera', 'accent'], dnd_on: ['dnd', 'orange'], dnd_off: ['bell', ''],
   };
 
   function renderHead() {
@@ -95,7 +95,8 @@
   function gallery() {
     const rings = (state.log || []).filter(e => e.thumb).map(e => ({
       thumb: e.thumb, full: e.full, ts: e.ts, text: e.text + (e.name ? ' · ' + e.name : ''),
-      icon: e.kind === 'ring' ? 'bell' : (e.kind === 'motion' ? 'motion' : (e.kind === 'access_denied' ? 'denied' : (METHOD[e.method] ? METHOD[e.method][0] : 'access'))),
+      icon: e.kind === 'ring' ? 'bell' : (e.kind === 'motion' ? 'motion' : (e.kind === 'snapshot' ? 'camera'
+        : (e.kind === 'access_denied' ? 'denied' : (METHOD[e.method] ? METHOD[e.method][0] : 'access')))),
     }));
     const snap = state.snapshot;
     const same = snap && snap.url ? rings.find(r => Math.abs(r.ts - snap.ts) <= 15) : null;

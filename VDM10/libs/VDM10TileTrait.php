@@ -90,6 +90,7 @@ trait VDM10TileTrait
         if (!$this->TakeSnapshot()) {
             throw new RuntimeException($this->Translate('No picture captured'));
         }
+        $this->logSnapshot(); // „Neues Bild“ bleibt in Log und Galerie (eigene Grenze)
         return true;
     }
 

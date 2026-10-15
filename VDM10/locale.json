@@ -387,7 +387,8 @@
             "Notice text": "Hinweistext",
             "Show on the touch display": "Auf dem Touch-Display anzeigen",
             "Door opener %d is not set up": "Türöffner %d ist nicht eingerichtet",
-            "The door station rejected the login; polling paused, next attempt in 5 minutes.": "Die Türstation hat die Anmeldung abgelehnt; Abfragen pausieren, nächster Versuch in 5 Minuten."
+            "The door station rejected the login; polling paused, next attempt in 5 minutes.": "Die Türstation hat die Anmeldung abgelehnt; Abfragen pausieren, nächster Versuch in 5 Minuten.",
+            "Picture taken": "Bild aufgenommen"
         }
     }
 }
