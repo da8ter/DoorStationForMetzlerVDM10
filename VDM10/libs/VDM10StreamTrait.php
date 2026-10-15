@@ -28,7 +28,15 @@ trait VDM10StreamTrait
             }
             $head = substr($buffer, 0, $end);
             $code = preg_match('#^HTTP/\d\.\d\s+(\d{3})#', $head, $m) ? (int) $m[1] : 0;
-            $this->SendDebug('Stream', 'HTTP ' . $code, 0);
+            if ($code === 0 && (str_starts_with(ltrim($buffer), '--') || stripos($head, 'Content-Length') !== false)) {
+                // Kein Statuskopf, sondern Stream-Teile: die Verbindung streamt bereits
+                // (z. B. nach einem Modul-Reload, der die Puffer geleert hat).
+                $this->SendDebug('Stream', 'already streaming', 0);
+                $code = 200;
+                $end = -4;
+            } else {
+                $this->SendDebug('Stream', 'HTTP ' . $code, 0);
+            }
             if ($code !== 200) {
                 $this->SetBuffer('Handshake', 'error');
                 $this->SetBuffer('RX', '');
