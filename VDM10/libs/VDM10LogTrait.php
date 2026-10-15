@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 /**
  * Ereignis-Log der Türstation für die Kachel: die letzten 50 Ereignisse im Attribut `EventLog`
- * (nur Text), Klingelbilder als Dateien unter media/vdm10_<InstanzID>/ (die letzten 10).
+ * (nur Text), Bilder als Dateien unter media/vdm10_<InstanzID>/ (je die letzten 10 Klingel- und
+ * Zutrittsbilder).
  * Statuswechsel kommen über VM_UPDATE der eigenen Variablen, Klingeln und Zutritte direkt aus
  * der Ereignisverarbeitung. Wird von VDM10 (module.php) als Trait eingebunden.
  */
 trait VDM10LogTrait
 {
     private const LOG_SIZE = 50;
-    private const LOG_IMAGES = 10;
+    private const LOG_IMAGES = 10; // je Gruppe: Klingeln und Zutritte
 
     /** Variablen, deren Wechsel ins Log gehören: Ident => [Art bei true, Art bei false] (null = nicht loggen). */
     private const LOG_ON_CHANGE = [
@@ -69,26 +70,34 @@ trait VDM10LogTrait
     /** Klingeln mit dem aktuellen Snapshot ins Log. */
     private function logRing(string $source, string $button = ''): void
     {
-        $img = false;
         $media = (int) @$this->GetIDForIdent(self::MEDIA_SNAPSHOT);
         $jpeg = $media > 0 ? (string) base64_decode(IPS_GetMediaContent($media), true) : '';
         $id = $this->logEvent('ring', ['source' => $source] + ($button !== '' ? ['name' => $button] : []));
-        if ($jpeg !== '' && str_starts_with($jpeg, "\xFF\xD8") && $this->ensureLogDir()) {
-            $img = file_put_contents($this->logImagePath($id), $jpeg) !== false;
+        $this->attachLogImage($id, $jpeg);
+    }
+
+    /** Bild an einen Log-Eintrag hängen; je Gruppe (Klingeln, Zutritte) bleiben die letzten 10. */
+    private function attachLogImage(int $id, string $jpeg): void
+    {
+        if ($jpeg === '' || !str_starts_with($jpeg, "\xFF\xD8") || !$this->ensureLogDir()
+            || file_put_contents($this->logImagePath($id), $jpeg) === false) {
+            return;
         }
-        if ($img) {
-            $log = $this->readLog();
-            $log[0]['img'] = true;
-            $kept = 0;
-            foreach ($log as &$entry) {
-                if (!empty($entry['img']) && ++$kept > self::LOG_IMAGES) {
-                    $this->deleteLogImage((int) $entry['id']);
-                    $entry['img'] = false;
-                }
+        $log = $this->readLog();
+        $kept = ['ring' => 0, 'access' => 0];
+        foreach ($log as &$entry) {
+            if ((int) $entry['id'] === $id) {
+                $entry['img'] = true;
             }
-            unset($entry);
-            $this->WriteAttributeString('EventLog', (string) json_encode($log, JSON_UNESCAPED_UNICODE));
+            $group = $entry['kind'] === 'ring' ? 'ring' : 'access';
+            if (!empty($entry['img']) && ++$kept[$group] > self::LOG_IMAGES) {
+                $this->deleteLogImage((int) $entry['id']);
+                $entry['img'] = false;
+            }
         }
+        unset($entry);
+        $this->WriteAttributeString('EventLog', (string) json_encode($log, JSON_UNESCAPED_UNICODE));
+        $this->tileChanged();
     }
 
     /** Taste nachträglich am letzten Klingel-Eintrag vermerken (callerInfo kommt nach dem Tastendruck). */
@@ -103,12 +112,13 @@ trait VDM10LogTrait
         $this->tileChanged();
     }
 
-    /** Zutritt mit Person und Methode ins Log. */
-    private function logAccess(array $e, string $name, string $employeeNo): void
+    /** Zutritt mit Person, Methode und (falls aufgenommen) Bild ins Log. */
+    private function logAccess(array $e, string $name, string $employeeNo, string $jpeg = ''): void
     {
-        $this->logEvent($e['kind'] === VDM10Events::KIND_ACCESS_OK ? 'access' : 'access_denied', [
+        $id = $this->logEvent($e['kind'] === VDM10Events::KIND_ACCESS_OK ? 'access' : 'access_denied', [
             'name' => $name, 'emp' => $employeeNo, 'method' => VDM10Events::accessMethod($e['minor']), 'door' => $e['door'],
         ]);
+        $this->attachLogImage($id, $jpeg);
     }
 
     /** VM_UPDATE einer eigenen Variable: Wechsel ins Log, Kachel aktualisieren. */

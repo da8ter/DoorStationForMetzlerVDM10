@@ -110,6 +110,11 @@
                     "caption": "Take a snapshot when the doorbell rings"
                 },
                 {
+                    "type": "CheckBox",
+                    "name": "SnapshotOnAccess",
+                    "caption": "Take a picture on every access attempt (fingerprint, card, PIN), successful or not"
+                },
+                {
                     "type": "NumberSpinner",
                     "name": "SnapshotArchive",
                     "caption": "Keep previous snapshots",

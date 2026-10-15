@@ -343,7 +343,8 @@
             "Cards can be enrolled after the person has been created.": "Karten lassen sich anlernen, sobald die Person angelegt ist.",
             "On from": "An ab",
             "Off at": "Aus um",
-            "Button lighting: start and end must differ": "Tastenbeleuchtung: Beginn und Ende müssen verschieden sein"
+            "Button lighting: start and end must differ": "Tastenbeleuchtung: Beginn und Ende müssen verschieden sein",
+            "Take a picture on every access attempt (fingerprint, card, PIN), successful or not": "Bei jedem Zutrittsversuch ein Bild aufnehmen (Fingerabdruck, Karte, PIN), erfolgreich oder nicht"
         }
     }
 }

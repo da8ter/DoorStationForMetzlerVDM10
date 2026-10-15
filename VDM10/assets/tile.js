@@ -95,7 +95,10 @@
   // Aktuelles Bild und Klingelbilder aus dem Log, neueste zuerst. Das aktuelle Bild entfällt,
   // wenn es das Bild des letzten Klingelns ist.
   function gallery() {
-    const rings = (state.log || []).filter(e => e.thumb).map(e => ({ thumb: e.thumb, full: e.full, ts: e.ts, text: e.text, icon: 'bell' }));
+    const rings = (state.log || []).filter(e => e.thumb).map(e => ({
+      thumb: e.thumb, full: e.full, ts: e.ts, text: e.text + (e.name ? ' · ' + e.name : ''),
+      icon: e.kind === 'ring' ? 'bell' : (e.kind === 'access_denied' ? 'denied' : (METHOD[e.method] ? METHOD[e.method][0] : 'access')),
+    }));
     const snap = state.snapshot;
     const same = snap && snap.url ? rings.find(r => Math.abs(r.ts - snap.ts) <= 15) : null;
     if (same) same.alt = snap.url; // Hauptbild antippen blättert ab diesem Klingelbild
@@ -199,8 +202,11 @@
         const initials = (p.name || '').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
         const face = p.photo ? '<img src="' + esc(p.photo) + '" alt="">' : (p.denied ? I('denied') : (initials ? esc(initials) : I('user')));
         const n = p.count > 1 ? '<span class="badge" title="' + esc(p.count) + '">' + (p.count > 99 ? '99+' : esc(p.count)) + '</span>' : '';
-        return '<div class="person' + (p.denied ? ' denied' : '') + '"><div class="avatar-wrap"><div class="avatar">' + face + '</div>' + n + '</div>' +
-          '<b>' + esc(p.denied ? T('Unknown') : (p.name || T('Unknown'))) + '</b><small>' + (m ? I(m[0]) : '') + esc(ago(p.ts, true)) + '</small></div>';
+        // Mit Zutrittsbild ist die Person ein Knopf: Tippen zeigt das Bild groß
+        const tag = p.full ? 'button' : 'div';
+        return '<' + tag + ' class="person' + (p.denied ? ' denied' : '') + '"' + (p.full ? ' data-full="' + esc(p.full) + '"' : '') + '>' +
+          '<div class="avatar-wrap"><div class="avatar">' + face + '</div>' + n + '</div>' +
+          '<b>' + esc(p.denied ? T('Unknown') : (p.name || T('Unknown'))) + '</b><small>' + (m ? I(m[0]) : '') + esc(ago(p.ts, true)) + '</small></' + tag + '>';
       }).join('') + '</div>');
   }
 
@@ -211,7 +217,7 @@
         const k = KIND[e.kind] || ['events', ''];
         const icon = e.kind === 'access' && METHOD[e.method] ? METHOD[e.method][0] : k[0];
         const sub = [e.name, METHOD[e.method] ? T(METHOD[e.method][1]) : ''].filter(Boolean).join(' · ');
-        return '<div class="row"><span class="ico ' + k[1] + '">' + I(icon) + '</span>' +
+        return '<div class="row"' + (e.full ? ' data-full="' + esc(e.full) + '"' : '') + '><span class="ico ' + k[1] + '">' + I(icon) + '</span>' +
           '<span class="txt"><b>' + esc(e.text) + '</b>' + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</span>' +
           (e.thumb ? '<button class="thumb" data-full="' + esc(e.full) + '" style="background-image:url(\'' + esc(e.thumb) + '\')"></button>' : '') +
           '<span class="time">' + esc(ago(e.ts)) + '</span></div>';
@@ -270,7 +276,7 @@
   document.addEventListener('contextmenu', e => { if (e.target.closest('.hold')) e.preventDefault(); });
 
   document.addEventListener('click', e => {
-    const t = e.target.closest('button, img[data-full]');
+    const t = e.target.closest('button, [data-full]');
     if (!t || !state) return;
     if (t.dataset.reject) action('CALL_CONTROL', 2);
     else if (t.dataset.live && state.live) { try { openObject(state.live); } catch (err) { /* außerhalb von Symcon */ } }

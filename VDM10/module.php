@@ -80,6 +80,7 @@ class VDM10 extends IPSModuleStrict
         $this->registerSecurityModuleProperties();
         $this->registerSubModuleProperties();
         $this->RegisterPropertyBoolean('SnapshotOnRing', true);
+        $this->RegisterPropertyBoolean('SnapshotOnAccess', true);
         $this->RegisterPropertyInteger('SnapshotArchive', 3);
         $this->RegisterPropertyInteger('SnapshotChannel', 101);
         $this->RegisterPropertyBoolean('StreamMedia', true);
@@ -437,6 +438,8 @@ class VDM10 extends IPSModuleStrict
                 break;
             case VDM10Events::KIND_ACCESS_OK:
             case VDM10Events::KIND_ACCESS_FAIL:
+                // Bild zuerst (die Person steht noch vor der Kamera), ohne den Kachel-Snapshot zu ersetzen
+                $jpeg = $this->ReadPropertyBoolean('SnapshotOnAccess') ? $this->isapi()->picture($this->ReadPropertyInteger('SnapshotChannel')) : '';
                 $text = $this->Translate($e['label']);
                 if ($e['kind'] === VDM10Events::KIND_ACCESS_FAIL) {
                     $text .= ' ' . $this->Translate('(denied)');
@@ -446,7 +449,7 @@ class VDM10 extends IPSModuleStrict
                 $name = $e['name'] !== '' ? $e['name'] : $name;
                 $this->SetValue('LAST_ACCESS', $name !== '' ? $text . ': ' . $name : $text);
                 $this->SetValue('LAST_ACCESS_TIME', time());
-                $this->logAccess($e, $name, $employee);
+                $this->logAccess($e, $name, $employee, $jpeg);
                 break;
             case VDM10Events::KIND_MOTION:
                 $this->SetValue('MOTION', true);

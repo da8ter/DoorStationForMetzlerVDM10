@@ -162,6 +162,12 @@ Der Knopf **Bilder** auf dem Snapshot öffnet eine Galerie mit dem aktuellen Bil
 letzten zehn Klingel-Ereignisse. Ein Tipp öffnet die Großansicht. Dort blättern die Pfeile, eine
 Wischgeste oder die Pfeiltasten durch die Bilder.
 
+Bei jedem **Zutrittsversuch** (Fingerabdruck, Karte, PIN, erfolgreich oder abgelehnt) nimmt das
+Modul ein Bild direkt von der Kamera auf, ohne den Snapshot der Kachel zu ersetzen. Ein Tipp auf den
+Eintrag im Log oder auf die Person unter „Letzte Zutritte“ zeigt es groß. Abschaltbar mit der Option
+„Bei jedem Zutrittsversuch ein Bild aufnehmen“; aufbewahrt werden die letzten zehn Zutrittsbilder
+zusätzlich zu den zehn Klingelbildern.
+
 Das **Ereignis-Log** hält die letzten 50 Ereignisse und übersteht Neustarts: Klingeln, Türöffner,
 dauerhaft offen, Zutritte, Bewegung, Sabotage, Türkontakt, Verbindung und SIP-Anmeldung. Die letzten
 zehn Klingel-Einträge haben ein Vorschaubild. Ein Tipp darauf zeigt das Bild groß. Die Bilder liegen
