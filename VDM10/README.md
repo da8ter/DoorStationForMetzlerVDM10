@@ -88,7 +88,9 @@ Mit dem Sicherheitsmodul (Metzler-SM) hängt der Türöffner am Modul im geschü
 - **Display-Module:** Helligkeit (auch als Variable), Tastenton, Design, Startbildschirm, direktes Klingeln, Taste „Zentrale anrufen“; es erscheinen nur Felder, die das Modul meldet.
 - **Hinweis auf dem Touch-Display:** ein kurzer Text (höchstens 45 Zeichen empfohlen), den das Display im Ruhezustand zeigt, etwa „Paket bitte beim Nachbarn abgeben“. Nur sichtbar, wenn ein Display angeschlossen ist. Die Diashow mit eigenen Bildern bleibt in der Weboberfläche der Türstation.
 - **Klingeltasten** mit Zimmernummer und Beschriftung (Beschriftungen speichert die Türstation nur für Display-Tasten). Welche Taste geklingelt hat, zeigt die Variable „Klingeltaste“, sofern die Türstation es meldet; die VDM10 mit Firmware V3.7.1 meldet es beim Taster des Hauptmoduls nicht.
-- Geprüft mit dem Finger- und Kartenleser DS-KD-MFB; Display-, Taster- und Info-Module sind nach der Weboberfläche der Türstation umgesetzt, ohne Test an echter Hardware.
+
+> [!CAUTION]
+> Geprüft mit dem Finger- und Kartenleser DS-KD-MFB; Display-, Taster- und Info-Module sind nach der Weboberfläche der Türstation umgesetzt, ohne Test an echter Hardware.
 
 ## Benachrichtigungen und Uhrzeit
 
