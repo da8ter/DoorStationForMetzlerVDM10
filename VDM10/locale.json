@@ -1,7 +1,7 @@
 {
     "translations": {
         "de": {
-            "VDM10": "Metzler VDM10 Türstation",
+            "VDM10": "Türstation für Metzler VDM10",
             "Metzler VDM10 door station via ISAPI (local, no cloud). Enter the IP address and the admin password of the door station.": "Metzler VDM10 Türstation über ISAPI (lokal, ohne Cloud). IP-Adresse und admin-Passwort der Türstation eintragen.",
             "IP address / host name": "IP-Adresse / Hostname",
             "HTTP port": "HTTP-Port",

@@ -1,4 +1,4 @@
-# Metzler VDM10 Türstation
+# Türstation für Metzler VDM10
 
 Bindet die Video-Türstation **Metzler VDM10 (2.0)** lokal über die ISAPI-Schnittstelle in Symcon ein, ohne Hik-Connect-Cloud. Die VDM10 basiert auf der Hikvision-Modulartürstation DS-KD8003; geprüft mit Firmware V3.7.1 (build 251112). Die Instanz bringt eine eigene Kachel als Steuerzentrale mit; Skripte und Ablaufpläne steuern alles über Variablen und `VDM10_*`-Funktionen.
 
@@ -86,7 +86,7 @@ Mit dem Sicherheitsmodul (Metzler-SM) hängt der Türöffner am Modul im geschü
 ## Einrichtung
 
 1. Bibliothek über den Module Store oder im Module Control mit `https://github.com/da8ter/MetzlerVDM10` hinzufügen.
-2. Instanz **Metzler VDM10 Türstation** anlegen. Die Konsole legt dabei einen Client Socket für den Ereignis-Stream an.
+2. Instanz **Türstation für Metzler VDM10** anlegen. Die Konsole legt dabei einen Client Socket für den Ereignis-Stream an.
 3. IP-Adresse und admin-Passwort eintragen, „Verbindung testen“.
 4. Optional: Türöffner, Sicherheitsmodul, Türkontakt, Bilder, Benachrichtigungen einstellen.
 
