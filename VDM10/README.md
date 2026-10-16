@@ -99,7 +99,7 @@ Mit dem Sicherheitsmodul (Metzler-SM) hängt der Türöffner am Modul im geschü
 
 ## Einrichtung
 
-1. Bibliothek über den Module Store oder im Module Control mit `https://github.com/da8ter/DoorStationForMetzlerVDM10` hinzufügen.
+1. Bibliothek über den Module Store oder im Module Control mit `https://github.com/da8ter/DoorStationForMetzlerVDM10` hinzufügen. Im Module Store exakt nach **Türstation für Metzler VDM10** suchen.
 2. Instanz **Türstation für Metzler VDM10** anlegen. Die Konsole legt dabei einen Client Socket für den Ereignis-Stream an.
 3. IP-Adresse und admin-Passwort eintragen, „Verbindung testen“.
 4. Optional: Türöffner, Sicherheitsmodul, Türkontakt, Bilder, Benachrichtigungen einstellen.
