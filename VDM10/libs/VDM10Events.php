@@ -32,6 +32,8 @@ final class VDM10Events
     public const KIND_DOOR_ALARM = 'door_alarm';
     public const KIND_MOTION = 'motion';
     public const KIND_TAMPER = 'tamper';
+    public const KIND_EMERGENCY = 'emergency';
+    public const KIND_DURESS = 'duress';
     public const KIND_HEARTBEAT = 'heartbeat';
     public const KIND_OTHER = 'other';
 
@@ -64,25 +66,27 @@ final class VDM10Events
         75   => [self::KIND_ACCESS_OK, 'Face'],
         76   => [self::KIND_ACCESS_FAIL, 'Face'],
         92   => [self::KIND_ACCESS_OK, 'PIN'],
-        1281 => [self::KIND_RING, 'Call'],
+        1281 => [self::KIND_OTHER, 'Custom event 2'], // MINOR_EVENT_CUSTOM2, kein Klingeln (gesehen 15.10.2026 ohne Klingeln)
     ];
 
     /**
-     * Alarme (majorEventType 1). Minor 3 ist an der VDM10 die Bewegungserkennung der Kamera:
-     * kommt beim Annähern (daher kurz vor dem Klingeln), ohne Klingeln, nachts und alle ~8 s,
-     * solange Bewegung anhält (am 15.10.2026 belegt). Das Klingeln selbst meldet der Stream
-     * nicht; es wird über callStatus=ring erkannt. 0x404/0x40a/0x40f Sabotage.
+     * Alarme (majorEventType 1), Namen nach HCNetSDK.h: 3 MINOR_MOTDET_START (Bewegung, kommt
+     * beim Annähern und alle ~8 s, solange Bewegung anhält; am 15.10.2026 belegt), 0x404/0x405
+     * Sabotage Gehäuse, 0x40A MINOR_STRESS_ALARM (Nötigungsalarm), 0x40F Sabotage Sicherheitsmodul,
+     * 0x1048/0x1049 MINOR_EMERGENCY_CALL_HELP_ALARM (Notruf). Das Klingeln meldet der Stream nicht;
+     * es wird über callStatus=ring erkannt. Türkontakt/-alarm kommen als 5/25–5/28.
      *
      * @var array<int, array{0:string,1:string}>
      */
     private const ALARM_MINOR = [
         3      => [self::KIND_MOTION, 'Motion'],
+        4      => [self::KIND_OTHER, 'Motion ended'],
         0x404  => [self::KIND_TAMPER, 'Tamper'],
-        0x40A  => [self::KIND_TAMPER, 'Reader tamper'],
+        0x40A  => [self::KIND_DURESS, 'Duress alarm'],
         0x40F  => [self::KIND_TAMPER, 'Secure module tamper'],
         0x405  => [self::KIND_OTHER, 'Tamper resolved'],
-        0x1048 => [self::KIND_DOOR_ALARM, 'Door open too long'],
-        0x1049 => [self::KIND_OTHER, 'Door open too long resolved'],
+        0x1048 => [self::KIND_EMERGENCY, 'Emergency call'],
+        0x1049 => [self::KIND_OTHER, 'Emergency call ended'],
     ];
 
     /**

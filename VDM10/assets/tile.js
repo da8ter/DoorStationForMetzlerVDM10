@@ -63,7 +63,7 @@
     access: ['access', 'green'], access_denied: ['denied', 'red'], motion: ['motion', ''], tamper: ['tamper', 'red'],
     door_open: ['doorOpen', ''], door_closed: ['door', ''], door_alarm: ['alarm', 'red'], online: ['online', 'green'],
     offline: ['offline', 'red'], sip_on: ['sipOn', 'green'], sip_off: ['sipOff', 'red'], sm_online: ['smOn', 'green'], sm_offline: ['smOff', 'red'],
-    module_online: ['module', 'green'], module_offline: ['module', 'red'], clock_set: ['clock', ''], snapshot: ['camera', 'accent'], dnd_on: ['dnd', 'orange'], dnd_off: ['bell', ''],
+    module_online: ['module', 'green'], module_offline: ['module', 'red'], clock_set: ['clock', ''], snapshot: ['camera', 'accent'], emergency: ['alarm', 'red'], duress: ['alarm', 'red'], dnd_on: ['dnd', 'orange'], dnd_off: ['bell', ''],
   };
 
   function renderHead() {

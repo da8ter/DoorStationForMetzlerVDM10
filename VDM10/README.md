@@ -40,7 +40,7 @@ Gegensprechen (Audio) übernimmt das Modul nicht. Dafür die Türstation per SIP
 ## Klingeln, Bewegung und Zutritte
 
 - **Klingeln** erkennt das Modul am Rufstatus der Türstation (Abfrage im eingestellten Takt, Vorgabe 3 s). Der Ereignis-Stream meldet das Klingeln nicht. Ein Besuch zählt als ein Klingeln, auch wenn die Türstation bis zu einer Minute ruft.
-- **Bewegung, Zutritte, Sabotage, Türkontakt** kommen in Echtzeit über den Ereignis-Stream (Client Socket).
+- **Bewegung, Zutritte, Sabotage, Türkontakt, Notruf, Nötigungsalarm** kommen in Echtzeit über den Ereignis-Stream (Client Socket).
 - **Bilder:** beim Klingeln ein Snapshot (mit Archiv), bei jedem Zutrittsversuch und bei Bewegung ein Bild direkt von der Kamera, ohne den Snapshot der Kachel zu ersetzen. Alles abschaltbar.
 - **Ereignis-Log:** die letzten 50 Ereignisse, übersteht Neustarts. Bilder liegen unter `media/vdm10_<InstanzID>/` und werden beim Löschen der Instanz entfernt.
 - **Bilder in der Kachel** kommen über den WebHook `/hook/vdm10/<InstanzID>` mit einem zufälligen Token der Instanz; ohne gültiges Token antwortet er mit 403. Er liefert nur den Snapshot, Bilder aus dem Log und zugeordnete Personenfotos.
@@ -79,7 +79,7 @@ Mit dem Sicherheitsmodul (Metzler-SM) hängt der Türöffner am Modul im geschü
 
 ## Benachrichtigungen und Uhrzeit
 
-- **Push-Nachrichten** über eine Kachel-Visualisierung: beim Klingeln, wahlweise bei abgelehnten Zutritten und bei Störungen (Sabotage, Türalarm, Türstation offline, SIP-Anmeldung verloren, Modul offline; dieselbe Störung höchstens alle fünf Minuten). Bei „Nicht stören“ entfällt die Klingel-Nachricht, sofern nicht anders eingestellt. Ein Tipp öffnet die Kachel; ein Bild kann die Nachricht selbst nicht enthalten. Voraussetzung: gültige Subskription und registrierte Geräte.
+- **Push-Nachrichten** über eine Kachel-Visualisierung: beim Klingeln, wahlweise bei abgelehnten Zutritten und bei Störungen (Sabotage, Türalarm, Notruf, Nötigungsalarm, Türstation offline, SIP-Anmeldung verloren, Modul offline; dieselbe Störung höchstens alle fünf Minuten). Bei „Nicht stören“ entfällt die Klingel-Nachricht, sofern nicht anders eingestellt. Ein Tipp öffnet die Kachel; ein Bild kann die Nachricht selbst nicht enthalten. Voraussetzung: gültige Subskription und registrierte Geräte.
 - **Uhrzeit:** Die Türstation stellt ihre Uhr per NTP über einen Hostnamen und driftet, wenn sie keine Namen auflösen kann. Das Modul zeigt die Abweichung und stellt die Uhr ab 30 s auf die Symcon-Zeit (höchstens einmal pro Stunde, abschaltbar); der Zeitmodus bleibt NTP.
 
 ## Einrichtung
@@ -163,7 +163,7 @@ Zeitfenster als JSON-Liste, z. B. `[{"days":"weekdays","from":"08:00","to":"12:0
 ## Technischer Hintergrund
 
 - **Ereignisse:** `GET /ISAPI/Event/notification/alertStream` (multipart/mixed) über den Client Socket. Nur eine Verbindung gleichzeitig; nach einem Abbruch antwortet die Türstation bis zu einer Minute mit HTTP 500. Heartbeat alle 10 s; bleibt er aus, meldet das Modul den Stream als getrennt und fragt neu an.
-- **Klingeln:** nicht im Stream, nur `GET /ISAPI/VideoIntercom/callStatus` (`ring`, ein Ruf dauert bis ~60 s). AccessControllerEvent 1/3 ist die Bewegungserkennung der Kamera, 5/38 Fingerabdruck ok, 5/39 abgelehnt, 5/21 Schloss geöffnet.
+- **Klingeln:** nicht im Stream, nur `GET /ISAPI/VideoIntercom/callStatus` (`ring`, ein Ruf dauert bis ~60 s). AccessControllerEvent 1/3 ist die Bewegungserkennung der Kamera, 5/38 Fingerabdruck ok, 5/39 abgelehnt, 5/21 Schloss geöffnet. Nach HCNetSDK: 1/0x404 Sabotage, 1/0x40A Nötigungsalarm, 1/0x1048 Notruf (0x1049 beendet), 2/1039 bzw. 2/1040 Sicherheitsmodul offline bzw. online, 2/1041 Batterie schwach, 5/1281 benutzerdefiniertes Ereignis 2 (kein Klingeln). 5/37 (Klingeln) sieht das Modul vor, die VDM10 sendet es aber nicht.
 - **HTTP-Listening (`httpHosts`)** ist auf Firmware V3.7.1 nicht funktionsfähig: gespeichert wird es, Ereignisse schickt die Türstation trotzdem nicht (am 15.10.2026 mit Paketlogger geprüft). Deshalb der Alert-Stream.
 - **Personen:** `UserInfo/Record|Modify|Search|Delete`, Fingerabdruck `CaptureFingerPrint` + `FingerPrint/SetUp`, Karte `CaptureCardInfo` + `CardInfo/Record`. Der Stream liefert bei Zutritten keinen Namen; das Modul holt ihn aus dem Ereignisprotokoll (`AcsEvent`).
 - **Prüfen ohne Türstation:** `php tests/<Name>Test.php` (Bild-Hook, Sperre „dauerhaft offen“, Gültigkeit, Erweiterungsmodule, Sicherheitsmodul). Probe-Skript für andere Firmware-Stände: `php tests/probe-isapi.php <IP> admin <Passwort>`.

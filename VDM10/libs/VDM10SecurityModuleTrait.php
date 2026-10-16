@@ -13,8 +13,10 @@ trait VDM10SecurityModuleTrait
 {
     private const PATH_SM_STATUS = '/ISAPI/AccessControl/DoorSecurityModule/moduleStatus';
     private const PATH_ACS_CFG = '/ISAPI/AccessControl/AcsCfg?format=json';
+    // HCNetSDK MAJOR_EXCEPTION: 0x410 MINOR_SECURITY_MODULE_RESUME, 0x40F MINOR_SECURITY_MODULE_OFF
+    // (0x411 = 1041 ist „Batteriespannung niedrig“, nicht offline).
     private const EVENT_SM_ONLINE = 1040;
-    private const EVENT_SM_OFFLINE = 1041;
+    private const EVENT_SM_OFFLINE = 1039;
 
     /** In Create() aufrufen. */
     private function registerSecurityModuleProperties(): void
@@ -92,10 +94,6 @@ trait VDM10SecurityModuleTrait
             case VDM10Events::KIND_DOOR_ALARM:
                 $set('DOOR' . $door . '_ALARM', true);
                 return true;
-        }
-        if ($e['major'] === 1 && $e['minor'] === 0x1049) {
-            $set('DOOR' . $door . '_ALARM', false);
-            return true;
         }
         if ($e['major'] === 2 && in_array($e['minor'], [self::EVENT_SM_ONLINE, self::EVENT_SM_OFFLINE], true)) {
             $set('SECURITY_MODULE', $e['minor'] === self::EVENT_SM_ONLINE);

@@ -418,6 +418,10 @@ class VDM10 extends IPSModuleStrict
             case VDM10Events::KIND_TAMPER:
                 $this->SetValue('TAMPER', true);
                 break;
+            case VDM10Events::KIND_EMERGENCY:
+            case VDM10Events::KIND_DURESS:
+                $this->logEvent($e['kind'], $e['door'] > 0 ? ['door' => $e['door']] : []); // Log + Push (Störungen)
+                break;
             case VDM10Events::KIND_OTHER:
                 if ($e['major'] === 1 && $e['minor'] === 0x405) {
                     $this->SetValue('TAMPER', false);

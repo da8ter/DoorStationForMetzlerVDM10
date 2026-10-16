@@ -37,7 +37,8 @@ trait VDM10LogTrait
         'online' => 'Door station online', 'offline' => 'Door station offline', 'sip_on' => 'SIP registered',
         'sip_off' => 'SIP registration lost', 'sm_online' => 'Security module online', 'sm_offline' => 'Security module offline',
         'module_online' => 'Extension module online', 'module_offline' => 'Extension module offline',
-        'clock_set' => 'Clock of the door station set', 'snapshot' => 'Picture taken', 'dnd_on' => 'Do not disturb on', 'dnd_off' => 'Do not disturb off',
+        'clock_set' => 'Clock of the door station set', 'snapshot' => 'Picture taken',
+        'emergency' => 'Emergency call at the door station', 'duress' => 'Duress alarm', 'dnd_on' => 'Do not disturb on', 'dnd_off' => 'Do not disturb off',
     ];
 
     /** @return array<int, array<string,mixed>> Log, neuester Eintrag zuerst */

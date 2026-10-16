@@ -32,6 +32,8 @@ trait VDM10NotifyTrait
         'sip_off'        => ['NotifyProblems', 'alarm', 'Warning'],
         'sm_offline'     => ['NotifyProblems', 'alarm', 'Warning'],
         'module_offline' => ['NotifyProblems', 'alarm', 'Warning'],
+        'emergency'      => ['NotifyProblems', 'siren', 'Warning'],
+        'duress'         => ['NotifyProblems', 'siren', 'Warning'],
     ];
 
     /** In Create(): Optionen und Variablen. */

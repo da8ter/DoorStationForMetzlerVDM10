@@ -79,14 +79,11 @@
             "Door opened abnormally": "Tür unerwartet geöffnet",
             "Door open too long": "Tür zu lange offen",
             "Doorbell button": "Klingeltaster",
-            "Call": "Anruf",
             "Fingerprint": "Fingerabdruck",
             "Face": "Gesicht",
             "PIN": "PIN",
-            "Reader tamper": "Sabotage Leser",
             "Secure module tamper": "Sabotage Sicherheitsmodul",
             "Tamper resolved": "Sabotage beendet",
-            "Door open too long resolved": "Tür wieder geschlossen",
             "Heartbeat": "Heartbeat",
             "Persons, fingerprints and cards": "Personen, Fingerabdrücke und Karten",
             "Persons on the door station": "Personen auf der Türstation",
@@ -388,7 +385,13 @@
             "Show on the touch display": "Auf dem Touch-Display anzeigen",
             "Door opener %d is not set up": "Türöffner %d ist nicht eingerichtet",
             "The door station rejected the login; polling paused, next attempt in 5 minutes.": "Die Türstation hat die Anmeldung abgelehnt; Abfragen pausieren, nächster Versuch in 5 Minuten.",
-            "Picture taken": "Bild aufgenommen"
+            "Picture taken": "Bild aufgenommen",
+            "Motion ended": "Bewegung beendet",
+            "Duress alarm": "Nötigungsalarm",
+            "Emergency call": "Notruf",
+            "Emergency call ended": "Notruf beendet",
+            "Emergency call at the door station": "Notruf an der Türstation",
+            "Custom event 2": "Benutzerdefiniertes Ereignis 2"
         }
     }
 }
