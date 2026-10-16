@@ -1,5 +1,7 @@
 # Türstation für Metzler VDM10
 
+![Türstation für Metzler VDM10 — Kachel maximiert](https://raw.githubusercontent.com/da8ter/images/main/DoorStationForMetzlerVDM10%20Maximiert.png)
+
 Bindet die Video-Türstation **Metzler VDM10 (2.0)** lokal über die ISAPI-Schnittstelle in Symcon ein, ohne Hik-Connect-Cloud. Die VDM10 basiert auf der Hikvision-Modulartürstation DS-KD8003; geprüft mit Firmware V3.7.1 (build 251112). Die Instanz bringt eine eigene Kachel als Steuerzentrale mit; Skripte und Ablaufpläne steuern alles über Variablen und `VDM10_*`-Funktionen.
 
 Gegensprechen (Audio) übernimmt das Modul nicht. Dafür wird das offizielle Symcon-Modul [Türsprechanlage](https://www.symcon.de/de/shop/enterprise/ips-extension-doorip/) benötigt; die Türstation meldet sich dort per SIP an (Türstation: System und Wartung → Netzwerk → Gerätezugriff → VoIP). Alternativ klingelt sie per SIP an einer FRITZ!Box.
@@ -21,6 +23,10 @@ Gegensprechen (Audio) übernimmt das Modul nicht. Dafür wird das offizielle Sym
 - **Normal:** alle Bereiche untereinander.
 - **Breit** (z. B. maximiert): zwei Spalten, links Bild und Steuerung, rechts das Ereignis-Log; jede Spalte scrollt für sich.
 
+<p><img src="https://raw.githubusercontent.com/da8ter/images/main/DoorStationForMetzlerVDM10%20Uebersicht.png" alt="Türstation für Metzler VDM10 — Normale Kachel" width="49%"> <img src="https://raw.githubusercontent.com/da8ter/images/main/DoorStationForMetzlerVDM10%20Klingeln.png" alt="Türstation für Metzler VDM10 — Es klingelt" width="49%"></p>
+
+<p><img src="https://raw.githubusercontent.com/da8ter/images/main/DoorStationForMetzlerVDM10%20Kompakt.png" alt="Türstation für Metzler VDM10 — Kleine Kachel" width="60%"></p>
+
 ### Bedienung
 
 - **Türöffner:** öffnet erst nach einer Sekunde Gedrückthalten; ein versehentliches Antippen öffnet keine Tür.
@@ -29,6 +35,12 @@ Gegensprechen (Audio) übernimmt das Modul nicht. Dafür wird das offizielle Sym
 - **Log und Zutritte:** Ein Tipp auf einen Eintrag mit Bild oder auf eine Person zeigt das Bild groß. Unbekannte zeigen das Zutrittsbild im Kreis; aufeinanderfolgende Fehlversuche bilden einen Eintrag mit rotem Zähler.
 - **Livebild:** öffnet das RTSP-Medienobjekt; die Kachel selbst kann RTSP nicht abspielen.
 - **Test der Klingel-Anzeige:** `VDM10_TileTestRing($id, true)`, aus mit `false` oder beim Neuladen des Moduls. „Tür öffnen“ öffnet dabei wirklich.
+
+![Türstation für Metzler VDM10 — Galerie](https://raw.githubusercontent.com/da8ter/images/main/DoorStationForMetzlerVDM10%20Galerie.png)
+
+![Türstation für Metzler VDM10 — Großansicht](https://raw.githubusercontent.com/da8ter/images/main/DoorStationForMetzlerVDM10%20Grossansicht.png)
+
+Die Screenshots zeigen erfundene Beispieldaten; Personen und Kamerabilder sind KI-generiert.
 
 ## Voraussetzungen
 
