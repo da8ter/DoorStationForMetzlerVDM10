@@ -14,7 +14,7 @@ Gegensprechen (Audio) übernimmt das Modul nicht. Dafür wird das offizielle Sym
 | **Bild** | letzter Snapshot mit den Knöpfen Bilder (Galerie), Livebild und Neues Bild |
 | **Tür** | Türöffner zum Gedrückthalten, Türkontakt, Schalter „Dauerhaft offen“ |
 | **Schnellschalter** | Nicht stören, Rufton außen, Bewegungserkennung |
-| **Letzte Zutritte** | die fünf zuletzt eingetretenen Personen mit Foto, Fehlversuche mit Zähler |
+| **Letzte Zutritte** | die 15 zuletzt eingetretenen Personen mit Foto, Fehlversuche mit Zähler; die Reihe scrollt waagerecht, wenn sie nicht passt |
 | **Ereignisse** | die letzten 50 Ereignisse mit Bildern |
 
 ### Ansichten

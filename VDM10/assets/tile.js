@@ -201,6 +201,8 @@
     // Ohne Finger-/Kartenleser und Tastenfeld gibt es keine Zutritte: Bereich ausblenden
     $('access').hidden = !(r.finger || r.card || r.pin);
     if ($('access').hidden) { $('access').innerHTML = ''; return; }
+    const old = $('access').querySelector('.people');
+    const left = old ? old.scrollLeft : 0; // Neuzeichnen setzt die Reihe sonst an den Anfang zurück
     $('access').innerHTML = '<h3>' + I('access') + esc(T('Recent access')) + '</h3>' + (list.length === 0 ?
       '<div class="empty">' + esc(T('No access yet')) + '</div>' :
       '<div class="people scroll-x">' + list.map(p => {
@@ -216,7 +218,20 @@
           '<div class="avatar-wrap"><div class="avatar">' + face + '</div>' + n + '</div>' +
           '<b>' + esc(p.denied ? T('Unknown') : (p.name || T('Unknown'))) + '</b><small>' + (m ? I(m[0]) : '') + esc(ago(p.ts, true)) + '</small></' + tag + '>';
       }).join('') + '</div>');
+    const row = $('access').querySelector('.people');
+    if (row && left) row.scrollLeft = left;
   }
+
+  // Mausrad über der Zutritts-Reihe schiebt sie waagerecht; an den Enden scrollt wieder die Kachel
+  $('access').addEventListener('wheel', e => {
+    const row = e.target.closest && e.target.closest('.people');
+    if (!row || Math.abs(e.deltaX) >= Math.abs(e.deltaY)) return;
+    const max = row.scrollWidth - row.clientWidth;
+    if (max <= 1 || (e.deltaY < 0 && row.scrollLeft <= 0) || (e.deltaY > 0 && row.scrollLeft >= max - 1)) return;
+    row.scrollLeft += e.deltaY;
+    e.preventDefault();
+    e.stopPropagation();
+  }, { passive: false });
 
   function renderLog() {
     const list = state.log || [];

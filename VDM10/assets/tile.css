@@ -135,8 +135,14 @@ html.compact .doors.multi .ring-over .hold-no { display: none; } /* zwei Türen,
 .empty { color: var(--muted); padding: 8px 2px; }
 
 /* Letzte Zutritte */
-.people { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
-.people::-webkit-scrollbar { display: none; }
+/* Reihe scrollt waagerecht, sobald sie nicht mehr passt; Balken nach Hausrezept (6 px, Akzent 70 %) */
+.people { display: flex; gap: 10px; overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; padding-bottom: 8px; }
+.people::-webkit-scrollbar { height: 6px; }
+.people::-webkit-scrollbar-track { background: transparent; }
+.people::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--accent) 70%, transparent); border-radius: 999px; }
+@supports not selector(::-webkit-scrollbar) {
+  .people { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--accent) 70%, transparent) transparent; }
+}
 .person { width: 70px; flex: none; display: grid; justify-items: center; gap: 4px; text-align: center; }
 .avatar { position: relative; width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; overflow: hidden;
   background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--accent); font-weight: 700; font-size: 18px; border: 2px solid transparent; }

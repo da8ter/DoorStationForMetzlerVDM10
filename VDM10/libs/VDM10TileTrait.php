@@ -11,7 +11,7 @@ declare(strict_types=1);
 trait VDM10TileTrait
 {
     private const TILE_PUSH_MS = 300;
-    private const TILE_ACCESS_PERSONS = 5;
+    private const TILE_ACCESS_PERSONS = 15;
 
     /** Texte der Kachel (englisch; Übersetzung über locale.json). */
     private const TILE_TEXTS = [
