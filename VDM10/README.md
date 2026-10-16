@@ -2,7 +2,7 @@
 
 Bindet die Video-Türstation **Metzler VDM10 (2.0)** lokal über die ISAPI-Schnittstelle in Symcon ein, ohne Hik-Connect-Cloud. Die VDM10 basiert auf der Hikvision-Modulartürstation DS-KD8003; geprüft mit Firmware V3.7.1 (build 251112). Die Instanz bringt eine eigene Kachel als Steuerzentrale mit; Skripte und Ablaufpläne steuern alles über Variablen und `VDM10_*`-Funktionen.
 
-Gegensprechen (Audio) übernimmt das Modul nicht. Dafür wird das offizielle Symcon-Modul [Türstation](https://www.symcon.de/de/shop/enterprise/ips-extension-doorip/) benötigt; die Türstation meldet sich dort per SIP an (Türstation: System und Wartung → Netzwerk → Gerätezugriff → VoIP). Alternativ klingelt sie per SIP an einer FRITZ!Box.
+Gegensprechen (Audio) übernimmt das Modul nicht. Dafür wird das offizielle Symcon-Modul [Türsprechanlage](https://www.symcon.de/de/shop/enterprise/ips-extension-doorip/) benötigt; die Türstation meldet sich dort per SIP an (Türstation: System und Wartung → Netzwerk → Gerätezugriff → VoIP). Alternativ klingelt sie per SIP an einer FRITZ!Box.
 
 ## Die Kachel
 
@@ -35,7 +35,7 @@ Gegensprechen (Audio) übernimmt das Modul nicht. Dafür wird das offizielle Sym
 - Symcon ab 8.2 mit Kachelvisualisierung
 - Metzler VDM10 (2.0) im lokalen Netz: HTTP (Port 80) für ISAPI, RTSP (Port 554) für das Livebild
 - Benutzer `admin` mit dem bei der Aktivierung vergebenen Passwort; für das Livebild ohne Zeichen, die in einer URL eine Bedeutung haben (Metzler empfiehlt Buchstaben, Ziffern und `-_~`)
-- Für Gegensprechen: das offizielle Symcon-Modul [Türstation](https://www.symcon.de/de/shop/enterprise/ips-extension-doorip/)
+- Für Gegensprechen: das offizielle Symcon-Modul [Türsprechanlage](https://www.symcon.de/de/shop/enterprise/ips-extension-doorip/)
 - Die Türstation erlaubt nur **eine** Ereignis-Verbindung. Pro Türstation also nur eine Instanz betreiben.
 
 ## Klingeln, Bewegung und Zutritte
