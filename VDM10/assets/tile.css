@@ -184,10 +184,10 @@ html.compact .door-head { display: none; }
 html.compact .sub { display: none; }
 html.compact .name { font-size: 16px; }
 html.compact .chips .chip:not(:first-child) { display: none; }
-html.compact .hold { padding: 12px 10px; font-size: 17px; white-space: nowrap; }
-html.compact .hold { flex-wrap: nowrap; } /* ohne Hinweiszeile: Symbol und Text immer in einer Zeile */
+/* Kleine Kachel: Symbol und Text in einer Zeile, „Zum Öffnen gedrückt halten“ als eigene Zeile darunter */
+html.compact .hold { padding: 10px; font-size: 17px; white-space: nowrap; flex-wrap: wrap; row-gap: 2px; }
 html.compact .hold .fa-icon { width: 21px; height: 21px; }
-html.compact .hold small { display: none; }
+html.compact .hold small { flex-basis: 100%; max-width: 100%; text-align: center; overflow: hidden; text-overflow: ellipsis; }
 html.compact .doors.multi { grid-template-columns: 1fr 1fr; gap: 8px; }
 html.compact .doors.multi .hold-label { display: none; }
 html.compact .doors.multi .hold-no { display: inline; }
