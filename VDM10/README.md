@@ -2,6 +2,9 @@
 
 ![Türstation für Metzler VDM10 — Kachel maximiert](https://raw.githubusercontent.com/da8ter/images/main/DoorStationForMetzlerVDM10%20Maximiert.png)
 
+> [!CAUTION]
+> **Betaversion:** Das Modul befindet sich noch im Betastatus. Bitte vor der ersten Verwendung eine Sicherung der Türstation erstellen: In der Weboberfläche der Türstation (`http://<IP-der-Türstation>`) unter **System und Wartung** im Bereich Wartung die Konfigurationsdatei exportieren und, falls angeboten, auch Personen, Karten und Fingerabdrücke. Das Modul schreibt auf Wunsch Personen, Zeitpläne und Einstellungen in die Türstation.
+
 Bindet die Video-Türstation **Metzler VDM10 (2.0)** lokal über die ISAPI-Schnittstelle in Symcon ein, ohne Hik-Connect-Cloud. Die VDM10 basiert auf der Hikvision-Modulartürstation DS-KD8003; geprüft mit Firmware V3.7.1 (build 251112). Die Instanz bringt eine eigene Kachel als Steuerzentrale mit; Skripte und Ablaufpläne steuern alles über Variablen und `VDM10_*`-Funktionen.
 
 Gegensprechen (Audio) übernimmt das Modul nicht. Dafür wird das offizielle Symcon-Modul [Türsprechanlage](https://www.symcon.de/de/shop/enterprise/ips-extension-doorip/) benötigt; die Türstation meldet sich dort per SIP an (Türstation: System und Wartung → Netzwerk → Gerätezugriff → VoIP). Alternativ klingelt sie per SIP an einer FRITZ!Box.
