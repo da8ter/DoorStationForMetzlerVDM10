@@ -427,7 +427,9 @@ class VDM10 extends IPSModuleStrict
                 // Ein Ende meldet die Türstation nur beim eigenen Gehäuse (0x405); die Sabotage des
                 // Sicherheitsmoduls (0x40F) kommt bei jedem Auslösen erneut, ohne Ende-Ereignis.
                 $this->SetValue('TAMPER', true);
-                $this->SetTimerInterval('TamperReset', max(1, $this->ReadPropertyInteger('TamperReset')) * 1000);
+                if ($e['major'] === 1 && $e['minor'] === 0x40F) {
+                    $this->SetTimerInterval('TamperReset', max(1, $this->ReadPropertyInteger('TamperReset')) * 1000);
+                }
                 break;
             case VDM10Events::KIND_EMERGENCY:
             case VDM10Events::KIND_DURESS:

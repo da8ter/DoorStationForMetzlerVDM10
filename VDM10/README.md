@@ -125,7 +125,7 @@ Weitere Bereiche im Formular: **Einstellungen der Türstation** (Öffnungsdauer 
 | Tür n dauerhaft offen | Relais dauerhaft an (schaltbar, sofern erlaubt) |
 | Tür n, Tür n Alarm | Türkontakt offen/geschlossen, zu lange oder gewaltsam geöffnet (nur mit Türkontakt) |
 | Rufsteuerung | 1 Annehmen, 2 Ablehnen, 3 Auflegen (schaltbar) |
-| Bewegung, Sabotage | Ereignisse der Türstation; beide gehen nach der eingestellten Zeit wieder auf aus (Sabotage: 60 s), weil die Türstation das Ende der Sabotage am Sicherheitsmodul nicht meldet |
+| Bewegung, Sabotage | Ereignisse der Türstation; Bewegung geht nach der eingestellten Zeit wieder aus; Sabotage am Gehäuse der Türstation bleibt bis zu deren Ende-Meldung, Sabotage am Sicherheitsmodul geht nach der eingestellten Zeit (60 s) zurück, weil die Türstation dort kein Ende meldet |
 | Letzter Zutritt, Zeitpunkt letzter Zutritt | Art, Name, Zeit |
 | Letztes Ereignis | Klartext mit Rohcode |
 | Türstation, Ereignis-Stream, SIP-Anmeldung | Erreichbarkeit, Stream, SIP |
