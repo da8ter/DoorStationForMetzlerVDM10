@@ -85,6 +85,16 @@ Die Screenshots zeigen erfundene Beispieldaten; Personen und Kamerabilder sind K
 
 Mit dem Sicherheitsmodul (Metzler-SM) hängt der Türöffner am Modul im geschützten Innenbereich, angeschlossen per RS-485. Türöffnen, „dauerhaft offen“ und die Öffnungsdauer funktionieren unverändert (DIP-Schalter ID 1 = Relais 1). Am Modul lassen sich Türkontakt und Exit-Taster anschließen; das Modul hat nur ein Relais. Variablen „Sicherheitsmodul“ und je Tür „Tür n“ und „Tür n Alarm“ entstehen über die Optionen in der Konfiguration.
 
+Einrichtung, die an einer VDM10 mit Finger- und Kartenleser funktioniert hat (21.10.2026, Hikvision DS-K2M061, Türstation V3.7.1):
+
+- **Anschluss:** RS-485+ (gelb) und RS-485− (blau) am Bus der Türstation, auch am Ausgang „RS485 OUT“ eines Erweiterungsmoduls. Am Ausgang ist B1 Minus und B2 Plus. Kommt das Modul nicht, die beiden Adern tauschen.
+- **DIP-Schalter:** nur Schalter 1 auf ON (Relais 1).
+- **Startreihenfolge:** Das Modul muss gleichzeitig mit oder vor der Türstation Strom bekommen. Beim ersten Start bindet es sich an deren Seriennummer.
+- **Zurücksetzen** (z. B. wenn es vorher an einer anderen Türstation hing): RS-485 abklemmen, Modul unter Strom lassen, BUTTON (gelb/grau) und GND (schwarz) mindestens 10 s verbinden, höchstens 3 s trennen, wieder mindestens 10 s verbinden. Danach Türstation neu starten.
+- **Türkontakt** an DOOR_SENSOR (gelb/grün) und GND (schwarz). Die Türstation meldet ihn nur, wenn Eingang 1 auf „Türstatus“ steht (Formular: Einstellungen der Türstation → Eingänge).
+- **Statusanzeige:** Die Türstation meldet das Modul auch im Betrieb als „registerFailed“, die Variable „Sicherheitsmodul“ zeigt dann „Offline“, obwohl Relais, Türkontakt und Sabotagekontakt arbeiten.
+- **Sabotage:** Das Öffnen des Modulgehäuses meldet die Türstation mit einem Alarmton und dem Ereignis 1/0x40F, ein Ende meldet sie nicht. Die Variable „Sabotage“ geht deshalb nach der eingestellten Zeit zurück.
+
 ## Erweiterungsmodule und Klingeltasten
 
 - **Status** je Modul am Bus der Türstation (Touch-Display VDM10-TDM, Namensschild-, Taster-, Tastenfeld-, Info-Module, Finger- und Kartenleser) als Variable, im Log und als Chip „Module“ in der Kachel.
