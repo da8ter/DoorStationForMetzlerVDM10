@@ -70,6 +70,7 @@ class VDM10 extends IPSModuleStrict
         $this->RegisterPropertyInteger('PollInterval', 3);
         $this->RegisterPropertyInteger('RingTimeout', 30);
         $this->RegisterPropertyInteger('MotionReset', 10);
+        $this->RegisterPropertyInteger('TamperReset', 60);
         $this->RegisterPropertyInteger('DoorCount', 1);
         $this->registerSecurityModuleProperties();
         $this->registerSubModuleProperties();
@@ -135,6 +136,7 @@ class VDM10 extends IPSModuleStrict
         $this->RegisterTimer('Watchdog', 0, 'VDM10_Watchdog($_IPS[\'TARGET\']);');
         $this->RegisterTimer('RingReset', 0, 'VDM10_ResetRing($_IPS[\'TARGET\']);');
         $this->RegisterTimer('MotionReset', 0, 'VDM10_ResetMotion($_IPS[\'TARGET\']);');
+        $this->RegisterTimer('TamperReset', 0, 'VDM10_ResetTamper($_IPS[\'TARGET\']);');
         $this->RegisterTimer('DoorReset', 0, 'VDM10_ResetDoors($_IPS[\'TARGET\']);');
         $this->RegisterTimer('TilePush', 0, 'VDM10_TilePush($_IPS[\'TARGET\']);');
         $this->RegisterTimer('Retry', 0, 'VDM10_Retry($_IPS[\'TARGET\']);');
@@ -328,6 +330,12 @@ class VDM10 extends IPSModuleStrict
         $this->SetValue('MOTION', false);
     }
 
+    public function ResetTamper(): void
+    {
+        $this->SetTimerInterval('TamperReset', 0);
+        $this->SetValue('TAMPER', false);
+    }
+
     public function ResetDoors(): void
     {
         $this->SetTimerInterval('DoorReset', 0);
@@ -416,7 +424,10 @@ class VDM10 extends IPSModuleStrict
                 $this->SetTimerInterval('MotionReset', max(1, $this->ReadPropertyInteger('MotionReset')) * 1000);
                 break;
             case VDM10Events::KIND_TAMPER:
+                // Ein Ende meldet die Türstation nur beim eigenen Gehäuse (0x405); die Sabotage des
+                // Sicherheitsmoduls (0x40F) kommt bei jedem Auslösen erneut, ohne Ende-Ereignis.
                 $this->SetValue('TAMPER', true);
+                $this->SetTimerInterval('TamperReset', max(1, $this->ReadPropertyInteger('TamperReset')) * 1000);
                 break;
             case VDM10Events::KIND_EMERGENCY:
             case VDM10Events::KIND_DURESS:
@@ -424,7 +435,7 @@ class VDM10 extends IPSModuleStrict
                 break;
             case VDM10Events::KIND_OTHER:
                 if ($e['major'] === 1 && $e['minor'] === 0x405) {
-                    $this->SetValue('TAMPER', false);
+                    $this->ResetTamper();
                 }
                 break;
         }

@@ -391,7 +391,8 @@
             "Emergency call": "Notruf",
             "Emergency call ended": "Notruf beendet",
             "Emergency call at the door station": "Notruf an der Türstation",
-            "Custom event 2": "Benutzerdefiniertes Ereignis 2"
+            "Custom event 2": "Benutzerdefiniertes Ereignis 2",
+            "Reset tamper alarm after": "Sabotage zurücksetzen nach"
         }
     }
 }

@@ -125,7 +125,7 @@ Weitere Bereiche im Formular: **Einstellungen der Türstation** (Öffnungsdauer 
 | Tür n dauerhaft offen | Relais dauerhaft an (schaltbar, sofern erlaubt) |
 | Tür n, Tür n Alarm | Türkontakt offen/geschlossen, zu lange oder gewaltsam geöffnet (nur mit Türkontakt) |
 | Rufsteuerung | 1 Annehmen, 2 Ablehnen, 3 Auflegen (schaltbar) |
-| Bewegung, Sabotage | Ereignisse der Türstation |
+| Bewegung, Sabotage | Ereignisse der Türstation; beide gehen nach der eingestellten Zeit wieder auf aus (Sabotage: 60 s), weil die Türstation das Ende der Sabotage am Sicherheitsmodul nicht meldet |
 | Letzter Zutritt, Zeitpunkt letzter Zutritt | Art, Name, Zeit |
 | Letztes Ereignis | Klartext mit Rohcode |
 | Türstation, Ereignis-Stream, SIP-Anmeldung | Erreichbarkeit, Stream, SIP |
@@ -181,7 +181,7 @@ Zeitfenster als JSON-Liste, z. B. `[{"days":"weekdays","from":"08:00","to":"12:0
 ## Technischer Hintergrund
 
 - **Ereignisse:** `GET /ISAPI/Event/notification/alertStream` (multipart/mixed) über den Client Socket. Nur eine Verbindung gleichzeitig; nach einem Abbruch antwortet die Türstation bis zu einer Minute mit HTTP 500. Heartbeat alle 10 s; bleibt er aus, meldet das Modul den Stream als getrennt und fragt neu an.
-- **Klingeln:** nicht im Stream, nur `GET /ISAPI/VideoIntercom/callStatus` (`ring`, ein Ruf dauert bis ~60 s). AccessControllerEvent 1/3 ist die Bewegungserkennung der Kamera, 5/38 Fingerabdruck ok, 5/39 abgelehnt, 5/21 Schloss geöffnet. Nach HCNetSDK: 1/0x404 Sabotage, 1/0x40A Nötigungsalarm, 1/0x1048 Notruf (0x1049 beendet), 2/1039 bzw. 2/1040 Sicherheitsmodul offline bzw. online, 2/1041 Batterie schwach, 5/1281 benutzerdefiniertes Ereignis 2 (kein Klingeln). 5/37 (Klingeln) sieht das Modul vor, die VDM10 sendet es aber nicht.
+- **Klingeln:** nicht im Stream, nur `GET /ISAPI/VideoIntercom/callStatus` (`ring`, ein Ruf dauert bis ~60 s). AccessControllerEvent 1/3 ist die Bewegungserkennung der Kamera, 5/38 Fingerabdruck ok, 5/39 abgelehnt, 5/21 Schloss geöffnet. Nach HCNetSDK: 1/0x404 Sabotage (Ende 0x405), 1/0x40F Sabotage Sicherheitsmodul (bei jedem Auslösen erneut, ohne Ende-Ereignis; gemessen 21.10.2026), 1/0x40A Nötigungsalarm, 1/0x1048 Notruf (0x1049 beendet), 2/1039 bzw. 2/1040 Sicherheitsmodul offline bzw. online, 2/1041 Batterie schwach, 5/1281 benutzerdefiniertes Ereignis 2 (kein Klingeln). 5/37 (Klingeln) sieht das Modul vor, die VDM10 sendet es aber nicht.
 - **HTTP-Listening (`httpHosts`)** ist auf Firmware V3.7.1 nicht funktionsfähig: gespeichert wird es, Ereignisse schickt die Türstation trotzdem nicht (am 15.10.2026 mit Paketlogger geprüft). Deshalb der Alert-Stream.
 - **Personen:** `UserInfo/Record|Modify|Search|Delete`, Fingerabdruck `CaptureFingerPrint` + `FingerPrint/SetUp`, Karte `CaptureCardInfo` + `CardInfo/Record`. Der Stream liefert bei Zutritten keinen Namen; das Modul holt ihn aus dem Ereignisprotokoll (`AcsEvent`).
 - **Prüfen ohne Türstation:** `php tests/<Name>Test.php` (Bild-Hook, Sperre „dauerhaft offen“, Gültigkeit, Erweiterungsmodule, Sicherheitsmodul). Probe-Skript für andere Firmware-Stände: `php tests/probe-isapi.php <IP> admin <Passwort>`.

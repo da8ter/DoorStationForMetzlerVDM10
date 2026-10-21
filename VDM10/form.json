@@ -75,6 +75,14 @@
                     "minimum": 1,
                     "maximum": 3600,
                     "suffix": "s"
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "TamperReset",
+                    "caption": "Reset tamper alarm after",
+                    "minimum": 1,
+                    "maximum": 3600,
+                    "suffix": "s"
                 }
             ]
         },
