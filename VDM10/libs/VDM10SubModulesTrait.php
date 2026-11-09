@@ -121,7 +121,7 @@ trait VDM10SubModulesTrait
         $ident = 'DISPLAY' . $module['id'] . '_BRIGHTNESS';
         if ($this->MaintainVariable($ident, sprintf($this->Translate('%s brightness'), $this->moduleTitle($module)), VARIABLETYPE_INTEGER, [
             'PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'ICON' => 'sun',
-            'MIN' => $caps['brightness'][0], 'MAX' => $caps['brightness'][1], 'STEP' => 1,
+            'MIN' => $caps['brightness'][0], 'MAX' => $caps['brightness'][1], 'STEP_SIZE' => 1,
         ], self::POSITION_DISPLAY + $module['id'], true)) {
             $this->EnableAction($ident);
         }
