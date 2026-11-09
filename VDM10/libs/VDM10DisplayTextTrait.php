@@ -64,9 +64,8 @@ trait VDM10DisplayTextTrait
         if (!$this->ReadPropertyBoolean('SubModuleVariables') || $this->displayTextCaps() === null) {
             return;
         }
-        if (!@$this->GetIDForIdent('DISPLAY_TEXT')) {
-            $this->MaintainVariable('DISPLAY_TEXT', $this->Translate('Notice on the touch display'), VARIABLETYPE_STRING,
-                ['PRESENTATION' => VARIABLE_PRESENTATION_VALUE_PRESENTATION, 'ICON' => 'Information'], self::POSITION_DISPLAY_TEXT, true);
+        if ($this->MaintainVariable('DISPLAY_TEXT', $this->Translate('Notice on the touch display'), VARIABLETYPE_STRING,
+            ['PRESENTATION' => VARIABLE_PRESENTATION_VALUE_PRESENTATION, 'ICON' => 'circle-info'], self::POSITION_DISPLAY_TEXT, true)) {
             $this->EnableAction('DISPLAY_TEXT');
         }
         $this->SetValue('DISPLAY_TEXT', $this->displayText());

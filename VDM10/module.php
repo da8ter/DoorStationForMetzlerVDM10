@@ -97,39 +97,39 @@ class VDM10 extends IPSModuleStrict
             'ContentColorActive' => false, 'ContentColorValue' => -1,
         ];
         $this->RegisterVariableInteger('CALL_STATUS', $this->Translate('Call status'), [
-            'PRESENTATION' => VARIABLE_PRESENTATION_VALUE_PRESENTATION, 'ICON' => 'Telephone', 'DIGITS' => 0,
+            'PRESENTATION' => VARIABLE_PRESENTATION_VALUE_PRESENTATION, 'ICON' => 'phone', 'DIGITS' => 0,
             'INTERVALS_ACTIVE' => true,
             'INTERVALS' => json_encode([
-                $state(self::CALL_IDLE, 'Idle', 'Telephone', -1),
-                $state(self::CALL_RING, 'Ringing', 'Alert', 0xFF8000),
-                $state(self::CALL_ON_CALL, 'Talking', 'Talk', 0x00C000),
+                $state(self::CALL_IDLE, 'Idle', 'phone', -1),
+                $state(self::CALL_RING, 'Ringing', 'bell-on', 0xFF8000),
+                $state(self::CALL_ON_CALL, 'Talking', 'phone-volume', 0x00C000),
             ], JSON_UNESCAPED_UNICODE),
         ], 10);
-        $this->RegisterVariableBoolean('DOORBELL', $this->Translate('Doorbell'), $this->boolPresentation('Alert', 'Quiet', 'Ringing', 0x808080, 0xFF8000), 20);
+        $this->RegisterVariableBoolean('DOORBELL', $this->Translate('Doorbell'), $this->boolPresentation('bell-on', 'Quiet', 'Ringing', 0x808080, 0xFF8000), 20);
         $this->RegisterVariableInteger('LAST_RING', $this->Translate('Last ring'), [
             'PRESENTATION' => self::PRESENTATION_DATE_TIME, 'DATE' => 1, 'TIME' => 2, 'MONTH_TEXT' => false, 'DAY_OF_THE_WEEK' => false,
         ], 30);
         $this->RegisterVariableBoolean('DOOR1', $this->Translate('Door opener 1'), $this->doorPresentation(), 40);
         $this->EnableAction('DOOR1');
         $this->RegisterVariableInteger('CALL_CONTROL', $this->Translate('Call control'), [
-            'PRESENTATION' => VARIABLE_PRESENTATION_ENUMERATION, 'ICON' => 'Telephone',
+            'PRESENTATION' => VARIABLE_PRESENTATION_ENUMERATION, 'ICON' => 'phone',
             'OPTIONS' => json_encode([
-                $option(self::CTRL_NONE, '-', 'Telephone', 0x808080),
-                $option(self::CTRL_ANSWER, 'Answer', 'Talk', 0x00C000),
-                $option(self::CTRL_REJECT, 'Reject', 'Cross', 0xFF0000),
-                $option(self::CTRL_HANGUP, 'Hang up', 'Telephone', 0xFF8000),
+                $option(self::CTRL_NONE, '-', 'phone', 0x808080),
+                $option(self::CTRL_ANSWER, 'Answer', 'phone-arrow-down-left', 0x00C000),
+                $option(self::CTRL_REJECT, 'Reject', 'phone-xmark', 0xFF0000),
+                $option(self::CTRL_HANGUP, 'Hang up', 'phone-hangup', 0xFF8000),
             ], JSON_UNESCAPED_UNICODE),
         ], 60);
         $this->EnableAction('CALL_CONTROL');
-        $this->RegisterVariableBoolean('MOTION', $this->Translate('Motion'), $this->boolPresentation('Motion', 'No motion', 'Motion', 0x808080, 0xFF8000), 70);
-        $this->RegisterVariableBoolean('TAMPER', $this->Translate('Tamper'), $this->boolPresentation('Warning', 'OK', 'Tamper', 0x00C000, 0xFF0000), 80);
-        $this->RegisterVariableString('LAST_ACCESS', $this->Translate('Last access'), ['PRESENTATION' => VARIABLE_PRESENTATION_VALUE_PRESENTATION, 'ICON' => 'Key'], 90);
+        $this->RegisterVariableBoolean('MOTION', $this->Translate('Motion'), $this->boolPresentation('person-walking', 'No motion', 'Motion', 0x808080, 0xFF8000), 70);
+        $this->RegisterVariableBoolean('TAMPER', $this->Translate('Tamper'), $this->boolPresentation('triangle-exclamation', 'OK', 'Tamper', 0x00C000, 0xFF0000), 80);
+        $this->RegisterVariableString('LAST_ACCESS', $this->Translate('Last access'), ['PRESENTATION' => VARIABLE_PRESENTATION_VALUE_PRESENTATION, 'ICON' => 'key'], 90);
         $this->RegisterVariableInteger('LAST_ACCESS_TIME', $this->Translate('Last access time'), [
             'PRESENTATION' => self::PRESENTATION_DATE_TIME, 'DATE' => 1, 'TIME' => 2, 'MONTH_TEXT' => false, 'DAY_OF_THE_WEEK' => false,
         ], 100);
-        $this->RegisterVariableString('LAST_EVENT', $this->Translate('Last event'), ['PRESENTATION' => VARIABLE_PRESENTATION_VALUE_PRESENTATION, 'ICON' => 'Information'], 110);
-        $this->RegisterVariableBoolean('ONLINE', $this->Translate('Door station'), $this->boolPresentation('Network', 'Offline', 'Online', 0xFF0000, 0x00C000), 120);
-        $this->RegisterVariableBoolean('STREAM_CONNECTED', $this->Translate('Event stream'), $this->boolPresentation('Network', 'Disconnected', 'Connected', 0x808080, 0x00C000), 130);
+        $this->RegisterVariableString('LAST_EVENT', $this->Translate('Last event'), ['PRESENTATION' => VARIABLE_PRESENTATION_VALUE_PRESENTATION, 'ICON' => 'circle-info'], 110);
+        $this->RegisterVariableBoolean('ONLINE', $this->Translate('Door station'), $this->boolPresentation('network-wired', 'Offline', 'Online', 0xFF0000, 0x00C000), 120);
+        $this->RegisterVariableBoolean('STREAM_CONNECTED', $this->Translate('Event stream'), $this->boolPresentation('network-wired', 'Disconnected', 'Connected', 0x808080, 0x00C000), 130);
 
         $this->registerControlVariables();
         $this->RegisterTimer('Poll', 0, 'VDM10_Poll($_IPS[\'TARGET\']);');

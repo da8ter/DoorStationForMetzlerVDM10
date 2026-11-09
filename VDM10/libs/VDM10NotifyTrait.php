@@ -47,11 +47,11 @@ trait VDM10NotifyTrait
         $this->RegisterPropertyBoolean('ClockSync', true);
         $this->RegisterAttributeInteger('ClockSynced', 0);
         $this->RegisterVariableBoolean('DND', $this->Translate('Do not disturb'), [
-            'PRESENTATION' => VARIABLE_PRESENTATION_SWITCH, 'ICON_TRUE' => 'Sleep', 'ICON_FALSE' => 'Bell', 'USE_ICON_FALSE' => true, 'USAGE_TYPE' => 0,
+            'PRESENTATION' => VARIABLE_PRESENTATION_SWITCH, 'ICON_TRUE' => 'bell-slash', 'ICON_FALSE' => 'bell', 'USE_ICON_FALSE' => true, 'USAGE_TYPE' => 0,
         ], 26);
         $this->EnableAction('DND');
         $this->RegisterVariableInteger('CLOCK_DRIFT', $this->Translate('Clock deviation of the door station'), [
-            'PRESENTATION' => VARIABLE_PRESENTATION_VALUE_PRESENTATION, 'ICON' => 'Clock', 'SUFFIX' => ' s', 'DIGITS' => 0,
+            'PRESENTATION' => VARIABLE_PRESENTATION_VALUE_PRESENTATION, 'ICON' => 'clock', 'SUFFIX' => ' s', 'DIGITS' => 0,
         ], 196);
     }
 

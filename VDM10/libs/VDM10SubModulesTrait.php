@@ -93,10 +93,9 @@ trait VDM10SubModulesTrait
         foreach ($modules as $m) {
             $ident = 'SUBMODULE_' . $m['id'];
             $present[] = $ident;
-            if (!@$this->GetIDForIdent($ident)) {
-                $this->MaintainVariable($ident, $this->moduleTitle($m), VARIABLETYPE_BOOLEAN,
-                    $this->boolPresentation('Network', 'Offline', 'Online', 0xFF0000, 0x00C000), self::POSITION_SUBMODULE + $m['id'], true);
-            }
+            // Auch bestehende Variablen: zieht die Darstellung nach; Name und Position behält Symcon.
+            $this->MaintainVariable($ident, $this->moduleTitle($m), VARIABLETYPE_BOOLEAN,
+                $this->boolPresentation('network-wired', 'Offline', 'Online', 0xFF0000, 0x00C000), self::POSITION_SUBMODULE + $m['id'], true);
             $this->SetValue($ident, $m['status'] === 'online');
             if (VDM10SubModules::isDisplay($m['type']) && $m['status'] === 'online') {
                 $this->refreshDisplay($m);
@@ -120,11 +119,10 @@ trait VDM10SubModulesTrait
             return;
         }
         $ident = 'DISPLAY' . $module['id'] . '_BRIGHTNESS';
-        if (!@$this->GetIDForIdent($ident)) {
-            $this->MaintainVariable($ident, sprintf($this->Translate('%s brightness'), $this->moduleTitle($module)), VARIABLETYPE_INTEGER, [
-                'PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'ICON' => 'Sun',
-                'MIN' => $caps['brightness'][0], 'MAX' => $caps['brightness'][1], 'STEP' => 1,
-            ], self::POSITION_DISPLAY + $module['id'], true);
+        if ($this->MaintainVariable($ident, sprintf($this->Translate('%s brightness'), $this->moduleTitle($module)), VARIABLETYPE_INTEGER, [
+            'PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'ICON' => 'sun',
+            'MIN' => $caps['brightness'][0], 'MAX' => $caps['brightness'][1], 'STEP' => 1,
+        ], self::POSITION_DISPLAY + $module['id'], true)) {
             $this->EnableAction($ident);
         }
         $cfg = $this->displayConfig($module['id']);
@@ -214,7 +212,7 @@ trait VDM10SubModulesTrait
             $intervals[] = $interval($k['id'], $this->keyName($k));
         }
         $this->MaintainVariable('RING_BUTTON', $this->Translate('Bell button'), VARIABLETYPE_INTEGER, [
-            'PRESENTATION' => VARIABLE_PRESENTATION_VALUE_PRESENTATION, 'ICON' => 'Bell', 'DIGITS' => 0,
+            'PRESENTATION' => VARIABLE_PRESENTATION_VALUE_PRESENTATION, 'ICON' => 'bell', 'DIGITS' => 0,
             'INTERVALS_ACTIVE' => true, 'INTERVALS' => json_encode($intervals, JSON_UNESCAPED_UNICODE),
         ], 25, true);
     }

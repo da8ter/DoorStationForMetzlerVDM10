@@ -24,25 +24,25 @@ trait VDM10ControlsTrait
         $this->RegisterVariableBoolean('DOOR1_HOLD', $this->Translate('Door 1 permanently open'), $this->holdPresentation(), 45);
         $this->EnableAction('DOOR1_HOLD');
         $this->RegisterVariableBoolean('MOTION_DETECTION', $this->Translate('Motion detection'), [
-            'PRESENTATION' => VARIABLE_PRESENTATION_SWITCH, 'ICON_TRUE' => 'Motion', 'ICON_FALSE' => 'Motion', 'USAGE_TYPE' => 0,
+            'PRESENTATION' => VARIABLE_PRESENTATION_SWITCH, 'ICON_TRUE' => 'person-walking', 'ICON_FALSE' => 'person-walking', 'USAGE_TYPE' => 0,
         ], 140);
         $this->EnableAction('MOTION_DETECTION');
         $this->RegisterVariableInteger('MOTION_SENSITIVITY', $this->Translate('Motion sensitivity'), [
-            'PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'ICON' => 'Motion', 'MIN' => 1, 'MAX' => 6, 'STEP_SIZE' => 1, 'USAGE_TYPE' => 0,
+            'PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'ICON' => 'person-walking', 'MIN' => 1, 'MAX' => 6, 'STEP_SIZE' => 1, 'USAGE_TYPE' => 0,
         ], 150);
         $this->EnableAction('MOTION_SENSITIVITY');
         $this->RegisterVariableBoolean('RING_ENABLED', $this->Translate('Ringtone at the door station'), [
-            'PRESENTATION' => VARIABLE_PRESENTATION_SWITCH, 'ICON_TRUE' => 'Speaker', 'ICON_FALSE' => 'Speaker', 'USAGE_TYPE' => 0,
+            'PRESENTATION' => VARIABLE_PRESENTATION_SWITCH, 'ICON_TRUE' => 'volume-high', 'ICON_FALSE' => 'volume-high', 'USAGE_TYPE' => 0,
         ], 160);
         $this->EnableAction('RING_ENABLED');
         foreach (['RING_VOLUME' => ['Ringtone volume', 170], 'TALK_VOLUME' => ['Speech volume', 180]] as $ident => [$caption, $pos]) {
             $this->RegisterVariableInteger($ident, $this->Translate($caption), [
-                'PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'ICON' => 'Speaker', 'MIN' => 0, 'MAX' => 10, 'STEP_SIZE' => 1, 'USAGE_TYPE' => 2,
+                'PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'ICON' => 'volume-high', 'MIN' => 0, 'MAX' => 10, 'STEP_SIZE' => 1, 'USAGE_TYPE' => 2,
             ], $pos);
             $this->EnableAction($ident);
         }
         $this->RegisterVariableString('BACKLIGHT', $this->Translate('Button lighting'), [
-            'PRESENTATION' => VARIABLE_PRESENTATION_ENUMERATION, 'ICON' => 'Bulb',
+            'PRESENTATION' => VARIABLE_PRESENTATION_ENUMERATION, 'ICON' => 'lightbulb',
             'OPTIONS' => json_encode(array_map(fn (string $m): array => ['Value' => $m, 'Caption' => $this->Translate('backlight_' . $m),
                 'IconValue' => '', 'IconActive' => false, 'Color' => -1], self::BACKLIGHT_MODES), JSON_UNESCAPED_UNICODE),
         ], 185);
@@ -50,11 +50,11 @@ trait VDM10ControlsTrait
         $sip = fn (string $v, string $c, int $color): array => ['Value' => $v, 'Caption' => $this->Translate($c), 'IconActive' => false, 'IconValue' => '',
             'ColorActive' => true, 'ColorValue' => $color, 'ContentColorActive' => false, 'ContentColorValue' => -1];
         $this->RegisterVariableString('SIP_STATUS', $this->Translate('SIP registration'), [
-            'PRESENTATION' => VARIABLE_PRESENTATION_VALUE_PRESENTATION, 'ICON' => 'Telephone',
+            'PRESENTATION' => VARIABLE_PRESENTATION_VALUE_PRESENTATION, 'ICON' => 'phone',
             'OPTIONS' => json_encode([$sip('connect', 'Registered', 0x00C000), $sip('unregistered', 'Not registered', 0xFF0000),
                 $sip('notEnabled', 'Not enabled', 0x808080)], JSON_UNESCAPED_UNICODE),
         ], 135);
-        $this->RegisterVariableString('FIRMWARE', $this->Translate('Firmware'), ['PRESENTATION' => VARIABLE_PRESENTATION_VALUE_PRESENTATION, 'ICON' => 'Information'], 195);
+        $this->RegisterVariableString('FIRMWARE', $this->Translate('Firmware'), ['PRESENTATION' => VARIABLE_PRESENTATION_VALUE_PRESENTATION, 'ICON' => 'circle-info'], 195);
         $this->RegisterTimer('StatusRefresh', 0, 'VDM10_RefreshStatus($_IPS[\'TARGET\']);');
     }
 
@@ -233,7 +233,7 @@ trait VDM10ControlsTrait
 
     private function holdPresentation(): array
     {
-        return ['PRESENTATION' => VARIABLE_PRESENTATION_SWITCH, 'ICON_TRUE' => 'LockOpen', 'ICON_FALSE' => 'LockClosed', 'USE_ICON_FALSE' => true, 'USAGE_TYPE' => 0];
+        return ['PRESENTATION' => VARIABLE_PRESENTATION_SWITCH, 'ICON_TRUE' => 'lock-open', 'ICON_FALSE' => 'lock', 'USE_ICON_FALSE' => true, 'USAGE_TYPE' => 0];
     }
 
     private function boolPresentation(string $icon, string $falseCaption, string $trueCaption, int $falseColor, int $trueColor): array
@@ -246,6 +246,6 @@ trait VDM10ControlsTrait
 
     private function doorPresentation(): array
     {
-        return ['PRESENTATION' => VARIABLE_PRESENTATION_SWITCH, 'ICON_TRUE' => 'Door', 'ICON_FALSE' => 'Door', 'USE_ICON_FALSE' => false, 'USAGE_TYPE' => 2];
+        return ['PRESENTATION' => VARIABLE_PRESENTATION_SWITCH, 'ICON_TRUE' => 'door-open', 'ICON_FALSE' => 'door-open', 'USE_ICON_FALSE' => false, 'USAGE_TYPE' => 2];
     }
 }

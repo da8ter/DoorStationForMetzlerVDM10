@@ -32,13 +32,13 @@ trait VDM10SecurityModuleTrait
         $contact = $this->ReadPropertyBoolean('DoorContact');
         $doors = $this->ReadPropertyInteger('DoorCount');
         $this->MaintainVariable('SECURITY_MODULE', $this->Translate('Security module'), VARIABLETYPE_BOOLEAN,
-            $this->boolPresentation('Lock', 'Offline', 'Online', 0xFF0000, 0x00C000), 125, $sm);
+            $this->boolPresentation('shield-halved', 'Offline', 'Online', 0xFF0000, 0x00C000), 125, $sm);
         foreach ([1, 2] as $door) {
             $keep = $contact && $door <= $doors;
             $this->MaintainVariable('DOOR' . $door . '_CONTACT', sprintf($this->Translate('Door %d'), $door), VARIABLETYPE_BOOLEAN,
-                $this->boolPresentation('Door', 'Closed', 'Open', 0x00C000, 0xFF8000), 41 + $door * 10, $keep);
+                $this->boolPresentation('door-closed', 'Closed', 'Open', 0x00C000, 0xFF8000), 41 + $door * 10, $keep);
             $this->MaintainVariable('DOOR' . $door . '_ALARM', sprintf($this->Translate('Door %d alarm'), $door), VARIABLETYPE_BOOLEAN,
-                $this->boolPresentation('Warning', 'OK', 'Alarm', 0x00C000, 0xFF0000), 42 + $door * 10, $keep);
+                $this->boolPresentation('triangle-exclamation', 'OK', 'Alarm', 0x00C000, 0xFF0000), 42 + $door * 10, $keep);
         }
     }
 
