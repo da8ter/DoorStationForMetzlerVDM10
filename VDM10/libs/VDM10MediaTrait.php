@@ -17,13 +17,12 @@ trait VDM10MediaTrait
     private function maintainMedia(): void
     {
         $this->mediaId(self::MEDIA_SNAPSHOT, MEDIATYPE_IMAGE, $this->Translate('Snapshot'), self::POSITION_SNAPSHOT);
+        // Archivplätze entstehen erst, wenn ein Bild hineinrückt (storeSnapshot): ein Bildmedium ohne
+        // Datei zeigt die Konsole rot. Leere Plätze älterer Versionen verschwinden deshalb hier.
         $archive = max(0, min(10, $this->ReadPropertyInteger('SnapshotArchive')));
         for ($i = 1; $i <= 10; $i++) {
-            $ident = self::MEDIA_SNAPSHOT . '_' . $i;
-            $id = (int) @$this->GetIDForIdent($ident);
-            if ($i <= $archive) {
-                $this->mediaId($ident, MEDIATYPE_IMAGE, sprintf($this->Translate('Snapshot -%d'), $i), self::POSITION_SNAPSHOT + $i);
-            } elseif ($id > 0) {
+            $id = (int) @$this->GetIDForIdent(self::MEDIA_SNAPSHOT . '_' . $i);
+            if ($id > 0 && ($i > $archive || $this->mediaEmpty($id))) {
                 IPS_DeleteMedia($id, true);
             }
         }
@@ -64,6 +63,12 @@ trait VDM10MediaTrait
         return $id;
     }
 
+    private function mediaEmpty(int $id): bool
+    {
+        $media = IPS_GetMedia($id);
+        return (int) ($media['MediaSize'] ?? 0) === 0 && !($media['MediaIsAvailable'] ?? false);
+    }
+
     /** Neues Bild übernehmen; das bisherige rückt ins Archiv. */
     private function storeSnapshot(string $jpeg): void
     {
@@ -76,14 +81,16 @@ trait VDM10MediaTrait
         }
         $archive = max(0, min(10, $this->ReadPropertyInteger('SnapshotArchive')));
         for ($i = $archive; $i >= 1; $i--) {
-            $to = (int) @$this->GetIDForIdent(self::MEDIA_SNAPSHOT . '_' . $i);
             $from = $i === 1 ? $current : (int) @$this->GetIDForIdent(self::MEDIA_SNAPSHOT . '_' . ($i - 1));
-            if ($to > 0 && $from > 0 && (int) (IPS_GetMedia($from)['MediaSize'] ?? 0) > 0) {
-                $content = IPS_GetMediaContent($from);
-                if ($content !== '') {
-                    IPS_SetMediaContent($to, $content);
-                    IPS_SendMediaEvent($to);
-                }
+            if ($from === 0 || $this->mediaEmpty($from)) {
+                continue;
+            }
+            $content = IPS_GetMediaContent($from);
+            if ($content !== '') {
+                $to = $this->mediaId(self::MEDIA_SNAPSHOT . '_' . $i, MEDIATYPE_IMAGE,
+                    sprintf($this->Translate('Snapshot -%d'), $i), self::POSITION_SNAPSHOT + $i);
+                IPS_SetMediaContent($to, $content);
+                IPS_SendMediaEvent($to);
             }
         }
         IPS_SetMediaContent($current, base64_encode($jpeg));
