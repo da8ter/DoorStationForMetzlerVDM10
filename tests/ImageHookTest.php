@@ -37,7 +37,6 @@ final class Probe
     public array $attributes = ['ImageHookToken' => '', 'PersonPhotos' => '{}'];
     public array $buffers = ['ImageHook' => '1'];
     public array $log = [];
-    public string $dir;
 
     protected function GetBuffer(string $name): string
     {
@@ -59,9 +58,12 @@ final class Probe
         return $this->log;
     }
 
-    private function logImagePath(int $id): string
+    /** Log-Bilder des Tests: Log-ID => Medien-ID */
+    public array $logImages = [];
+
+    private function logImageId(int $id): int
     {
-        return $this->dir . '/ring_' . $id . '.jpg';
+        return $this->logImages[$id] ?? 0;
     }
 
     protected function SendHeader(string $header): void
@@ -109,11 +111,10 @@ $jpeg = (string) ob_get_clean();
 $token = str_repeat('ab', 16);
 $p = new Probe();
 $p->attributes['ImageHookToken'] = $token;
-$p->dir = sys_get_temp_dir() . '/vdm10_hooktest_' . getmypid();
-@mkdir($p->dir);
-file_put_contents($p->dir . '/ring_42.jpg', $jpeg);
+$p->logImages = [42 => 400, 44 => 401];
 $p->log = [['id' => 42, 'img' => true], ['id' => 43, 'img' => false]];
-$GLOBALS['media'] = [100 => [MEDIATYPE_IMAGE, base64_encode($jpeg), 'C1'], 200 => [MEDIATYPE_IMAGE, base64_encode($jpeg), 'P1'], 300 => [2, base64_encode('x'), 'S1']];
+$GLOBALS['media'] = [100 => [MEDIATYPE_IMAGE, base64_encode($jpeg), 'C1'], 200 => [MEDIATYPE_IMAGE, base64_encode($jpeg), 'P1'], 300 => [2, base64_encode('x'), 'S1'],
+    400 => [MEDIATYPE_IMAGE, base64_encode($jpeg), 'R1'], 401 => [MEDIATYPE_IMAGE, base64_encode($jpeg), 'R2']];
 $p->attributes['PersonPhotos'] = json_encode(['7' => 200, '8' => 300]);
 $snapVersion = 'C11700000000';
 
@@ -167,6 +168,4 @@ $check('Personenfoto 200', $p->status === 200 && $body === $jpeg && str_contains
 $url = $p->url('ring', '42', 'thumb', '42');
 $check('Adresse enthält Token und Instanz-Hook', str_starts_with($url, '/hook/vdm10/30293?') && str_contains($url, 't=' . $token));
 
-array_map('unlink', glob($p->dir . '/*'));
-rmdir($p->dir);
 exit($fails === 0 ? 0 : 1);

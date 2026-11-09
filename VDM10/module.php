@@ -146,12 +146,6 @@ class VDM10 extends IPSModuleStrict
         $this->SetVisualizationType(defined('INSTANCE_VISUALIZATION_TYPE_HTML_FULLSCREEN') ? INSTANCE_VISUALIZATION_TYPE_HTML_FULLSCREEN : 1);
     }
 
-    public function Destroy(): void
-    {
-        $this->removeLogImages();
-        parent::Destroy();
-    }
-
     public function ApplyChanges(): void
     {
         parent::ApplyChanges();

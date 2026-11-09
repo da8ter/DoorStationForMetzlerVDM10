@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 /**
  * Ereignis-Log der Türstation für die Kachel: die letzten 50 Ereignisse im Attribut `EventLog`
- * (nur Text), Bilder als Dateien unter media/vdm10_<InstanzID>/ (je die letzten 10 Klingel- und
- * Zutrittsbilder).
+ * (nur Text), Bilder als Medienobjekte in der Kategorie „Ereignisbilder“ unter der Instanz (je Art die
+ * letzten 10).
  * Statuswechsel kommen über VM_UPDATE der eigenen Variablen, Klingeln und Zutritte direkt aus
  * der Ereignisverarbeitung. Wird von VDM10 (module.php) als Trait eingebunden.
  */
@@ -13,6 +13,8 @@ trait VDM10LogTrait
 {
     private const LOG_SIZE = 50;
     private const LOG_IMAGES = 10; // je Gruppe: Klingeln, Zutritte, Bewegung, „Neues Bild“
+    private const LOG_IMAGE_CATEGORY = 'EVENT_IMAGES';
+    private const POSITION_EVENT_IMAGES = 220;
 
     /** Variablen, deren Wechsel ins Log gehören: Ident => [Art bei true, Art bei false] (null = nicht loggen). */
     private const LOG_ON_CHANGE = [
@@ -91,14 +93,14 @@ trait VDM10LogTrait
     /** Bild an einen Log-Eintrag hängen; je Gruppe (Klingeln, Zutritte, Bewegung, Bild) bleiben die letzten 10. */
     private function attachLogImage(int $id, string $jpeg): void
     {
-        if ($jpeg === '' || !str_starts_with($jpeg, "\xFF\xD8") || !$this->ensureLogDir()
-            || file_put_contents($this->logImagePath($id), $jpeg) === false) {
+        if ($jpeg === '' || !str_starts_with($jpeg, "\xFF\xD8")) {
             return;
         }
         $log = $this->readLog();
         $kept = ['ring' => 0, 'access' => 0, 'motion' => 0, 'snapshot' => 0];
         foreach ($log as &$entry) {
             if ((int) $entry['id'] === $id) {
+                $this->createLogImage($entry, $jpeg);
                 $entry['img'] = true;
             }
             $group = in_array($entry['kind'], ['ring', 'motion', 'snapshot'], true) ? $entry['kind'] : 'access';
@@ -170,40 +172,49 @@ trait VDM10LogTrait
         }
     }
 
-    private function logDir(): string
+    /** Medienobjekt des Bildes zu einem Log-Eintrag, 0 wenn keins. */
+    private function logImageId(int $id): int
     {
-        return IPS_GetKernelDir() . 'media' . DIRECTORY_SEPARATOR . 'vdm10_' . $this->InstanceID;
+        $category = (int) @$this->GetIDForIdent(self::LOG_IMAGE_CATEGORY);
+        return $category > 0 ? (int) @IPS_GetObjectIDByIdent('IMG_' . $id, $category) : 0;
     }
 
-    private function logImagePath(int $id): string
+    /** Bild als Medienobjekt in der Kategorie „Ereignisbilder“; Name und Position nur beim Anlegen, das neueste steht oben. */
+    private function createLogImage(array $entry, string $jpeg): void
     {
-        return $this->logDir() . DIRECTORY_SEPARATOR . 'ring_' . $id . '.jpg';
+        $id = (int) $entry['id'];
+        $media = $this->logImageId($id);
+        if ($media === 0) {
+            $media = IPS_CreateMedia(MEDIATYPE_IMAGE);
+            IPS_SetParent($media, $this->logImageCategory());
+            IPS_SetIdent($media, 'IMG_' . $id);
+            IPS_SetName($media, implode(' · ', array_filter([(string) $entry['text'], (string) ($entry['name'] ?? ''),
+                date('d.m.Y H:i:s', (int) $entry['ts'])], 'strlen')));
+            IPS_SetPosition($media, -(int) $entry['ts']);
+            IPS_SetMediaFile($media, 'media/vdm10_' . $this->InstanceID . '_event_' . $id . '.jpg', false);
+        }
+        IPS_SetMediaContent($media, base64_encode($jpeg));
     }
 
-    private function ensureLogDir(): bool
+    private function logImageCategory(): int
     {
-        return is_dir($this->logDir()) || @mkdir($this->logDir(), 0750, true);
+        $category = (int) @$this->GetIDForIdent(self::LOG_IMAGE_CATEGORY);
+        if ($category > 0) {
+            return $category;
+        }
+        $category = IPS_CreateCategory();
+        IPS_SetParent($category, $this->InstanceID);
+        IPS_SetIdent($category, self::LOG_IMAGE_CATEGORY);
+        IPS_SetName($category, $this->Translate('Event images'));
+        IPS_SetPosition($category, self::POSITION_EVENT_IMAGES);
+        return $category;
     }
 
     private function deleteLogImage(int $id): void
     {
-        $path = $this->logImagePath($id);
-        if (is_file($path)) {
-            @unlink($path);
-        }
-    }
-
-    /** In Destroy(): Bilddateien und Ordner entfernen – nur wenn die Instanz gelöscht wird, nicht beim Modul-Update. */
-    private function removeLogImages(): void
-    {
-        if (IPS_InstanceExists($this->InstanceID)) {
-            return;
-        }
-        foreach (glob($this->logDir() . DIRECTORY_SEPARATOR . 'ring_*.jpg') ?: [] as $file) {
-            @unlink($file);
-        }
-        if (is_dir($this->logDir())) {
-            @rmdir($this->logDir());
+        $media = $this->logImageId($id);
+        if ($media > 0) {
+            IPS_DeleteMedia($media, true);
         }
     }
 }

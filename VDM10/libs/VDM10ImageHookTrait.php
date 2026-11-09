@@ -137,8 +137,9 @@ trait VDM10ImageHookTrait
         }
         if ($key === 'ring' && ctype_digit($id)) {
             foreach ($this->readLog() as $entry) {
-                if ((string) $entry['id'] === $id && !empty($entry['img']) && is_file($this->logImagePath((int) $id))) {
-                    return [(string) file_get_contents($this->logImagePath((int) $id)), $id];
+                $media = (string) $entry['id'] === $id && !empty($entry['img']) ? $this->logImageId((int) $id) : 0;
+                if ($media > 0) {
+                    return [(string) base64_decode(IPS_GetMediaContent($media), true), $id];
                 }
             }
             return ['', ''];

@@ -58,7 +58,7 @@ Die Screenshots zeigen erfundene Beispieldaten; Personen und Kamerabilder sind K
 - **Klingeln** erkennt das Modul am Rufstatus der Türstation (Abfrage im eingestellten Takt, Vorgabe 3 s). Der Ereignis-Stream meldet das Klingeln nicht. Ein Besuch zählt als ein Klingeln, auch wenn die Türstation bis zu einer Minute ruft.
 - **Bewegung, Zutritte, Sabotage, Türkontakt, Notruf, Nötigungsalarm** kommen in Echtzeit über den Ereignis-Stream (Client Socket).
 - **Bilder:** beim Klingeln ein Snapshot (mit Archiv), bei jedem Zutrittsversuch und bei Bewegung ein Bild direkt von der Kamera, ohne den Snapshot der Kachel zu ersetzen. Alles abschaltbar.
-- **Ereignis-Log:** die letzten 50 Ereignisse, übersteht Neustarts. Bilder liegen unter `media/vdm10_<InstanzID>/` und werden beim Löschen der Instanz entfernt.
+- **Ereignis-Log:** die letzten 50 Ereignisse, übersteht Neustarts. Die Bilder dazu liegen als Medienobjekte in der Kategorie „Ereignisbilder“ unter der Instanz, je Art (Klingeln, Zutritte, Bewegung, „Neues Bild“) die letzten zehn, das neueste oben.
 - **Bilder in der Kachel** kommen über den WebHook `/hook/vdm10/<InstanzID>` mit einem zufälligen Token der Instanz; ohne gültiges Token antwortet er mit 403. Er liefert nur den Snapshot, Bilder aus dem Log und zugeordnete Personenfotos.
 
 ## Personen, Karten und Zeitpläne
@@ -146,7 +146,7 @@ Weitere Bereiche im Formular: **Einstellungen der Türstation** (Öffnungsdauer 
 | Firmware, Uhrzeit-Abweichung der Türstation | Firmware-Stand, Abweichung zu Symcon in Sekunden |
 | Erweiterungsmodule | je Modul online/offline, Display-Helligkeit (schaltbar), Klingeltaste, Hinweis auf dem Touch-Display (schaltbar) |
 
-Medien: Bild (aktueller Snapshot), Bild -1 … -n (Archiv), Livebild (RTSP).
+Medien: Bild (aktueller Snapshot), Bild -1 … -n (Archiv), Livebild (RTSP), Kategorie „Ereignisbilder“ mit den Bildern des Ereignis-Logs.
 
 ## Funktionen
 
@@ -194,7 +194,7 @@ Zeitfenster als JSON-Liste, z. B. `[{"days":"weekdays","from":"08:00","to":"12:0
 - **Klingeln:** nicht im Stream, nur `GET /ISAPI/VideoIntercom/callStatus` (`ring`, ein Ruf dauert bis ~60 s). AccessControllerEvent 1/3 ist die Bewegungserkennung der Kamera, 5/38 Fingerabdruck ok, 5/39 abgelehnt, 5/21 Schloss geöffnet. Nach HCNetSDK: 1/0x404 Sabotage (Ende 0x405), 1/0x40F Sabotage Sicherheitsmodul (bei jedem Auslösen erneut, ohne Ende-Ereignis; gemessen 21.10.2026), 1/0x40A Nötigungsalarm, 1/0x1048 Notruf (0x1049 beendet), 2/1039 bzw. 2/1040 Sicherheitsmodul offline bzw. online, 2/1041 Batterie schwach, 5/1281 benutzerdefiniertes Ereignis 2 (kein Klingeln). 5/37 (Klingeln) sieht das Modul vor, die VDM10 sendet es aber nicht.
 - **HTTP-Listening (`httpHosts`)** ist auf Firmware V3.7.1 nicht funktionsfähig: gespeichert wird es, Ereignisse schickt die Türstation trotzdem nicht (am 15.10.2026 mit Paketlogger geprüft). Deshalb der Alert-Stream.
 - **Personen:** `UserInfo/Record|Modify|Search|Delete`, Fingerabdruck `CaptureFingerPrint` + `FingerPrint/SetUp`, Karte `CaptureCardInfo` + `CardInfo/Record`. Der Stream liefert bei Zutritten keinen Namen; das Modul holt ihn aus dem Ereignisprotokoll (`AcsEvent`).
-- **Prüfen ohne Türstation:** `php tests/<Name>Test.php` (Bild-Hook, Sperre „dauerhaft offen“, Gültigkeit, Erweiterungsmodule, Sicherheitsmodul). Probe-Skript für andere Firmware-Stände: `php tests/probe-isapi.php <IP> admin <Passwort>`.
+- **Prüfen ohne Türstation:** `php tests/<Name>Test.php` (Bild-Hook, Ereignisbilder, Bildarchiv, Sperre „dauerhaft offen“, Gültigkeit, Erweiterungsmodule, Sicherheitsmodul). Probe-Skript für andere Firmware-Stände: `php tests/probe-isapi.php <IP> admin <Passwort>`.
 
 ## Marken
 
