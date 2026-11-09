@@ -52,7 +52,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 
 
 /* Bild */
-.photo { position: relative; border-radius: 16px; overflow: hidden; aspect-ratio: 16 / 9; background: var(--surface); flex: none; }
+/* Seitenverhältnis des Bildes (--photo-ratio setzt tile.js beim Laden); Vorgabe wie die VDM10-Bilder, 704 × 576 */
+.photo { position: relative; border-radius: 16px; overflow: hidden; aspect-ratio: var(--photo-ratio, 704 / 576); background: var(--surface); flex: none; }
 .photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .photo-empty { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; gap: 8px; color: var(--muted); }
 .photo-empty .fa-icon { width: 30px; height: 30px; }
@@ -196,7 +197,7 @@ html.compact .doors.multi .hold-no { display: inline; }
 html.wide .body { display: grid; grid-template-columns: minmax(320px, 1fr) minmax(300px, 1fr); grid-template-rows: minmax(0, 1fr); column-gap: 20px;
   overflow: hidden; padding-right: 0; }
 html.wide .col { min-height: 0; overflow-y: auto; padding-right: var(--sb-pad); }
-html.wide .photo { max-height: 42vh; aspect-ratio: auto; height: min(42vh, calc((50vw - 40px) * 9 / 16)); }
+html.wide .photo { width: min(100%, calc(42vh * var(--photo-ratio, 704 / 576))); align-self: center; }
 
 /* Bildergalerie: Blatt von unten wie im Musikplayer, Glas in den Farben des Symcon-Themas */
 .sheet { position: fixed; inset: 0; z-index: 15; display: flex; align-items: flex-end; justify-content: center;

@@ -157,6 +157,16 @@
       el.innerHTML = (snap && snap.url ? '<img src="' + esc(snap.url) + '" alt="" data-full="' + esc(snap.url) + '">' :
         '<div class="photo-empty">' + I('camera') + '<span>' + esc(T('No picture yet')) + '</span></div>') +
         '<div class="photo-meta" id="photoMeta"></div>' + tools;
+      const img = el.querySelector('img');
+      if (img) {
+        // Bildfläche im Seitenverhältnis des Bildes, begrenzt auf 3:4 bis 21:9
+        const fit = () => {
+          if (img.naturalWidth && img.naturalHeight) {
+            el.style.setProperty('--photo-ratio', Math.min(21 / 9, Math.max(3 / 4, img.naturalWidth / img.naturalHeight)).toFixed(4));
+          }
+        };
+        if (img.complete) fit(); else img.addEventListener('load', fit, { once: true });
+      }
     }
     const meta = $('photoMeta');
     if (meta) meta.textContent = snap ? ago(snap.ts) : '';
