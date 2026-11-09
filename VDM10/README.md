@@ -37,7 +37,6 @@ Gegensprechen (Audio) übernimmt das Modul nicht. Dafür wird das offizielle Sym
 - **Bilder:** Die Galerie zeigt das aktuelle Bild und die Bilder von Klingeln, Zutritten, Bewegungen und „Neues Bild“ (je die letzten zehn). Ein Tipp öffnet die Großansicht; Pfeile, Wischgeste oder Pfeiltasten blättern.
 - **Log und Zutritte:** Ein Tipp auf einen Eintrag mit Bild oder auf eine Person zeigt das Bild groß. Unbekannte zeigen das Zutrittsbild im Kreis; aufeinanderfolgende Fehlversuche bilden einen Eintrag mit rotem Zähler.
 - **Livebild:** öffnet das RTSP-Medienobjekt; die Kachel selbst kann RTSP nicht abspielen.
-- **Test der Klingel-Anzeige:** `VDM10_TileTestRing($id, true)`, aus mit `false` oder beim Neuladen des Moduls. „Tür öffnen“ öffnet dabei wirklich.
 
 ![Türstation für Metzler VDM10 — Galerie](https://raw.githubusercontent.com/da8ter/images/main/DoorStationForMetzlerVDM10%20Galerie.png)
 
