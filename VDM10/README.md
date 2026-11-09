@@ -47,7 +47,7 @@ Die Screenshots zeigen erfundene Beispieldaten; Personen und Kamerabilder sind K
 
 ## Voraussetzungen
 
-- Symcon ab 8.2 mit Kachelvisualisierung
+- Symcon ab 9.0 mit Kachelvisualisierung
 - Metzler VDM10 (2.0) im lokalen Netz: HTTP (Port 80) für ISAPI, RTSP (Port 554) für das Livebild
 - Benutzer `admin` mit dem bei der Aktivierung vergebenen Passwort; für das Livebild ohne Zeichen, die in einer URL eine Bedeutung haben (Metzler empfiehlt Buchstaben, Ziffern und `-_~`)
 - Für Gegensprechen: das offizielle Symcon-Modul [Türsprechanlage](https://www.symcon.de/de/shop/enterprise/ips-extension-doorip/)
