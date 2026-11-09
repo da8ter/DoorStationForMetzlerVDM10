@@ -193,7 +193,6 @@ Zeitfenster als JSON-Liste, z. B. `[{"days":"weekdays","from":"08:00","to":"12:0
 - **Klingeln:** nicht im Stream, nur `GET /ISAPI/VideoIntercom/callStatus` (`ring`, ein Ruf dauert bis ~60 s). AccessControllerEvent 1/3 ist die Bewegungserkennung der Kamera, 5/38 Fingerabdruck ok, 5/39 abgelehnt, 5/21 Schloss geöffnet. Nach HCNetSDK: 1/0x404 Sabotage (Ende 0x405), 1/0x40F Sabotage Sicherheitsmodul (bei jedem Auslösen erneut, ohne Ende-Ereignis; gemessen 21.10.2026), 1/0x40A Nötigungsalarm, 1/0x1048 Notruf (0x1049 beendet), 2/1039 bzw. 2/1040 Sicherheitsmodul offline bzw. online, 2/1041 Batterie schwach, 5/1281 benutzerdefiniertes Ereignis 2 (kein Klingeln). 5/37 (Klingeln) sieht das Modul vor, die VDM10 sendet es aber nicht.
 - **HTTP-Listening (`httpHosts`)** ist auf Firmware V3.7.1 nicht funktionsfähig: gespeichert wird es, Ereignisse schickt die Türstation trotzdem nicht (am 15.10.2026 mit Paketlogger geprüft). Deshalb der Alert-Stream.
 - **Personen:** `UserInfo/Record|Modify|Search|Delete`, Fingerabdruck `CaptureFingerPrint` + `FingerPrint/SetUp`, Karte `CaptureCardInfo` + `CardInfo/Record`. Der Stream liefert bei Zutritten keinen Namen; das Modul holt ihn aus dem Ereignisprotokoll (`AcsEvent`).
-- **Prüfen ohne Türstation:** `php tests/<Name>Test.php` (Bild-Hook, Ereignisbilder, Bildarchiv, Sperre „dauerhaft offen“, Gültigkeit, Erweiterungsmodule, Sicherheitsmodul). Probe-Skript für andere Firmware-Stände: `php tests/probe-isapi.php <IP> admin <Passwort>`.
 
 ## Marken
 
