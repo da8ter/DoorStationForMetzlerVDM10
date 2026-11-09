@@ -11,4 +11,4 @@ Symcon-Bibliothek mit einem Modul:
 
 Dieses Projekt stammt nicht von Metzler oder Hikvision und wird von ihnen weder unterstützt noch geprüft. Metzler, Hikvision und Hik-Connect sind Marken ihrer jeweiligen Inhaber.
 
-Lizenz: GPL-3.0
+Lizenz: MIT
